@@ -1,0 +1,53 @@
+==========================================================================================
+RISK OF RUIN — the 'guaranteed $1/day' martingale, simulated honestly
+==========================================================================================
+
+### Even/Odd martingale, $1/day, $10 start (1 week)
+    contract win prob 0.500, payout 1.950, start $10.00, target $1.00/day, horizon 7 days
+    P(win any single day)         ~ 0.8750
+    P(RUIN within 7 days)         =  62.88%
+    P(RUIN within  7 days)        =  62.88%
+    median final bankroll         = $   0.00   (the 'it works!' illusion)
+    MEAN  final bankroll          = $   4.47   (the truth: EV)
+    expected P/L over  7 days     = $  -5.53
+
+### Even/Odd martingale, $1/day, $10 start (1 month)
+    contract win prob 0.500, payout 1.950, start $10.00, target $1.00/day, horizon 30 days
+    P(win any single day)         ~ 0.8750
+    P(RUIN within 7 days)         =  62.56%
+    P(RUIN within 30 days)        =  97.43%
+    median final bankroll         = $   0.00   (the 'it works!' illusion)
+    MEAN  final bankroll          = $   0.44   (the truth: EV)
+    expected P/L over 30 days     = $  -9.56
+
+### Rise/Fall martingale, $1/day, $10 start (1 month)
+    contract win prob 0.487, payout 1.920, start $10.00, target $1.00/day, horizon 30 days
+    P(win any single day)         ~ 0.8650
+    P(RUIN within 7 days)         =  66.40%
+    P(RUIN within 30 days)        =  98.58%
+    median final bankroll         = $   0.00   (the 'it works!' illusion)
+    MEAN  final bankroll          = $   0.24   (the truth: EV)
+    expected P/L over 30 days     = $  -9.76
+
+### Differs(90%) martingale, $0.50/day, $10 start (1 month)
+    contract win prob 0.900, payout 1.090, start $10.00, target $0.50/day, horizon 30 days
+    P(win any single day)         ~ 0.9000
+    P(RUIN within 7 days)         =  52.04%
+    P(RUIN within 30 days)        =  95.78%
+    median final bankroll         = $   0.00   (the 'it works!' illusion)
+    MEAN  final bankroll          = $   1.05   (the truth: EV)
+    expected P/L over 30 days     = $  -8.95
+
+### Even/Odd martingale, $1/day, $50 start (1 month)
+    contract win prob 0.500, payout 1.950, start $50.00, target $1.00/day, horizon 30 days
+    P(win any single day)         ~ 0.9688
+    P(RUIN within 7 days)         =  21.16%
+    P(RUIN within 30 days)        =  70.94%
+    median final bankroll         = $   0.00   (the 'it works!' illusion)
+    MEAN  final bankroll          = $  10.59   (the truth: EV)
+    expected P/L over 30 days     = $ -39.41
+
+==========================================================================================
+TAKEAWAY: high P(win a day) + negative mean = the martingale illusion.
+You bank dollars for a while, then one losing streak returns all of them plus your stake.
+==========================================================================================

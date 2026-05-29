@@ -1,0 +1,66 @@
+========================================================================================================================
+HONEST BACKTESTS — popular Deriv strategies on REAL ticks with REAL payouts
+Engine is generous: no spread/slippage/commission beyond the quoted payout.
+========================================================================================================================
+
+================ 1HZ100V  (n=86380 ticks, start $10.00, base $0.35) ================
+  Differs / flat                     | trades   2089 | win 90.52% | staked $   731.15 | PnL $   -9.73 | ROI  -1.33% | EV/trade $-0.0047 | maxDD $  11.19 | end $    0.27 | RUINED
+  Differs / MARTINGALE x2            | trades    850 | win 90.24% | staked $   336.70 | PnL $   -9.75 | ROI  -2.90% | EV/trade $-0.0115 | maxDD $  11.36 | end $    0.25 | RUINED
+  Even / flat                        | trades   4016 | win 50.92% | staked $  1405.60 | PnL $   -9.89 | ROI  -0.70% | EV/trade $-0.0025 | maxDD $  41.30 | end $    0.11 | RUINED
+  Even / MARTINGALE x2               | trades     58 | win 51.72% | staked $    47.95 | PnL $   -1.54 | ROI  -3.21% | EV/trade $-0.0266 | maxDD $  10.85 | end $    8.46 | survived
+  Even / anti-martingale             | trades     55 | win 54.55% | staked $    50.05 | PnL $   -9.78 | ROI -19.55% | EV/trade $-0.1779 | maxDD $  14.37 | end $    0.22 | RUINED
+  Over0 (90%) / flat                 | trades   1143 | win 89.50% | staked $   400.05 | PnL $   -9.78 | ROI  -2.44% | EV/trade $-0.0086 | maxDD $  10.21 | end $    0.22 | RUINED
+  Over0 (90%) / MARTINGALE           | trades   1000 | win 89.80% | staked $   394.45 | PnL $   -8.75 | ROI  -2.22% | EV/trade $-0.0088 | maxDD $   9.22 | end $    1.25 | survived
+  Gambler low->Over3 / flat          | trades   1784 | win 60.37% | staked $   624.40 | PnL $   -9.97 | ROI  -1.60% | EV/trade $-0.0056 | maxDD $  23.26 | end $    0.03 | RUINED
+  Gambler match->Diff /flat          | trades    553 | win 87.16% | staked $   193.55 | PnL $   -9.67 | ROI  -4.99% | EV/trade $-0.0175 | maxDD $  10.01 | end $    0.33 | RUINED
+  Momentum rise(3) / flat            | trades    568 | win 49.47% | staked $   198.80 | PnL $   -9.97 | ROI  -5.01% | EV/trade $-0.0175 | maxDD $  12.26 | end $    0.03 | RUINED
+  MeanRev rise(3) / flat             | trades    114 | win 39.47% | staked $    39.90 | PnL $   -9.66 | ROI -24.21% | EV/trade $-0.0847 | maxDD $   9.66 | end $    0.34 | RUINED
+  Momentum rise(3) / MART            | trades      6 | win 33.33% | staked $     5.95 | PnL $   -4.61 | ROI -77.41% | EV/trade $-0.7677 | maxDD $   5.25 | end $    5.39 | survived
+
+================ R_100  (n=43196 ticks, start $10.00, base $0.35) ================
+  Differs / flat                     | trades    722 | win 88.23% | staked $   252.70 | PnL $   -9.68 | ROI  -3.83% | EV/trade $-0.0134 | maxDD $  10.30 | end $    0.32 | RUINED
+  Differs / MARTINGALE x2            | trades    629 | win 88.08% | staked $   252.35 | PnL $   -9.72 | ROI  -3.85% | EV/trade $-0.0154 | maxDD $  10.49 | end $    0.28 | RUINED
+  Even / flat                        | trades    210 | win 45.24% | staked $    73.50 | PnL $   -9.66 | ROI -13.14% | EV/trade $-0.0460 | maxDD $  11.24 | end $    0.34 | RUINED
+  Even / MARTINGALE x2               | trades     12 | win 50.00% | staked $    13.65 | PnL $   -8.95 | ROI -65.54% | EV/trade $-0.7455 | maxDD $  10.85 | end $    1.05 | survived
+  Even / anti-martingale             | trades     72 | win 48.61% | staked $    65.45 | PnL $   -9.67 | ROI -14.78% | EV/trade $-0.1344 | maxDD $  19.28 | end $    0.33 | RUINED
+  Over0 (90%) / flat                 | trades   1943 | win 90.43% | staked $   680.05 | PnL $   -9.75 | ROI  -1.43% | EV/trade $-0.0050 | maxDD $  10.10 | end $    0.25 | RUINED
+  Over0 (90%) / MARTINGALE           | trades   1408 | win 90.62% | staked $   549.85 | PnL $   -8.12 | ROI  -1.48% | EV/trade $-0.0058 | maxDD $   8.49 | end $    1.88 | survived
+  Gambler low->Over3 / flat          | trades   1464 | win 60.93% | staked $   512.40 | PnL $   -9.76 | ROI  -1.90% | EV/trade $-0.0067 | maxDD $  15.90 | end $    0.24 | RUINED
+  Gambler match->Diff /flat          | trades   1796 | win 90.31% | staked $   628.60 | PnL $   -9.81 | ROI  -1.56% | EV/trade $-0.0055 | maxDD $  10.28 | end $    0.19 | RUINED
+  Momentum rise(3) / flat            | trades    283 | win 47.00% | staked $    99.05 | PnL $   -9.67 | ROI  -9.77% | EV/trade $-0.0342 | maxDD $  13.40 | end $    0.33 | RUINED
+  MeanRev rise(3) / flat             | trades    696 | win 50.00% | staked $   243.60 | PnL $   -9.74 | ROI  -4.00% | EV/trade $-0.0140 | maxDD $  14.27 | end $    0.26 | RUINED
+  Momentum rise(3) / MART            | trades     48 | win 56.25% | staked $    37.80 | PnL $   -2.86 | ROI  -7.56% | EV/trade $-0.0595 | maxDD $  10.85 | end $    7.14 | survived
+
+================ 1HZ10V  (n=80000 ticks, start $10.00, base $0.35) ================
+  Differs / flat                     | trades   2551 | win 90.75% | staked $   892.85 | PnL $   -9.68 | ROI  -1.08% | EV/trade $-0.0038 | maxDD $   9.72 | end $    0.32 | RUINED
+  Differs / MARTINGALE x2            | trades   2841 | win 90.81% | staked $  1099.35 | PnL $   -8.64 | ROI  -0.79% | EV/trade $-0.0030 | maxDD $   9.79 | end $    1.36 | survived
+  Even / flat                        | trades   1344 | win 50.22% | staked $   470.40 | PnL $   -9.71 | ROI  -2.06% | EV/trade $-0.0072 | maxDD $  14.82 | end $    0.29 | RUINED
+  Even / MARTINGALE x2               | trades      5 | win 20.00% | staked $     5.60 | PnL $   -4.92 | ROI -87.81% | EV/trade $-0.9835 | maxDD $   5.25 | end $    5.08 | survived
+  Even / anti-martingale             | trades     49 | win 46.94% | staked $    37.10 | PnL $   -9.80 | ROI -26.42% | EV/trade $-0.2000 | maxDD $  10.13 | end $    0.20 | RUINED
+  Over0 (90%) / flat                 | trades   3023 | win 90.90% | staked $  1058.05 | PnL $   -9.69 | ROI  -0.92% | EV/trade $-0.0032 | maxDD $  10.57 | end $    0.31 | RUINED
+  Over0 (90%) / MARTINGALE           | trades   3006 | win 90.95% | staked $  1166.55 | PnL $   -9.46 | ROI  -0.81% | EV/trade $-0.0031 | maxDD $  10.37 | end $    0.54 | survived
+  Gambler low->Over3 / flat          | trades   2678 | win 60.72% | staked $   937.30 | PnL $   -9.67 | ROI  -1.03% | EV/trade $-0.0036 | maxDD $  15.49 | end $    0.33 | RUINED
+  Gambler match->Diff /flat          | trades    856 | win 88.79% | staked $   299.60 | PnL $   -9.66 | ROI  -3.22% | EV/trade $-0.0113 | maxDD $   9.66 | end $    0.34 | RUINED
+  Momentum rise(3) / flat            | trades    210 | win 45.24% | staked $    73.50 | PnL $   -9.66 | ROI -13.14% | EV/trade $-0.0460 | maxDD $   9.66 | end $    0.34 | RUINED
+  MeanRev rise(3) / flat             | trades   1218 | win 50.90% | staked $   426.30 | PnL $   -9.66 | ROI  -2.27% | EV/trade $-0.0079 | maxDD $  18.31 | end $    0.34 | RUINED
+  Momentum rise(3) / MART            | trades     50 | win 40.00% | staked $    55.65 | PnL $   -5.92 | ROI -10.64% | EV/trade $-0.1184 | maxDD $  10.85 | end $    4.08 | survived
+
+================ JD100  (n=80000 ticks, start $10.00, base $0.35) ================
+  Differs / flat                     | trades   1711 | win 90.24% | staked $   598.85 | PnL $   -9.81 | ROI  -1.64% | EV/trade $-0.0057 | maxDD $  12.63 | end $    0.19 | RUINED
+  Differs / MARTINGALE x2            | trades   1831 | win 90.22% | staked $   712.95 | PnL $   -9.46 | ROI  -1.33% | EV/trade $-0.0052 | maxDD $  12.27 | end $    0.54 | survived
+  Even / flat                        | trades    307 | win 46.58% | staked $   107.45 | PnL $   -9.85 | ROI  -9.17% | EV/trade $-0.0321 | maxDD $   9.85 | end $    0.15 | RUINED
+  Even / MARTINGALE x2               | trades      8 | win 25.00% | staked $     7.35 | PnL $   -4.62 | ROI -62.86% | EV/trade $-0.5775 | maxDD $   5.25 | end $    5.38 | survived
+  Even / anti-martingale             | trades     42 | win 35.71% | staked $    24.85 | PnL $   -9.83 | ROI -39.58% | EV/trade $-0.2342 | maxDD $   9.83 | end $    0.17 | RUINED
+  Over0 (90%) / flat                 | trades   1316 | win 89.82% | staked $   460.60 | PnL $   -9.67 | ROI  -2.10% | EV/trade $-0.0073 | maxDD $  10.23 | end $    0.33 | RUINED
+  Over0 (90%) / MARTINGALE           | trades   1443 | win 89.74% | staked $   562.80 | PnL $   -9.63 | ROI  -1.71% | EV/trade $-0.0067 | maxDD $  10.19 | end $    0.37 | survived
+  Gambler low->Over3 / flat          | trades    484 | win 57.85% | staked $   169.40 | PnL $   -9.66 | ROI  -5.70% | EV/trade $-0.0200 | maxDD $  11.99 | end $    0.34 | RUINED
+  Gambler match->Diff /flat          | trades    912 | win 88.93% | staked $   319.20 | PnL $   -9.80 | ROI  -3.07% | EV/trade $-0.0107 | maxDD $  10.24 | end $    0.20 | RUINED
+  Momentum rise(3) / flat            | trades    295 | win 46.44% | staked $   103.25 | PnL $   -9.75 | ROI  -9.44% | EV/trade $-0.0330 | maxDD $  10.08 | end $    0.25 | RUINED
+  MeanRev rise(3) / flat             | trades    406 | win 47.78% | staked $   142.10 | PnL $   -9.70 | ROI  -6.82% | EV/trade $-0.0239 | maxDD $  13.72 | end $    0.30 | RUINED
+  Momentum rise(3) / MART            | trades      5 | win 20.00% | staked $     5.60 | PnL $   -4.92 | ROI -87.81% | EV/trade $-0.9835 | maxDD $   5.25 | end $    5.08 | survived
+
+================ stpRNG  (n=80000 ticks, start $10.00, base $0.35) ================
+  [digit contracts NOT offered by Deriv on this symbol -> only Rise/Fall tested]
+  Momentum rise(3) / flat            | trades    381 | win 47.51% | staked $   133.35 | PnL $   -9.82 | ROI  -7.36% | EV/trade $-0.0258 | maxDD $  13.96 | end $    0.18 | RUINED
+  MeanRev rise(3) / flat             | trades   1309 | win 50.19% | staked $   458.15 | PnL $   -9.75 | ROI  -2.13% | EV/trade $-0.0074 | maxDD $  20.77 | end $    0.25 | RUINED
+  Momentum rise(3) / MART            | trades     12 | win 25.00% | staked $    16.10 | PnL $   -9.96 | ROI -61.85% | EV/trade $-0.8298 | maxDD $  10.85 | end $    0.04 | RUINED

@@ -1,0 +1,1446 @@
+[
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITDIFF",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITMATCH",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITEVEN",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITODD",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "0",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "1",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.8,
+    "payout": 1.23,
+    "breakeven_p": 0.813,
+    "ev_per_$1": -0.016,
+    "house_edge": 0.016
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "2",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.7,
+    "payout": 1.4,
+    "breakeven_p": 0.7143,
+    "ev_per_$1": -0.02,
+    "house_edge": 0.02
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "3",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.6,
+    "payout": 1.63,
+    "breakeven_p": 0.6135,
+    "ev_per_$1": -0.022,
+    "house_edge": 0.022
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "4",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.4,
+    "payout": 2.43,
+    "breakeven_p": 0.4115,
+    "ev_per_$1": -0.028,
+    "house_edge": 0.028
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "6",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.3,
+    "payout": 3.21,
+    "breakeven_p": 0.3115,
+    "ev_per_$1": -0.037,
+    "house_edge": 0.037
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "7",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.2,
+    "payout": 4.72,
+    "breakeven_p": 0.2119,
+    "ev_per_$1": -0.056,
+    "house_edge": 0.056
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "8",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "1",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "2",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.2,
+    "payout": 4.72,
+    "breakeven_p": 0.2119,
+    "ev_per_$1": -0.056,
+    "house_edge": 0.056
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "3",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.3,
+    "payout": 3.21,
+    "breakeven_p": 0.3115,
+    "ev_per_$1": -0.037,
+    "house_edge": 0.037
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "4",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.4,
+    "payout": 2.43,
+    "breakeven_p": 0.4115,
+    "ev_per_$1": -0.028,
+    "house_edge": 0.028
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "6",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.6,
+    "payout": 1.63,
+    "breakeven_p": 0.6135,
+    "ev_per_$1": -0.022,
+    "house_edge": 0.022
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "7",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.7,
+    "payout": 1.4,
+    "breakeven_p": 0.7143,
+    "ev_per_$1": -0.02,
+    "house_edge": 0.02
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "8",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.8,
+    "payout": 1.23,
+    "breakeven_p": 0.813,
+    "ev_per_$1": -0.016,
+    "house_edge": 0.016
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "9",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITDIFF",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITMATCH",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.33,
+    "breakeven_p": 0.12,
+    "ev_per_$1": -0.167,
+    "house_edge": 0.167
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITEVEN",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.92,
+    "breakeven_p": 0.5208,
+    "ev_per_$1": -0.04,
+    "house_edge": 0.04
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITODD",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.92,
+    "breakeven_p": 0.5208,
+    "ev_per_$1": -0.04,
+    "house_edge": 0.04
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "0",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "1",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.8,
+    "payout": 1.22,
+    "breakeven_p": 0.8197,
+    "ev_per_$1": -0.024,
+    "house_edge": 0.024
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "2",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.7,
+    "payout": 1.39,
+    "breakeven_p": 0.7194,
+    "ev_per_$1": -0.027,
+    "house_edge": 0.027
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "3",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.6,
+    "payout": 1.61,
+    "breakeven_p": 0.6211,
+    "ev_per_$1": -0.034,
+    "house_edge": 0.034
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "4",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.92,
+    "breakeven_p": 0.5208,
+    "ev_per_$1": -0.04,
+    "house_edge": 0.04
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.4,
+    "payout": 2.38,
+    "breakeven_p": 0.4202,
+    "ev_per_$1": -0.048,
+    "house_edge": 0.048
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "6",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.3,
+    "payout": 3.13,
+    "breakeven_p": 0.3195,
+    "ev_per_$1": -0.061,
+    "house_edge": 0.061
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "7",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.2,
+    "payout": 4.55,
+    "breakeven_p": 0.2198,
+    "ev_per_$1": -0.09,
+    "house_edge": 0.09
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "8",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.33,
+    "breakeven_p": 0.12,
+    "ev_per_$1": -0.167,
+    "house_edge": 0.167
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "1",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.33,
+    "breakeven_p": 0.12,
+    "ev_per_$1": -0.167,
+    "house_edge": 0.167
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "2",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.2,
+    "payout": 4.55,
+    "breakeven_p": 0.2198,
+    "ev_per_$1": -0.09,
+    "house_edge": 0.09
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "3",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.3,
+    "payout": 3.13,
+    "breakeven_p": 0.3195,
+    "ev_per_$1": -0.061,
+    "house_edge": 0.061
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "4",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.4,
+    "payout": 2.38,
+    "breakeven_p": 0.4202,
+    "ev_per_$1": -0.048,
+    "house_edge": 0.048
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.92,
+    "breakeven_p": 0.5208,
+    "ev_per_$1": -0.04,
+    "house_edge": 0.04
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "6",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.6,
+    "payout": 1.61,
+    "breakeven_p": 0.6211,
+    "ev_per_$1": -0.034,
+    "house_edge": 0.034
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "7",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.7,
+    "payout": 1.39,
+    "breakeven_p": 0.7194,
+    "ev_per_$1": -0.027,
+    "house_edge": 0.027
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "8",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.8,
+    "payout": 1.22,
+    "breakeven_p": 0.8197,
+    "ev_per_$1": -0.024,
+    "house_edge": 0.024
+  },
+  {
+    "symbol": "R_100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "9",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITDIFF",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITMATCH",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITEVEN",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITODD",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "0",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "1",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.8,
+    "payout": 1.23,
+    "breakeven_p": 0.813,
+    "ev_per_$1": -0.016,
+    "house_edge": 0.016
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "2",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.7,
+    "payout": 1.4,
+    "breakeven_p": 0.7143,
+    "ev_per_$1": -0.02,
+    "house_edge": 0.02
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "3",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.6,
+    "payout": 1.63,
+    "breakeven_p": 0.6135,
+    "ev_per_$1": -0.022,
+    "house_edge": 0.022
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "4",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.4,
+    "payout": 2.43,
+    "breakeven_p": 0.4115,
+    "ev_per_$1": -0.028,
+    "house_edge": 0.028
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "6",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.3,
+    "payout": 3.21,
+    "breakeven_p": 0.3115,
+    "ev_per_$1": -0.037,
+    "house_edge": 0.037
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "7",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.2,
+    "payout": 4.72,
+    "breakeven_p": 0.2119,
+    "ev_per_$1": -0.056,
+    "house_edge": 0.056
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "8",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "1",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "2",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.2,
+    "payout": 4.72,
+    "breakeven_p": 0.2119,
+    "ev_per_$1": -0.056,
+    "house_edge": 0.056
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "3",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.3,
+    "payout": 3.21,
+    "breakeven_p": 0.3115,
+    "ev_per_$1": -0.037,
+    "house_edge": 0.037
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "4",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.4,
+    "payout": 2.43,
+    "breakeven_p": 0.4115,
+    "ev_per_$1": -0.028,
+    "house_edge": 0.028
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "6",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.6,
+    "payout": 1.63,
+    "breakeven_p": 0.6135,
+    "ev_per_$1": -0.022,
+    "house_edge": 0.022
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "7",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.7,
+    "payout": 1.4,
+    "breakeven_p": 0.7143,
+    "ev_per_$1": -0.02,
+    "house_edge": 0.02
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "8",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.8,
+    "payout": 1.23,
+    "breakeven_p": 0.813,
+    "ev_per_$1": -0.016,
+    "house_edge": 0.016
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "9",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITDIFF",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITMATCH",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITEVEN",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITODD",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "0",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "1",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.8,
+    "payout": 1.23,
+    "breakeven_p": 0.813,
+    "ev_per_$1": -0.016,
+    "house_edge": 0.016
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "2",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.7,
+    "payout": 1.4,
+    "breakeven_p": 0.7143,
+    "ev_per_$1": -0.02,
+    "house_edge": 0.02
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "3",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.6,
+    "payout": 1.63,
+    "breakeven_p": 0.6135,
+    "ev_per_$1": -0.022,
+    "house_edge": 0.022
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "4",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.4,
+    "payout": 2.43,
+    "breakeven_p": 0.4115,
+    "ev_per_$1": -0.028,
+    "house_edge": 0.028
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "6",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.3,
+    "payout": 3.21,
+    "breakeven_p": 0.3115,
+    "ev_per_$1": -0.037,
+    "house_edge": 0.037
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "7",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.2,
+    "payout": 4.72,
+    "breakeven_p": 0.2119,
+    "ev_per_$1": -0.056,
+    "house_edge": 0.056
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITOVER",
+    "params": {
+      "barrier": "8",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "1",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.1,
+    "payout": 8.93,
+    "breakeven_p": 0.112,
+    "ev_per_$1": -0.107,
+    "house_edge": 0.107
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "2",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.2,
+    "payout": 4.72,
+    "breakeven_p": 0.2119,
+    "ev_per_$1": -0.056,
+    "house_edge": 0.056
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "3",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.3,
+    "payout": 3.21,
+    "breakeven_p": 0.3115,
+    "ev_per_$1": -0.037,
+    "house_edge": 0.037
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "4",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.4,
+    "payout": 2.43,
+    "breakeven_p": 0.4115,
+    "ev_per_$1": -0.028,
+    "house_edge": 0.028
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "5",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.5,
+    "payout": 1.95,
+    "breakeven_p": 0.5128,
+    "ev_per_$1": -0.025,
+    "house_edge": 0.025
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "6",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.6,
+    "payout": 1.63,
+    "breakeven_p": 0.6135,
+    "ev_per_$1": -0.022,
+    "house_edge": 0.022
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "7",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.7,
+    "payout": 1.4,
+    "breakeven_p": 0.7143,
+    "ev_per_$1": -0.02,
+    "house_edge": 0.02
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "8",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.8,
+    "payout": 1.23,
+    "breakeven_p": 0.813,
+    "ev_per_$1": -0.016,
+    "house_edge": 0.016
+  },
+  {
+    "symbol": "JD100",
+    "contract": "DIGITUNDER",
+    "params": {
+      "barrier": "9",
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": 0.9,
+    "payout": 1.09,
+    "breakeven_p": 0.9174,
+    "ev_per_$1": -0.019,
+    "house_edge": 0.019
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "CALL",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "PUT",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "CALL",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "1HZ100V",
+    "contract": "PUT",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "R_100",
+    "contract": "CALL",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "R_100",
+    "contract": "PUT",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "R_100",
+    "contract": "CALL",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "R_100",
+    "contract": "PUT",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "CALL",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "PUT",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "CALL",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "1HZ10V",
+    "contract": "PUT",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.92,
+    "breakeven_p": 0.5208
+  },
+  {
+    "symbol": "JD100",
+    "contract": "CALL",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.95,
+    "breakeven_p": 0.5128
+  },
+  {
+    "symbol": "JD100",
+    "contract": "PUT",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.95,
+    "breakeven_p": 0.5128
+  },
+  {
+    "symbol": "JD100",
+    "contract": "CALL",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.95,
+    "breakeven_p": 0.5128
+  },
+  {
+    "symbol": "JD100",
+    "contract": "PUT",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.95,
+    "breakeven_p": 0.5128
+  },
+  {
+    "symbol": "stpRNG",
+    "contract": "CALL",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.95,
+    "breakeven_p": 0.5128
+  },
+  {
+    "symbol": "stpRNG",
+    "contract": "PUT",
+    "params": {
+      "duration": 1,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.95,
+    "breakeven_p": 0.5128
+  },
+  {
+    "symbol": "stpRNG",
+    "contract": "CALL",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.95,
+    "breakeven_p": 0.5128
+  },
+  {
+    "symbol": "stpRNG",
+    "contract": "PUT",
+    "params": {
+      "duration": 5,
+      "duration_unit": "t"
+    },
+    "true_p": null,
+    "payout": 1.95,
+    "breakeven_p": 0.5128
+  }
+]

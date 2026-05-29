@@ -1,0 +1,74 @@
+==============================================================================
+CRASH / BOOM SPIKE DYNAMICS
+==============================================================================
+
+=== CRASH1000  (spike = down-move) ===
+  ticks=86380  spikes=107  spike rate=1 per 807 ticks  P(spike)=0.00124
+  mean small move (favourable) = 0.0060
+  mean spike move (adverse)    = 5.9911   ratio=999x
+  total drift over window      = -149.89  (mean per tick -0.00174)
+  sum favourable moves=491.2  sum adverse moves=641.0  net=-149.9  (≈0 => martingale)
+  inter-spike gap: mean=790.4 median=585 max=3765 std=736.9
+  geometric expectation: if memoryless, std≈mean. observed std/mean=0.93
+  hazard test  P(spike now | waited W ticks):  (flat => memoryless => crash NOT 'overdue')
+      waited [   0, 395): hazard=0.00119  (n=34344)
+      waited [ 395, 790): hazard=0.00119  (n=21084)
+      waited [ 790,1185): hazard=0.00109  (n=13742)
+      waited [1185,1580): hazard=0.00193  (n=7263)
+      waited [1580, inf): hazard=0.00121  (n=9947)
+  hazard independence chi2=3.12 p=0.374  MEMORYLESS (no timing edge)
+
+=== CRASH500  (spike = down-move) ===
+  ticks=79999  spikes=163  spike rate=1 per 491 ticks  P(spike)=0.00204
+  mean small move (favourable) = 0.0063
+  mean spike move (adverse)    = 3.2019   ratio=508x
+  total drift over window      = -42.81  (mean per tick -0.00054)
+  sum favourable moves=479.1  sum adverse moves=521.9  net=-42.8  (≈0 => martingale)
+  inter-spike gap: mean=485.5 median=336 max=3310 std=482.0
+  geometric expectation: if memoryless, std≈mean. observed std/mean=0.99
+  hazard test  P(spike now | waited W ticks):  (flat => memoryless => crash NOT 'overdue')
+      waited [   0, 242): hazard=0.00200  (n=31457)
+      waited [ 242, 485): hazard=0.00197  (n=19770)
+      waited [ 485, 728): hazard=0.00254  (n=11034)
+      waited [ 728, 970): hazard=0.00127  (n=7078)
+      waited [ 970, inf): hazard=0.00225  (n=10660)
+  hazard independence chi2=3.48 p=0.324  MEMORYLESS (no timing edge)
+
+=== BOOM1000  (spike = up-move) ===
+  ticks=86380  spikes=79  spike rate=1 per 1093 ticks  P(spike)=0.00091
+  mean small move (favourable) = 0.0141
+  mean spike move (adverse)    = 14.4652   ratio=1028x
+  total drift over window      = -46.66  (mean per tick -0.00054)
+  sum favourable moves=1189.4  sum adverse moves=1142.8  net=+46.7  (≈0 => martingale)
+  inter-spike gap: mean=1086.6 median=664 max=4318 std=1024.3
+  geometric expectation: if memoryless, std≈mean. observed std/mean=0.94
+  hazard test  P(spike now | waited W ticks):  (flat => memoryless => crash NOT 'overdue')
+      waited [   0, 543): hazard=0.00111  (n=33214)
+      waited [ 543,1086): hazard=0.00060  (n=20044)
+      waited [1086,1629): hazard=0.00074  (n=13543)
+      waited [1629,2173): hazard=0.00031  (n=9768)
+      waited [2173, inf): hazard=0.00173  (n=9811)
+  hazard independence chi2=8.04 p=0.045  TIMING STRUCTURE
+
+=== BOOM500  (spike = up-move) ===
+  ticks=79999  spikes=157  spike rate=1 per 510 ticks  P(spike)=0.00196
+  mean small move (favourable) = 0.0112
+  mean spike move (adverse)    = 4.9900   ratio=447x
+  total drift over window      = -83.76  (mean per tick -0.00105)
+  sum favourable moves=867.2  sum adverse moves=783.4  net=+83.8  (≈0 => martingale)
+  inter-spike gap: mean=507.7 median=371 max=3494 std=506.7
+  geometric expectation: if memoryless, std≈mean. observed std/mean=1.00
+  hazard test  P(spike now | waited W ticks):  (flat => memoryless => crash NOT 'overdue')
+      waited [   0, 253): hazard=0.00169  (n=31444)
+      waited [ 253, 507): hazard=0.00211  (n=20340)
+      waited [ 507, 761): hazard=0.00242  (n=11139)
+      waited [ 761,1015): hazard=0.00216  (n=6944)
+      waited [1015, inf): hazard=0.00188  (n=10132)
+  hazard independence chi2=2.80 p=0.424  MEMORYLESS (no timing edge)
+
+INTERPRETATION
+  * Direction is lopsided but DRIFT ≈ 0: the rare spike pays back every small tick.
+  * Spike arrival is memoryless => you cannot time it; 'overdue' is the gambler's fallacy.
+  * Deriv lists ONLY Accumulator + Multiplier on Crash/Boom (no binary Rise/Fall).
+    - Multiplier: zero-drift underlying => pre-cost EV 0; commission/spread => EV<0.
+    - Accumulator: the spike is exactly the barrier breach that zeroes your growth.
