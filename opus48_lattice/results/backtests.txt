@@ -1,0 +1,39 @@
+====================================================================================================
+FULL 6-LAYER PIPELINE BACKTEST (lag-2 settlement, live payouts)
+start bankroll $1000 (a $10 account can't trade: 2% cap=$0.20 < $0.35 min stake)
+====================================================================================================
+
+--- (1) friend's system AS SPECIFIED: conv>=0.99 gate ---
+1HZ100V framework@0.99                 trades=     0 win=  -   P/L=  +0.000 ROI=     -   bank=1000.00 (min 1000.00)  executed_ticks=0
+  rolling convergence peaks ~0.6 -> the 99% gate NEVER fires. As specified, it never trades.
+
+--- (2) drift detector ON (conv>=0.50): the bot self-halts almost immediately ---
+1HZ100V drift-ON                       trades=     8 win=0.3750 P/L= -31.586 ROI= -31.84% bank=968.41 (min 968.41)  executed_ticks=3
+  executed 3 trades, then Layer-6 drift halt fired 80,657 times (untapped-fill assumption broke at once).
+
+--- (3) drift OFF, high volume: realized win rate converges to the house edge ---
+1HZ100V framework@0.50                 trades=   413 win=0.4818 P/L=-245.974 ROI=  -5.60% bank=754.03 (min 754.03)  executed_ticks=197
+1HZ10V framework@0.50                  trades=   372 win=0.4731 P/L=-202.930 ROI=  -4.67% bank=797.07 (min 797.07)  executed_ticks=184
+R_100 framework@0.50                   trades=  1157 win=0.5117 P/L= -89.234 ROI=  -0.63% bank=910.77 (min 854.43)  executed_ticks=558
+JD100 framework@0.50                   trades=   397 win=0.4937 P/L=-312.380 ROI=  -7.92% bank=687.62 (min 687.62)  executed_ticks=194
+    realized win rate by contract family (1HZ100V) — each sits at its uniform prob:
+      DIFFER  n=   180 win=0.8944 P/L= -68.004
+      EVEN    n=     3 win=0.3333 P/L= -14.373
+      MATCH   n=   197 win=0.0914 P/L=-176.366
+      ODD     n=    25 win=0.5600 P/L= +36.081
+      OVER    n=     4 win=0.5000 P/L= -17.216
+      UNDER   n=     4 win=0.7500 P/L=  -6.095
+
+--- (4) honest belief (p=uniform truth) -> Kelly=0 -> no trades, drift OFF ---
+1HZ100V honest                         trades=     0 win=  -   P/L=  +0.000 ROI=     -   bank=1000.00 (min 1000.00)  executed_ticks=0
+
+--- (5) PLANTED-EDGE SANITY: anti-repeat synthetic through the IDENTICAL engine ---
+ANTI_REPEAT framework                  trades= 38162 win=0.5045 P/L=+37947760026029.148 ROI=  +5.01% bank=37947760027029.03 (min 923.14)  executed_ticks=19498
+      DIFFER  n= 18580 win=0.7784 P/L=-91987072679500.047
+      EVEN    n=   206 win=0.2476 P/L=-3285965727368.694
+      MATCH   n= 18218 win=0.2175 P/L=+135985585828470.469
+      ODD     n=   185 win=0.2541 P/L=-166974983202.468
+      OVER    n=   617 win=0.7180 P/L=-2844192463203.085
+      UNDER   n=   356 win=0.8062 P/L=+246380050833.177
+  ^ Positive here while real data is not => the pipeline is SOUND; the fair
+    market — not the code — is what removes the edge.

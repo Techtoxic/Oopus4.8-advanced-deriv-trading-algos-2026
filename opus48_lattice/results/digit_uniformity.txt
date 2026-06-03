@@ -1,0 +1,48 @@
+======================================================================
+DIGIT UNIFORMITY + SPLIT-HALF STABILITY + MEASURED EV
+======================================================================
+
+=== 1HZ100V [2dp, n=86401] ===
+  counts=[8772, 8648, 8681, 8717, 8633, 8501, 8660, 8489, 8688, 8612]
+  chi2 uniform: chi2=8.19 df=9 p=0.515  uniform OK
+  split-half stability: Pearson r(dev1,dev2)=+0.071  sign-agree=5/10  noise (unstable)
+  best contract by MEASURED EV: UNDER 8  emp_win=0.7998 payout=1.23 EV/$=-0.0163  negative
+
+=== 1HZ10V [2dp, n=86402] ===
+  counts=[8712, 8726, 8780, 8582, 8654, 8597, 8587, 8654, 8609, 8501]
+  chi2 uniform: chi2=7.05 df=9 p=0.632  uniform OK
+  split-half stability: Pearson r(dev1,dev2)=+0.136  sign-agree=7/10  noise (unstable)
+  best contract by MEASURED EV: UNDER 8  emp_win=0.8020 payout=1.23 EV/$=-0.0136  negative
+
+=== 1HZ75V [2dp, n=86402] ===
+  counts=[8542, 8681, 8761, 8637, 8634, 8553, 8536, 8641, 8643, 8774]
+  chi2 uniform: chi2=7.21 df=9 p=0.615  uniform OK
+  split-half stability: Pearson r(dev1,dev2)=+0.385  sign-agree=5/10  noise (unstable)
+  best contract by MEASURED EV: OVER 1  emp_win=0.8007 payout=1.23 EV/$=-0.0152  negative
+
+=== 1HZ25V [2dp, n=86402] ===
+  counts=[8616, 8799, 8706, 8636, 8492, 8688, 8589, 8613, 8629, 8634]
+  chi2 uniform: chi2=6.70 df=9 p=0.668  uniform OK
+  split-half stability: Pearson r(dev1,dev2)=-0.083  sign-agree=3/10  noise (unstable)
+  best contract by MEASURED EV: UNDER 8  emp_win=0.8002 payout=1.23 EV/$=-0.0158  negative
+
+=== R_100 [2dp, n=43201] ===
+  counts=[4169, 4395, 4324, 4335, 4350, 4361, 4411, 4258, 4326, 4272]
+  chi2 uniform: chi2=10.58 df=9 p=0.305  uniform OK
+  split-half stability: Pearson r(dev1,dev2)=+0.156  sign-agree=4/10  noise (unstable)
+  best contract by MEASURED EV: DIFFER 0  emp_win=0.9035 payout=1.09 EV/$=-0.0152  negative
+
+=== R_10 [3dp, n=43201] ===
+  counts=[4290, 4422, 4318, 4362, 4231, 4358, 4279, 4206, 4388, 4347]
+  chi2 uniform: chi2=9.83 df=9 p=0.364  uniform OK
+  split-half stability: Pearson r(dev1,dev2)=+0.186  sign-agree=7/10  noise (unstable)
+  best contract by MEASURED EV: DIFFER 7  emp_win=0.9026 payout=1.09 EV/$=-0.0161  negative
+
+=== JD100 [2dp, n=86401] ===
+  counts=[8629, 8662, 8521, 8672, 8842, 8697, 8575, 8475, 8681, 8647]
+  chi2 uniform: chi2=10.77 df=9 p=0.292  uniform OK
+  split-half stability: Pearson r(dev1,dev2)=-0.001  sign-agree=4/10  noise (unstable)
+  best contract by MEASURED EV: OVER 1  emp_win=0.7999 payout=1.23 EV/$=-0.0162  negative
+
+======================================================================
+OVERALL: stable exploitable bias = False; any positive-EV contract = False

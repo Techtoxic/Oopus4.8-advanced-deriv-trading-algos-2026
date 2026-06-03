@@ -1,0 +1,27 @@
+======================================================================
+EXHAUSTIVE OUTCOME SPACE — real last-digit contracts x 10 digits
+======================================================================
+Real tradeable universe size: 40 (Match10 + Differ10 + Over0-8=9 + Under1-9=9 + Even + Odd)
+Prior framework said 42 (it added impossible Over9 + Under0). Corrected.
+
+digit 0: WIN=20 LOSE=20  OK
+digit 1: WIN=20 LOSE=20  OK
+digit 2: WIN=20 LOSE=20  OK
+digit 3: WIN=20 LOSE=20  OK
+digit 4: WIN=20 LOSE=20  OK
+digit 5: WIN=20 LOSE=20  OK
+digit 6: WIN=20 LOSE=20  OK
+digit 7: WIN=20 LOSE=20  OK
+digit 8: WIN=20 LOSE=20  OK
+digit 9: WIN=20 LOSE=20  OK
+
+STRUCTURAL INVARIANT (every digit -> 20 win / 20 lose of 40 real): PROVEN
+
+Compound chain example  Over3 & Under8 & Odd & Differ0:
+  wins on digits [5, 7]  -> joint P = 0.20
+  (matches the friend's hand calc: {5,7}, P=0.20)
+
+Why no compound chain escapes negative EV on a uniform RNG:
+  joint win prob = |intersection|/10 (exact, deterministic given digit);
+  each leg's payout = (1-edge)/q_leg, and realized p_leg = q_leg, so
+  every leg returns -edge per $1. A sum of negative-EV legs is negative-EV.

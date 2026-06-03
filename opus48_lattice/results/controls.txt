@@ -1,0 +1,17 @@
+==========================================================================
+DETECTOR CALIBRATION CONTROLS (null + planted edges)
+==========================================================================
+
+stream                               untapped   MI(o<=3)           chi2        Match7 EV
+FAIR (uniform)           null P=0.101,lo=0.100        null  null p=8.2e-01   null wr=0.100,EV=-0.11
+MARKOV_DRIFT             null P=0.100,lo=0.099        FIRE  null p=4.3e-01   null wr=0.100,EV=-0.11
+ANTI_REPEAT              FIRE P=0.224,lo=0.222        FIRE  null p=1.0e+00   null wr=0.100,EV=-0.11
+BIASED_DIGIT(7@16%)      null P=0.096,lo=0.095        null  FIRE p=0.0e+00   FIRE wr=0.160,EV=+0.43
+
+Expected vs observed:
+  FAIR (uniform)         silent on all                    PASS
+  MARKOV_DRIFT           MI detects memory                PASS
+  ANTI_REPEAT            untapped detects fill bias       PASS
+  BIASED_DIGIT(7@16%)    chi2 + EV detect bias            PASS
+
+HARNESS CALIBRATION: PASS - detectors fire on real edges, silent on fair RNG

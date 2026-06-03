@@ -1,0 +1,48 @@
+======================================================================
+LAYER-2 SKEW / MODE PREDICTIVENESS (settled lag-2)
+======================================================================
+
+=== 1HZ100V [2dp]  (n=86401, w=10, lag=2) ===
+  skew-follow O4/U5 win=0.4998  Wilson99lo=0.4953  BE~0.512  below BE  (n=82,576)
+  mode-match       win=0.1005  Wilson99lo=0.0979  BE~0.112  below BE  (n=86,389)
+  least-freq match win=0.1008  Wilson99lo=0.0982  BE~0.112  below BE  (n=86,389)
+  -> Layer-2 signal edge: NONE
+
+=== 1HZ10V [2dp]  (n=86402, w=10, lag=2) ===
+  skew-follow O4/U5 win=0.4986  Wilson99lo=0.4941  BE~0.512  below BE  (n=82,666)
+  mode-match       win=0.0998  Wilson99lo=0.0972  BE~0.112  below BE  (n=86,390)
+  least-freq match win=0.1013  Wilson99lo=0.0987  BE~0.112  below BE  (n=86,390)
+  -> Layer-2 signal edge: NONE
+
+=== 1HZ75V [2dp]  (n=86402, w=10, lag=2) ===
+  skew-follow O4/U5 win=0.5011  Wilson99lo=0.4967  BE~0.512  below BE  (n=82,657)
+  mode-match       win=0.1005  Wilson99lo=0.0979  BE~0.112  below BE  (n=86,390)
+  least-freq match win=0.0997  Wilson99lo=0.0971  BE~0.112  below BE  (n=86,390)
+  -> Layer-2 signal edge: NONE
+
+=== 1HZ25V [2dp]  (n=86402, w=10, lag=2) ===
+  skew-follow O4/U5 win=0.5047  Wilson99lo=0.5002  BE~0.512  below BE  (n=82,731)
+  mode-match       win=0.1002  Wilson99lo=0.0976  BE~0.112  below BE  (n=86,390)
+  least-freq match win=0.0987  Wilson99lo=0.0962  BE~0.112  below BE  (n=86,390)
+  -> Layer-2 signal edge: NONE
+
+=== R_100 [2dp]  (n=43201, w=10, lag=2) ===
+  skew-follow O4/U5 win=0.4945  Wilson99lo=0.4881  BE~0.512  below BE  (n=41,394)
+  mode-match       win=0.0966  Wilson99lo=0.0930  BE~0.112  below BE  (n=43,189)
+  least-freq match win=0.0997  Wilson99lo=0.0960  BE~0.112  below BE  (n=43,189)
+  -> Layer-2 signal edge: NONE
+
+=== R_10 [3dp]  (n=43201, w=10, lag=2) ===
+  skew-follow O4/U5 win=0.4986  Wilson99lo=0.4922  BE~0.512  below BE  (n=41,236)
+  mode-match       win=0.1001  Wilson99lo=0.0964  BE~0.112  below BE  (n=43,189)
+  least-freq match win=0.0994  Wilson99lo=0.0958  BE~0.112  below BE  (n=43,189)
+  -> Layer-2 signal edge: NONE
+
+=== JD100 [2dp]  (n=86401, w=10, lag=2) ===
+  skew-follow O4/U5 win=0.4998  Wilson99lo=0.4953  BE~0.512  below BE  (n=82,695)
+  mode-match       win=0.1004  Wilson99lo=0.0978  BE~0.112  below BE  (n=86,389)
+  least-freq match win=0.0988  Wilson99lo=0.0963  BE~0.112  below BE  (n=86,389)
+  -> Layer-2 signal edge: NONE
+
+======================================================================
+OVERALL: Layer-2 distribution signals DO NOT beat break-even.

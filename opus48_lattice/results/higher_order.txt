@@ -1,0 +1,48 @@
+======================================================================
+HIGHER-ORDER MEMORY  I(next ; last-k) vs shuffle null
+======================================================================
+
+=== 1HZ100V [2dp]  (n=86401) ===
+  order-1: MI_obs=0.00066 bits  null=0.00065+/-0.00010  z=+0.06  no memory
+  order-2: MI_obs=0.00715 bits  null=0.00750+/-0.00035  z=-1.00  no memory
+  order-3: MI_obs=0.07633 bits  null=0.07700+/-0.00103  z=-0.66  no memory
+  -> 1HZ100V [2dp]: memoryless to order 3
+
+=== 1HZ10V [2dp]  (n=86402) ===
+  order-1: MI_obs=0.00061 bits  null=0.00067+/-0.00011  z=-0.54  no memory
+  order-2: MI_obs=0.00727 bits  null=0.00743+/-0.00029  z=-0.57  no memory
+  order-3: MI_obs=0.07517 bits  null=0.07721+/-0.00120  z=-1.69  no memory
+  -> 1HZ10V [2dp]: memoryless to order 3
+
+=== 1HZ75V [2dp]  (n=86402) ===
+  order-1: MI_obs=0.00068 bits  null=0.00069+/-0.00011  z=-0.13  no memory
+  order-2: MI_obs=0.00687 bits  null=0.00746+/-0.00032  z=-1.82  no memory
+  order-3: MI_obs=0.07610 bits  null=0.07685+/-0.00116  z=-0.64  no memory
+  -> 1HZ75V [2dp]: memoryless to order 3
+
+=== 1HZ25V [2dp]  (n=86402) ===
+  order-1: MI_obs=0.00051 bits  null=0.00068+/-0.00012  z=-1.41  no memory
+  order-2: MI_obs=0.00771 bits  null=0.00753+/-0.00031  z=+0.57  no memory
+  order-3: MI_obs=0.07902 bits  null=0.07666+/-0.00100  z=+2.37  no memory
+  -> 1HZ25V [2dp]: memoryless to order 3
+
+=== R_100 [2dp]  (n=43201) ===
+  order-1: MI_obs=0.00150 bits  null=0.00134+/-0.00020  z=+0.80  no memory
+  order-2: MI_obs=0.01524 bits  null=0.01465+/-0.00072  z=+0.81  no memory
+  order-3: MI_obs=0.15547 bits  null=0.15989+/-0.00161  z=-2.75  no memory
+  -> R_100 [2dp]: memoryless to order 3
+
+=== R_10 [3dp]  (n=43201) ===
+  order-1: MI_obs=0.00178 bits  null=0.00129+/-0.00018  z=+2.67  no memory
+  order-2: MI_obs=0.01612 bits  null=0.01492+/-0.00076  z=+1.57  no memory
+  order-3: MI_obs=0.16155 bits  null=0.16012+/-0.00234  z=+0.61  no memory
+  -> R_10 [3dp]: memoryless to order 3
+
+=== JD100 [2dp]  (n=86401) ===
+  order-1: MI_obs=0.00066 bits  null=0.00069+/-0.00010  z=-0.35  no memory
+  order-2: MI_obs=0.00732 bits  null=0.00754+/-0.00030  z=-0.74  no memory
+  order-3: MI_obs=0.07656 bits  null=0.07700+/-0.00119  z=-0.36  no memory
+  -> JD100 [2dp]: memoryless to order 3
+
+======================================================================
+OVERALL: NO memory to order 3 on any index

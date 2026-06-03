@@ -1,0 +1,90 @@
+======================================================================
+UNTAPPED-FILL: tautology vs exploitability
+======================================================================
+
+=== 1HZ100V [2dp]  (n=86401) ===
+  (A) EVENTUAL FILL  P(absent digit appears within K ticks) vs 1-0.9^K:
+      K= 10  measured=0.6523  theory(1-0.9^K)=0.6513  diff=+0.0010
+      K= 22  measured=0.9020  theory(1-0.9^K)=0.9015  diff=+0.0005
+      K= 30  measured=0.9581  theory(1-0.9^K)=0.9576  diff=+0.0005
+      K= 50  measured=0.9953  theory(1-0.9^K)=0.9948  diff=+0.0004
+  (B) EXPLOITABILITY  P(next==d | d untapped in last w)  [null=0.1000]:
+      w= 5  P=0.1003  Wilson99=[0.0992,0.1014]  trials=509,936  at/below null
+      w=10  P=0.1006  Wilson99=[0.0992,0.1020]  trials=300,775  at/below null
+      w=20  P=0.0997  Wilson99=[0.0974,0.1022]  trials=104,236  at/below null
+  -> per-tick predictive edge from 'untapped': NONE (P=0.10, memoryless)
+
+=== 1HZ10V [2dp]  (n=86402) ===
+  (A) EVENTUAL FILL  P(absent digit appears within K ticks) vs 1-0.9^K:
+      K= 10  measured=0.6508  theory(1-0.9^K)=0.6513  diff=-0.0005
+      K= 22  measured=0.9011  theory(1-0.9^K)=0.9015  diff=-0.0005
+      K= 30  measured=0.9570  theory(1-0.9^K)=0.9576  diff=-0.0006
+      K= 50  measured=0.9947  theory(1-0.9^K)=0.9948  diff=-0.0002
+  (B) EXPLOITABILITY  P(next==d | d untapped in last w)  [null=0.1000]:
+      w= 5  P=0.1000  Wilson99=[0.0990,0.1011]  trials=510,388  at/below null
+      w=10  P=0.1001  Wilson99=[0.0987,0.1015]  trials=301,175  at/below null
+      w=20  P=0.0988  Wilson99=[0.0965,0.1012]  trials=105,217  at/below null
+  -> per-tick predictive edge from 'untapped': NONE (P=0.10, memoryless)
+
+=== 1HZ75V [2dp]  (n=86402) ===
+  (A) EVENTUAL FILL  P(absent digit appears within K ticks) vs 1-0.9^K:
+      K= 10  measured=0.6507  theory(1-0.9^K)=0.6513  diff=-0.0006
+      K= 22  measured=0.9027  theory(1-0.9^K)=0.9015  diff=+0.0011
+      K= 30  measured=0.9583  theory(1-0.9^K)=0.9576  diff=+0.0007
+      K= 50  measured=0.9949  theory(1-0.9^K)=0.9948  diff=+0.0000
+  (B) EXPLOITABILITY  P(next==d | d untapped in last w)  [null=0.1000]:
+      w= 5  P=0.1002  Wilson99=[0.0991,0.1013]  trials=510,526  at/below null
+      w=10  P=0.1005  Wilson99=[0.0991,0.1019]  trials=301,582  at/below null
+      w=20  P=0.1008  Wilson99=[0.0985,0.1033]  trials=104,624  at/below null
+  -> per-tick predictive edge from 'untapped': NONE (P=0.10, memoryless)
+
+=== 1HZ25V [2dp]  (n=86402) ===
+  (A) EVENTUAL FILL  P(absent digit appears within K ticks) vs 1-0.9^K:
+      K= 10  measured=0.6513  theory(1-0.9^K)=0.6513  diff=-0.0001
+      K= 22  measured=0.9003  theory(1-0.9^K)=0.9015  diff=-0.0012
+      K= 30  measured=0.9571  theory(1-0.9^K)=0.9576  diff=-0.0005
+      K= 50  measured=0.9948  theory(1-0.9^K)=0.9948  diff=-0.0000
+  (B) EXPLOITABILITY  P(next==d | d untapped in last w)  [null=0.1000]:
+      w= 5  P=0.0999  Wilson99=[0.0988,0.1010]  trials=510,312  at/below null
+      w=10  P=0.0994  Wilson99=[0.0980,0.1008]  trials=301,576  at/below null
+      w=20  P=0.0996  Wilson99=[0.0972,0.1020]  trials=106,164  at/below null
+  -> per-tick predictive edge from 'untapped': NONE (P=0.10, memoryless)
+
+=== R_100 [2dp]  (n=43201) ===
+  (A) EVENTUAL FILL  P(absent digit appears within K ticks) vs 1-0.9^K:
+      K= 10  measured=0.6522  theory(1-0.9^K)=0.6513  diff=+0.0009
+      K= 22  measured=0.9014  theory(1-0.9^K)=0.9015  diff=-0.0001
+      K= 30  measured=0.9577  theory(1-0.9^K)=0.9576  diff=+0.0001
+      K= 50  measured=0.9948  theory(1-0.9^K)=0.9948  diff=-0.0001
+  (B) EXPLOITABILITY  P(next==d | d untapped in last w)  [null=0.1000]:
+      w= 5  P=0.1003  Wilson99=[0.0988,0.1019]  trials=255,200  at/below null
+      w=10  P=0.1006  Wilson99=[0.0986,0.1026]  trials=150,654  at/below null
+      w=20  P=0.1009  Wilson99=[0.0976,0.1044]  trials=52,345  at/below null
+  -> per-tick predictive edge from 'untapped': NONE (P=0.10, memoryless)
+
+=== R_10 [3dp]  (n=43201) ===
+  (A) EVENTUAL FILL  P(absent digit appears within K ticks) vs 1-0.9^K:
+      K= 10  measured=0.6525  theory(1-0.9^K)=0.6513  diff=+0.0012
+      K= 22  measured=0.9024  theory(1-0.9^K)=0.9015  diff=+0.0009
+      K= 30  measured=0.9575  theory(1-0.9^K)=0.9576  diff=-0.0001
+      K= 50  measured=0.9951  theory(1-0.9^K)=0.9948  diff=+0.0003
+  (B) EXPLOITABILITY  P(next==d | d untapped in last w)  [null=0.1000]:
+      w= 5  P=0.0998  Wilson99=[0.0983,0.1014]  trials=254,842  at/below null
+      w=10  P=0.1001  Wilson99=[0.0981,0.1021]  trials=150,240  at/below null
+      w=20  P=0.0994  Wilson99=[0.0961,0.1028]  trials=52,131  at/below null
+  -> per-tick predictive edge from 'untapped': NONE (P=0.10, memoryless)
+
+=== JD100 [2dp]  (n=86401) ===
+  (A) EVENTUAL FILL  P(absent digit appears within K ticks) vs 1-0.9^K:
+      K= 10  measured=0.6512  theory(1-0.9^K)=0.6513  diff=-0.0001
+      K= 22  measured=0.9013  theory(1-0.9^K)=0.9015  diff=-0.0002
+      K= 30  measured=0.9577  theory(1-0.9^K)=0.9576  diff=+0.0000
+      K= 50  measured=0.9949  theory(1-0.9^K)=0.9948  diff=+0.0000
+  (B) EXPLOITABILITY  P(next==d | d untapped in last w)  [null=0.1000]:
+      w= 5  P=0.1001  Wilson99=[0.0990,0.1012]  trials=510,088  at/below null
+      w=10  P=0.1002  Wilson99=[0.0988,0.1016]  trials=301,518  at/below null
+      w=20  P=0.1007  Wilson99=[0.0983,0.1031]  trials=104,935  at/below null
+  -> per-tick predictive edge from 'untapped': NONE (P=0.10, memoryless)
+
+======================================================================
+OVERALL: untapped status CARRIES NO per-tick edge on real Deriv data.

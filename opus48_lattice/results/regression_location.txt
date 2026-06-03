@@ -1,0 +1,30 @@
+======================================================================
+LAYER-3 REGRESSION CLUSTER-LOCATION vs PERSISTENCE
+======================================================================
+
+=== 1HZ100V ===
+  band width = 1 (median |move| x 10)
+  regression cluster-hit rate = 0.7823
+  persistence cluster-hit rate = 0.8762  (predict next=last)
+  regression - persistence = -0.0939  no improvement over persistence
+
+=== 1HZ10V ===
+  band width = 1.2 (median |move| x 10)
+  regression cluster-hit rate = 0.7774
+  persistence cluster-hit rate = 0.8768  (predict next=last)
+  regression - persistence = -0.0994  no improvement over persistence
+
+=== R_100 ===
+  band width = 0.6 (median |move| x 10)
+  regression cluster-hit rate = 0.7961
+  persistence cluster-hit rate = 0.8866  (predict next=last)
+  regression - persistence = -0.0905  no improvement over persistence
+
+=== JD100 ===
+  band width = 0.4 (median |move| x 10)
+  regression cluster-hit rate = 0.7765
+  persistence cluster-hit rate = 0.8761  (predict next=last)
+  regression - persistence = -0.0996  no improvement over persistence
+
+======================================================================
+OVERALL: adaptive regression does NOT beat persistence at locating the next cluster.
