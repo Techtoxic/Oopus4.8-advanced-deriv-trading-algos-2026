@@ -10,6 +10,28 @@ artifacts force.
 
 ---
 
+## 🆕 2026 — Pivot to currencies & metals (MQL5 + COT + ML)
+
+Deriv synthetics are negative‑EV by construction (proven below). The next chapter
+moves to **real markets with real structure** — see
+**[`currencies-metals-swing/`](currencies-metals-swing/)**:
+
+- **`mql5/AdaptiveSwingTrader.mq5`** — an adaptive, **non‑repainting** swing EA for
+  FX & metals: ATR‑scaled stops / targets / position sizing, SuperTrend+ADX trend
+  regime, **COT bias via `WebRequest`** to your OpenCOT API, daily‑loss breaker,
+  **no martingale**. Compiles clean (0 errors / 0 warnings, verified in MetaEditor).
+- **`research/`** — honest walk‑forward backtests on real FX (2010–2020) & gold
+  (2004–2025) with CFTC COT history. Verdict: FX‑majors trend‑following shows no
+  robust edge after costs; **gold + COT‑index positioning** is the one signal that
+  survives out‑of‑sample; a purged‑walk‑forward ML filter **failed** (AUC≈0.49) and
+  the report says so plainly.
+- **`DIAGNOSIS.md`** — measured audit of the 97 legacy EAs (only **14 used ATR**;
+  **7+ used martingale**; **0 ever called the COT API**).
+
+Same "test before you trust" discipline as this Deriv study — now pointed at FX & metals.
+
+---
+
 ## ⭐ Bottom line (read this first)
 
 > **On Deriv synthetic indices, no algorithm has positive expected value — and
