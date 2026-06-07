@@ -1,0 +1,5 @@
+CROSS-MARKET DIGIT CORRELATION (Phase 1C Step 4) — 5000 simultaneous ticks aligned by epoch
+R_10-R_25: n=5000 digit_corr=+0.0015 same_digit_rate=0.1090 (exp 0.10) indep_chi2_p=0.296
+R_10-R_50: n=4999 digit_corr=-0.0053 same_digit_rate=0.0986 (exp 0.10) indep_chi2_p=0.334
+R_25-R_50: n=4999 digit_corr=+0.0127 same_digit_rate=0.1054 (exp 0.10) indep_chi2_p=0.094
+VERDICT: markets are independent; no cross-market predictive signal. No edge.

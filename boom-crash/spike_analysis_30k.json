@@ -1,0 +1,54 @@
+{
+  "BOOM500": {
+    "symbol": "BOOM500",
+    "n_ticks": 30000,
+    "n_spikes": 41,
+    "mean_interval": 713.825,
+    "median_interval": 566.5,
+    "std_interval": 614.6833285318547,
+    "min_interval": 35,
+    "max_interval": 3017,
+    "CV": 0.8611120772344127,
+    "ks_geom_p": 0.7319401908272887,
+    "interval_autocorr_lag1": -0.10065525709279598
+  },
+  "CRASH500": {
+    "symbol": "CRASH500",
+    "n_ticks": 30000,
+    "n_spikes": 54,
+    "mean_interval": 549.7169811320755,
+    "median_interval": 513.0,
+    "std_interval": 547.445194202157,
+    "min_interval": 8,
+    "max_interval": 2680,
+    "CV": 0.9958673517320858,
+    "ks_geom_p": 0.41772631326951415,
+    "interval_autocorr_lag1": -0.07040321881543783
+  },
+  "BOOM1000": {
+    "symbol": "BOOM1000",
+    "n_ticks": 30000,
+    "n_spikes": 22,
+    "mean_interval": 1087.7619047619048,
+    "median_interval": 686.0,
+    "std_interval": 1179.1800179528268,
+    "min_interval": 118,
+    "max_interval": 4804,
+    "CV": 1.0840423927246579,
+    "ks_geom_p": 0.8283954583268515,
+    "interval_autocorr_lag1": -0.11058853203079744
+  },
+  "CRASH1000": {
+    "symbol": "CRASH1000",
+    "n_ticks": 30000,
+    "n_spikes": 24,
+    "mean_interval": 1189.2173913043478,
+    "median_interval": 993.0,
+    "std_interval": 825.5294457404284,
+    "min_interval": 134,
+    "max_interval": 3738,
+    "CV": 0.6941787529990441,
+    "ks_geom_p": 0.3316670818501696,
+    "interval_autocorr_lag1": 0.09552474242403942
+  }
+}
