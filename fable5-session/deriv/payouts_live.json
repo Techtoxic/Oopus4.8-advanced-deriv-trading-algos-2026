@@ -1,0 +1,590 @@
+[
+ {
+  "contract_type": "DIGITDIFF",
+  "barrier": "0",
+  "symbol": "1HZ100V",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.096,
+  "ask": 10,
+  "payout": 10.96
+ },
+ {
+  "contract_type": "DIGITMATCH",
+  "barrier": "0",
+  "symbol": "1HZ100V",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 8.929,
+  "ask": 10,
+  "payout": 89.29
+ },
+ {
+  "contract_type": "DIGITEVEN",
+  "symbol": "1HZ100V",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.953,
+  "ask": 10,
+  "payout": 19.53
+ },
+ {
+  "contract_type": "DIGITOVER",
+  "barrier": "0",
+  "symbol": "1HZ100V",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.096,
+  "ask": 10,
+  "payout": 10.96
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "1HZ100V",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "1HZ100V",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "1HZ100V",
+  "duration": 2,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "1HZ100V",
+  "duration": 2,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "1HZ100V",
+  "duration": 5,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "1HZ100V",
+  "duration": 5,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "1HZ100V",
+  "duration": 10,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "1HZ100V",
+  "duration": 10,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "DIGITDIFF",
+  "barrier": "0",
+  "symbol": "R_100",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.087,
+  "ask": 10,
+  "payout": 10.87
+ },
+ {
+  "contract_type": "DIGITMATCH",
+  "barrier": "0",
+  "symbol": "R_100",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 8.333,
+  "ask": 10,
+  "payout": 83.33
+ },
+ {
+  "contract_type": "DIGITEVEN",
+  "symbol": "R_100",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "DIGITOVER",
+  "barrier": "0",
+  "symbol": "R_100",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.087,
+  "ask": 10,
+  "payout": 10.87
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "R_100",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "R_100",
+  "duration": 1,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "R_100",
+  "duration": 2,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "R_100",
+  "duration": 2,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "R_100",
+  "duration": 5,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "R_100",
+  "duration": 5,
+  "duration_unit": "t",
+  "payout_ratio": 1.923,
+  "ask": 10,
+  "payout": 19.23
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "R_100",
+  "duration": 10,
+  "duration_unit": "t",
+  "payout_ratio": 1.924,
+  "ask": 10,
+  "payout": 19.24
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "R_100",
+  "duration": 10,
+  "duration_unit": "t",
+  "payout_ratio": 1.922,
+  "ask": 10,
+  "payout": 19.22
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxEURUSD",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxEURUSD",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxEURUSD",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxEURUSD",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxEURUSD",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxEURUSD",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxEURUSD",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxEURUSD",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxEURUSD",
+  "duration": 1,
+  "duration_unit": "d",
+  "payout_ratio": 1.73,
+  "ask": 10,
+  "payout": 17.3
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxEURUSD",
+  "duration": 1,
+  "duration_unit": "d",
+  "payout_ratio": 2.027,
+  "ask": 10,
+  "payout": 20.27
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxXAUUSD",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxXAUUSD",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxXAUUSD",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not available from 21:00:00 to 23:59:59."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxXAUUSD",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not available from 21:00:00 to 23:59:59."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxXAUUSD",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading is not available from 21:00:00 to 23:59:59."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxXAUUSD",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading is not available from 21:00:00 to 23:59:59."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxXAUUSD",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading is not available from 21:00:00 to 23:59:59."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxXAUUSD",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading is not available from 21:00:00 to 23:59:59."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxXAUUSD",
+  "duration": 1,
+  "duration_unit": "d",
+  "payout_ratio": 1.6620000000000001,
+  "ask": 10,
+  "payout": 16.62
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxXAUUSD",
+  "duration": 1,
+  "duration_unit": "d",
+  "payout_ratio": 1.9940000000000002,
+  "ask": 10,
+  "payout": 19.94
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "cryBTCUSD",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "cryBTCUSD",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "cryBTCUSD",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "cryBTCUSD",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "cryBTCUSD",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "cryBTCUSD",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "cryBTCUSD",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "cryBTCUSD",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "cryBTCUSD",
+  "duration": 1,
+  "duration_unit": "d",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "cryBTCUSD",
+  "duration": 1,
+  "duration_unit": "d",
+  "error": "Trading is not offered for this asset."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxGBPUSD",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxGBPUSD",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxGBPUSD",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxGBPUSD",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxGBPUSD",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxGBPUSD",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxGBPUSD",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxGBPUSD",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxGBPUSD",
+  "duration": 1,
+  "duration_unit": "d",
+  "payout_ratio": 1.762,
+  "ask": 10,
+  "payout": 17.62
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxGBPUSD",
+  "duration": 1,
+  "duration_unit": "d",
+  "payout_ratio": 1.985,
+  "ask": 10,
+  "payout": 19.85
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxUSDJPY",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxUSDJPY",
+  "duration": 1,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxUSDJPY",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxUSDJPY",
+  "duration": 5,
+  "duration_unit": "m",
+  "error": "Trading is not offered for this duration."
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxUSDJPY",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxUSDJPY",
+  "duration": 15,
+  "duration_unit": "m",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxUSDJPY",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxUSDJPY",
+  "duration": 1,
+  "duration_unit": "h",
+  "error": "Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59"
+ },
+ {
+  "contract_type": "CALL",
+  "symbol": "frxUSDJPY",
+  "duration": 1,
+  "duration_unit": "d",
+  "payout_ratio": 1.625,
+  "ask": 10,
+  "payout": 16.25
+ },
+ {
+  "contract_type": "PUT",
+  "symbol": "frxUSDJPY",
+  "duration": 1,
+  "duration_unit": "d",
+  "payout_ratio": 2.153,
+  "ask": 10,
+  "payout": 21.53
+ }
+]

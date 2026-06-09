@@ -1,0 +1,151 @@
+======================================================================
+LIVE PAYOUTS / HOUSE EDGE (measured this session)
+======================================================================
+   1HZ100V DIGITDIFF b= 0 d=1t payout_x=1.0960 req_winrate=0.9124
+   1HZ100V DIGITMATCH b= 0 d=1t payout_x=8.9290 req_winrate=0.1120
+   1HZ100V DIGITEVEN b= - d=1t payout_x=1.9530 req_winrate=0.5120
+   1HZ100V DIGITOVER b= 0 d=1t payout_x=1.0960 req_winrate=0.9124
+   1HZ100V      CALL b= - d=1t payout_x=1.9230 req_winrate=0.5200
+   1HZ100V       PUT b= - d=1t payout_x=1.9230 req_winrate=0.5200
+   1HZ100V      CALL b= - d=2t payout_x=1.9230 req_winrate=0.5200
+   1HZ100V       PUT b= - d=2t payout_x=1.9230 req_winrate=0.5200
+   1HZ100V      CALL b= - d=5t payout_x=1.9230 req_winrate=0.5200
+   1HZ100V       PUT b= - d=5t payout_x=1.9230 req_winrate=0.5200
+   1HZ100V      CALL b= - d=10t payout_x=1.9230 req_winrate=0.5200
+   1HZ100V       PUT b= - d=10t payout_x=1.9230 req_winrate=0.5200
+     R_100 DIGITDIFF b= 0 d=1t payout_x=1.0870 req_winrate=0.9200
+     R_100 DIGITMATCH b= 0 d=1t payout_x=8.3330 req_winrate=0.1200
+     R_100 DIGITEVEN b= - d=1t payout_x=1.9230 req_winrate=0.5200
+     R_100 DIGITOVER b= 0 d=1t payout_x=1.0870 req_winrate=0.9200
+     R_100      CALL b= - d=1t payout_x=1.9230 req_winrate=0.5200
+     R_100       PUT b= - d=1t payout_x=1.9230 req_winrate=0.5200
+     R_100      CALL b= - d=2t payout_x=1.9230 req_winrate=0.5200
+     R_100       PUT b= - d=2t payout_x=1.9230 req_winrate=0.5200
+     R_100      CALL b= - d=5t payout_x=1.9230 req_winrate=0.5200
+     R_100       PUT b= - d=5t payout_x=1.9230 req_winrate=0.5200
+     R_100      CALL b= - d=10t payout_x=1.9240 req_winrate=0.5198
+     R_100       PUT b= - d=10t payout_x=1.9220 req_winrate=0.5203
+ frxEURUSD      CALL d=1m ERROR: Trading is not offered for this duration.
+ frxEURUSD       PUT d=1m ERROR: Trading is not offered for this duration.
+ frxEURUSD      CALL d=5m ERROR: Trading is not offered for this duration.
+ frxEURUSD       PUT d=5m ERROR: Trading is not offered for this duration.
+ frxEURUSD      CALL d=15m ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxEURUSD       PUT d=15m ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxEURUSD      CALL d=1h ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxEURUSD       PUT d=1h ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxEURUSD      CALL b= - d=1d payout_x=1.7300 req_winrate=0.5780
+ frxEURUSD       PUT b= - d=1d payout_x=2.0270 req_winrate=0.4933
+ frxXAUUSD      CALL d=1m ERROR: Trading is not offered for this duration.
+ frxXAUUSD       PUT d=1m ERROR: Trading is not offered for this duration.
+ frxXAUUSD      CALL d=5m ERROR: Trading is not available from 21:00:00 to 23:59:59.
+ frxXAUUSD       PUT d=5m ERROR: Trading is not available from 21:00:00 to 23:59:59.
+ frxXAUUSD      CALL d=15m ERROR: Trading is not available from 21:00:00 to 23:59:59.
+ frxXAUUSD       PUT d=15m ERROR: Trading is not available from 21:00:00 to 23:59:59.
+ frxXAUUSD      CALL d=1h ERROR: Trading is not available from 21:00:00 to 23:59:59.
+ frxXAUUSD       PUT d=1h ERROR: Trading is not available from 21:00:00 to 23:59:59.
+ frxXAUUSD      CALL b= - d=1d payout_x=1.6620 req_winrate=0.6017
+ frxXAUUSD       PUT b= - d=1d payout_x=1.9940 req_winrate=0.5015
+ cryBTCUSD      CALL d=1m ERROR: Trading is not offered for this asset.
+ cryBTCUSD       PUT d=1m ERROR: Trading is not offered for this asset.
+ cryBTCUSD      CALL d=5m ERROR: Trading is not offered for this asset.
+ cryBTCUSD       PUT d=5m ERROR: Trading is not offered for this asset.
+ cryBTCUSD      CALL d=15m ERROR: Trading is not offered for this asset.
+ cryBTCUSD       PUT d=15m ERROR: Trading is not offered for this asset.
+ cryBTCUSD      CALL d=1h ERROR: Trading is not offered for this asset.
+ cryBTCUSD       PUT d=1h ERROR: Trading is not offered for this asset.
+ cryBTCUSD      CALL d=1d ERROR: Trading is not offered for this asset.
+ cryBTCUSD       PUT d=1d ERROR: Trading is not offered for this asset.
+ frxGBPUSD      CALL d=1m ERROR: Trading is not offered for this duration.
+ frxGBPUSD       PUT d=1m ERROR: Trading is not offered for this duration.
+ frxGBPUSD      CALL d=5m ERROR: Trading is not offered for this duration.
+ frxGBPUSD       PUT d=5m ERROR: Trading is not offered for this duration.
+ frxGBPUSD      CALL d=15m ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxGBPUSD       PUT d=15m ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxGBPUSD      CALL d=1h ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxGBPUSD       PUT d=1h ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxGBPUSD      CALL b= - d=1d payout_x=1.7620 req_winrate=0.5675
+ frxGBPUSD       PUT b= - d=1d payout_x=1.9850 req_winrate=0.5038
+ frxUSDJPY      CALL d=1m ERROR: Trading is not offered for this duration.
+ frxUSDJPY       PUT d=1m ERROR: Trading is not offered for this duration.
+ frxUSDJPY      CALL d=5m ERROR: Trading is not offered for this duration.
+ frxUSDJPY       PUT d=5m ERROR: Trading is not offered for this duration.
+ frxUSDJPY      CALL d=15m ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxUSDJPY       PUT d=15m ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxUSDJPY      CALL d=1h ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxUSDJPY       PUT d=1h ERROR: Trading on forex contracts with duration less than 5 hours is not available from 21:00:00 to 23:59:59
+ frxUSDJPY      CALL b= - d=1d payout_x=1.6250 req_winrate=0.6154
+ frxUSDJPY       PUT b= - d=1d payout_x=2.1530 req_winrate=0.4645
+
+======================================================================
+SYNTHETIC TICK BATTERY (30k fresh ticks each)
+======================================================================
+ 1HZ100V: uniform_p=0.404 lag1_p=0.286 lag2_p=0.009 drift_p=0.198 ljungbox_p=0.180 runs_z=+0.72
+          best conditional DIGITDIFF Wilson99-lo=0.9075 (need >0.9126 at 1.0958x) cell=(5, 5, np.float64(0.9202557200538358), 2972)
+   R_100: uniform_p=0.274 lag1_p=0.780 lag2_p=0.442 drift_p=0.766 ljungbox_p=0.512 runs_z=+0.01
+          best conditional DIGITDIFF Wilson99-lo=0.8996 (need >0.9126 at 1.0958x) cell=(9, 7, np.float64(0.9127582814037389), 3049)
+  1HZ10V: uniform_p=0.891 lag1_p=0.539 lag2_p=0.917 drift_p=0.948 ljungbox_p=0.115 runs_z=+1.24
+          best conditional DIGITDIFF Wilson99-lo=0.9007 (need >0.9126 at 1.0958x) cell=(9, 1, np.float64(0.9140148950575491), 2954)
+    R_50: uniform_p=0.277 lag1_p=0.560 lag2_p=0.980 drift_p=0.293 ljungbox_p=0.443 runs_z=-0.00
+          best conditional DIGITDIFF Wilson99-lo=0.9023 (need >0.9126 at 1.0958x) cell=(0, 1, np.float64(0.9152709359605912), 3045)
+  1HZ75V: uniform_p=0.625 lag1_p=0.375 lag2_p=0.419 drift_p=0.345 ljungbox_p=0.878 runs_z=+1.43
+          best conditional DIGITDIFF Wilson99-lo=0.9008 (need >0.9126 at 1.0958x) cell=(3, 5, np.float64(0.9138834315651605), 3054)
+
+======================================================================
+REAL MARKETS — PREDICTABILITY vs MEASURED BINARY EDGE
+======================================================================
+--- frxEURUSD  (18645 1m bars)  req win rates: 1d:0.578
+   h=  1m: P(same sign)=0.4841 (z=-4.10, n=16743)  ret_ac1=-0.0401
+   h=  5m: P(same sign)=0.4837 (z=-1.95, n=3593)  ret_ac1=-0.0123
+   h= 15m: P(same sign)=0.4951 (z=-0.34, n=1218)  ret_ac1=+0.0588
+   h= 60m: P(same sign)=0.4787 (z=-0.74, n=305)  ret_ac1=+0.0831
+   hour 13 UTC: mean1m=-1.01e-05 t=-2.30 p=0.022 n=781
+   hour 06 UTC: mean1m=+7.10e-06 t=+2.44 p=0.015 n=780
+   hour 11 UTC: mean1m=+5.26e-06 t=+1.82 p=0.069 n=780
+--- frxGBPUSD  (18645 1m bars)  req win rates: 1d:0.568
+   h=  1m: P(same sign)=0.4835 (z=-4.33, n=17214)  ret_ac1=-0.0472
+   h=  5m: P(same sign)=0.4790 (z=-2.53, n=3612)  ret_ac1=-0.0268
+   h= 15m: P(same sign)=0.4980 (z=-0.14, n=1225)  ret_ac1=+0.0502
+   h= 60m: P(same sign)=0.4984 (z=-0.06, n=307)  ret_ac1=+0.0236
+   hour 13 UTC: mean1m=-7.44e-06 t=-1.53 p=0.127 n=781
+   hour 06 UTC: mean1m=+5.53e-06 t=+1.70 p=0.089 n=780
+   hour 11 UTC: mean1m=+5.31e-06 t=+1.66 p=0.098 n=780
+--- frxUSDJPY  (18646 1m bars)  req win rates: 1d:0.615
+   h=  1m: P(same sign)=0.4585 (z=-10.61, n=16374)  ret_ac1=-0.1117
+   h=  5m: P(same sign)=0.4758 (z=-2.88, n=3537)  ret_ac1=-0.0685
+   h= 15m: P(same sign)=0.4523 (z=-3.33, n=1216)  ret_ac1=-0.0792
+   h= 60m: P(same sign)=0.4643 (z=-1.25, n=308)  ret_ac1=-0.0462
+   hour 13 UTC: mean1m=+4.77e-06 t=+1.28 p=0.201 n=781
+   hour 12 UTC: mean1m=+3.50e-06 t=+1.61 p=0.108 n=781
+   hour 21 UTC: mean1m=-2.16e-06 t=-1.01 p=0.315 n=660
+--- frxXAUUSD  (17718 1m bars)  req win rates: 1d:0.602
+   h=  1m: P(same sign)=0.4877 (z=-3.27, n=17664)  ret_ac1=-0.0173
+   h=  5m: P(same sign)=0.4907 (z=-1.11, n=3534)  ret_ac1=-0.0101
+   h= 15m: P(same sign)=0.4754 (z=-1.69, n=1180)  ret_ac1=+0.0275
+   h= 60m: P(same sign)=0.5000 (z=+0.00, n=294)  ret_ac1=+0.0604
+   hour 13 UTC: mean1m=-4.93e-05 t=-2.41 p=0.016 n=781
+   hour 01 UTC: mean1m=-2.66e-05 t=-1.60 p=0.111 n=781
+   hour 05 UTC: mean1m=-1.64e-05 t=-1.19 p=0.235 n=780
+--- frxXAGUSD  (17718 1m bars)  req win rates: 
+   h=  1m: P(same sign)=0.4876 (z=-3.30, n=17669)  ret_ac1=-0.0104
+   h=  5m: P(same sign)=0.4900 (z=-1.19, n=3537)  ret_ac1=-0.0239
+   h= 15m: P(same sign)=0.4839 (z=-1.11, n=1180)  ret_ac1=-0.0238
+   h= 60m: P(same sign)=0.4728 (z=-0.93, n=294)  ret_ac1=+0.0119
+   hour 13 UTC: mean1m=-1.35e-04 t=-2.99 p=0.003 n=781
+   hour 01 UTC: mean1m=-8.24e-05 t=-1.91 p=0.056 n=781
+   hour 05 UTC: mean1m=-4.53e-05 t=-1.31 p=0.191 n=780
+--- cryBTCUSD  (29983 1m bars)  req win rates: 
+   h=  1m: P(same sign)=0.4925 (z=-2.60, n=29958)  ret_ac1=+0.0181
+   h=  5m: P(same sign)=0.4853 (z=-2.27, n=5994)  ret_ac1=-0.0254
+   h= 15m: P(same sign)=0.4787 (z=-1.90, n=1997)  ret_ac1=-0.0249
+   h= 60m: P(same sign)=0.4859 (z=-0.63, n=498)  ret_ac1=-0.0210
+   hour 13 UTC: mean1m=-4.94e-05 t=-2.15 p=0.032 n=1261
+   hour 20 UTC: mean1m=+4.46e-05 t=+2.38 p=0.017 n=1259
+   hour 01 UTC: mean1m=-3.06e-05 t=-1.55 p=0.122 n=1198
+--- cryETHUSD  (29983 1m bars)  req win rates: 
+   h=  1m: P(same sign)=0.4921 (z=-2.72, n=29543)  ret_ac1=+0.0194
+   h=  5m: P(same sign)=0.4748 (z=-3.90, n=5988)  ret_ac1=-0.0129
+   h= 15m: P(same sign)=0.4837 (z=-1.46, n=1993)  ret_ac1=+0.0034
+   h= 60m: P(same sign)=0.4748 (z=-1.12, n=497)  ret_ac1=-0.0336
+   hour 13 UTC: mean1m=-6.27e-05 t=-2.38 p=0.018 n=1261
+   hour 20 UTC: mean1m=+4.01e-05 t=+1.59 p=0.112 n=1259
+   hour 01 UTC: mean1m=-3.59e-05 t=-1.41 p=0.160 n=1198
