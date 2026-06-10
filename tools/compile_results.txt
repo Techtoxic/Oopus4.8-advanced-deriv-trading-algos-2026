@@ -1,0 +1,480 @@
+[
+    {
+        "EA":  "AdaptiveSwingTrader_v2.mq5",
+        "Result":  "Result: 0 errors, 0 warnings, 1821 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    },
+    {
+        "EA":  "EliteCOT_SwingPortfolio.mq5",
+        "Result":  "Result: 0 errors, 0 warnings, 1475 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    },
+    {
+        "EA":  "EliteGold_TSMOM.mq5",
+        "Result":  "Result: 0 errors, 0 warnings, 1592 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    },
+    {
+        "EA":  "FABLE_RegimeAllocator.mq5",
+        "Result":  "Result: 0 errors, 0 warnings, 1598 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    },
+    {
+        "EA":  "FABLE_TailGuard_Overlay.mq5",
+        "Result":  "Result: 0 errors, 0 warnings, 1337 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    },
+    {
+        "EA":  "FFZ_v3_PurpleBills.mq5",
+        "Result":  "Result: 0 errors, 0 warnings, 1521 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    },
+    {
+        "EA":  "HybridML_ShadowGate.mq5",
+        "Result":  "Result: 0 errors, 0 warnings, 1073 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    },
+    {
+        "EA":  "HybridScalper_CostGate.mq5",
+        "Result":  "Result: 0 errors, 3 warnings, 1064 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    },
+    {
+        "EA":  "XU_SEMA_NoRepaint_v2.mq5",
+        "Result":  "Result: 0 errors, 0 warnings, 1228 ms elapsed, cpu=\u0027X64 Regular\u0027"
+    }
+]
+
+===== AdaptiveSwingTrader_v2.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\AdaptiveSwingTrader_v2.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\AdaptiveSwingTrader_v2.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\AdaptiveSwingTrader_v2.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\AdaptiveSwingTrader_v2.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FableCOT.mqh
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 0 warnings, 1821 ms elapsed, cpu='X64 Regular'
+
+===== EliteCOT_SwingPortfolio.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\EliteCOT_SwingPortfolio.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\EliteCOT_SwingPortfolio.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\EliteCOT_SwingPortfolio.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\EliteCOT_SwingPortfolio.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FableCOT.mqh
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 0 warnings, 1475 ms elapsed, cpu='X64 Regular'
+
+===== EliteGold_TSMOM.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\EliteGold_TSMOM.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\EliteGold_TSMOM.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\EliteGold_TSMOM.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\EliteGold_TSMOM.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FableCOT.mqh
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 0 warnings, 1592 ms elapsed, cpu='X64 Regular'
+
+===== FABLE_RegimeAllocator.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FABLE_RegimeAllocator.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FABLE_RegimeAllocator.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FABLE_RegimeAllocator.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FABLE_RegimeAllocator.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FableCOT.mqh
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 0 warnings, 1598 ms elapsed, cpu='X64 Regular'
+
+===== FABLE_TailGuard_Overlay.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FABLE_TailGuard_Overlay.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FABLE_TailGuard_Overlay.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FABLE_TailGuard_Overlay.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 0 warnings, 1337 ms elapsed, cpu='X64 Regular'
+
+===== FFZ_v3_PurpleBills.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FFZ_v3_PurpleBills.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FFZ_v3_PurpleBills.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FFZ_v3_PurpleBills.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FFZ_v3_PurpleBills.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FableCOT.mqh
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 0 warnings, 1521 ms elapsed, cpu='X64 Regular'
+
+===== HybridML_ShadowGate.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridML_ShadowGate.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridML_ShadowGate.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridML_ShadowGate.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 0 warnings, 1073 ms elapsed, cpu='X64 Regular'
+
+===== HybridScalper_CostGate.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridScalper_CostGate.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridScalper_CostGate.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridScalper_CostGate.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridScalper_CostGate.mq5(121,4) : warning 63: cannot be used for static allocated array
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridScalper_CostGate.mq5(121,32) : warning 63: cannot be used for static allocated array
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\HybridScalper_CostGate.mq5(121,60) : warning 63: cannot be used for static allocated array
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 3 warnings, 1064 ms elapsed, cpu='X64 Regular'
+
+===== XU_SEMA_NoRepaint_v2.mq5.log =====
+
+
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\XU_SEMA_NoRepaint_v2.mq5 : information: compiling C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\XU_SEMA_NoRepaint_v2.mq5
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\XU_SEMA_NoRepaint_v2.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Object.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\StdLibErr.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\OrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\HistoryOrderInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\PositionInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\Trade.mqh : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Include\Trade\DealInfo.mqh
+C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\XU_SEMA_NoRepaint_v2.mq5 : information: including C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE54EBEFFE96C1\MQL5\Experts\Fable2026\FableCOT.mqh
+ : information: generating code
+ : information: generating code 3%
+ : information: generating code 6%
+ : information: generating code 9%
+ : information: generating code 12%
+ : information: generating code 15%
+ : information: generating code 18%
+ : information: generating code 21%
+ : information: generating code 24%
+ : information: generating code 27%
+ : information: generating code 30%
+ : information: generating code 33%
+ : information: generating code 36%
+ : information: generating code 39%
+ : information: generating code 42%
+ : information: generating code 45%
+ : information: generating code 48%
+ : information: generating code 51%
+ : information: generating code 54%
+ : information: generating code 57%
+ : information: generating code 60%
+ : information: generating code 63%
+ : information: generating code 66%
+ : information: generating code 69%
+ : information: generating code 72%
+ : information: generating code 75%
+ : information: generating code 78%
+ : information: generating code 81%
+ : information: generating code 84%
+ : information: generating code 87%
+ : information: generating code 90%
+ : information: generating code 93%
+ : information: generating code 95%
+ : information: generating code 100%
+ : information: code generated
+Result: 0 errors, 0 warnings, 1228 ms elapsed, cpu='X64 Regular'
+
