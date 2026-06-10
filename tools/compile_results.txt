@@ -1,39 +1,39 @@
 [
     {
         "EA":  "AdaptiveSwingTrader_v2.mq5",
-        "Result":  "Result: 0 errors, 0 warnings, 1821 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 0 warnings, 1816 ms elapsed, cpu=\u0027X64 Regular\u0027"
     },
     {
         "EA":  "EliteCOT_SwingPortfolio.mq5",
-        "Result":  "Result: 0 errors, 0 warnings, 1475 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 0 warnings, 1497 ms elapsed, cpu=\u0027X64 Regular\u0027"
     },
     {
         "EA":  "EliteGold_TSMOM.mq5",
-        "Result":  "Result: 0 errors, 0 warnings, 1592 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 0 warnings, 1223 ms elapsed, cpu=\u0027X64 Regular\u0027"
     },
     {
         "EA":  "FABLE_RegimeAllocator.mq5",
-        "Result":  "Result: 0 errors, 0 warnings, 1598 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 0 warnings, 1495 ms elapsed, cpu=\u0027X64 Regular\u0027"
     },
     {
         "EA":  "FABLE_TailGuard_Overlay.mq5",
-        "Result":  "Result: 0 errors, 0 warnings, 1337 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 0 warnings, 1330 ms elapsed, cpu=\u0027X64 Regular\u0027"
     },
     {
         "EA":  "FFZ_v3_PurpleBills.mq5",
-        "Result":  "Result: 0 errors, 0 warnings, 1521 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 0 warnings, 1431 ms elapsed, cpu=\u0027X64 Regular\u0027"
     },
     {
         "EA":  "HybridML_ShadowGate.mq5",
-        "Result":  "Result: 0 errors, 0 warnings, 1073 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 0 warnings, 1175 ms elapsed, cpu=\u0027X64 Regular\u0027"
     },
     {
         "EA":  "HybridScalper_CostGate.mq5",
-        "Result":  "Result: 0 errors, 3 warnings, 1064 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 3 warnings, 1108 ms elapsed, cpu=\u0027X64 Regular\u0027"
     },
     {
         "EA":  "XU_SEMA_NoRepaint_v2.mq5",
-        "Result":  "Result: 0 errors, 0 warnings, 1228 ms elapsed, cpu=\u0027X64 Regular\u0027"
+        "Result":  "Result: 0 errors, 0 warnings, 1384 ms elapsed, cpu=\u0027X64 Regular\u0027"
     }
 ]
 
@@ -84,7 +84,7 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 0 warnings, 1821 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 0 warnings, 1816 ms elapsed, cpu='X64 Regular'
 
 ===== EliteCOT_SwingPortfolio.mq5.log =====
 
@@ -133,7 +133,7 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 0 warnings, 1475 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 0 warnings, 1497 ms elapsed, cpu='X64 Regular'
 
 ===== EliteGold_TSMOM.mq5.log =====
 
@@ -182,7 +182,7 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 0 warnings, 1592 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 0 warnings, 1223 ms elapsed, cpu='X64 Regular'
 
 ===== FABLE_RegimeAllocator.mq5.log =====
 
@@ -231,7 +231,7 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 0 warnings, 1598 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 0 warnings, 1495 ms elapsed, cpu='X64 Regular'
 
 ===== FABLE_TailGuard_Overlay.mq5.log =====
 
@@ -279,7 +279,7 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 0 warnings, 1337 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 0 warnings, 1330 ms elapsed, cpu='X64 Regular'
 
 ===== FFZ_v3_PurpleBills.mq5.log =====
 
@@ -328,7 +328,7 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 0 warnings, 1521 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 0 warnings, 1431 ms elapsed, cpu='X64 Regular'
 
 ===== HybridML_ShadowGate.mq5.log =====
 
@@ -376,7 +376,7 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 0 warnings, 1073 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 0 warnings, 1175 ms elapsed, cpu='X64 Regular'
 
 ===== HybridScalper_CostGate.mq5.log =====
 
@@ -427,7 +427,7 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 3 warnings, 1064 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 3 warnings, 1108 ms elapsed, cpu='X64 Regular'
 
 ===== XU_SEMA_NoRepaint_v2.mq5.log =====
 
@@ -476,5 +476,5 @@ C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FB9A56D617EDDDFE29EE5
  : information: generating code 95%
  : information: generating code 100%
  : information: code generated
-Result: 0 errors, 0 warnings, 1228 ms elapsed, cpu='X64 Regular'
+Result: 0 errors, 0 warnings, 1384 ms elapsed, cpu='X64 Regular'
 
