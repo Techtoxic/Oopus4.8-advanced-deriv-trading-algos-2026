@@ -117,11 +117,22 @@ on marketplaces. The repo now contains the receipts for why they aren't.
   **costs and risk control decide survival; signals are secondary.** Every EA
   here embodies that.
 
-## 5. Verification status
+## 5. Verification status (final)
 
-- Python research: all scripts in `RESEARCH-2026-06-10/` ran in this session;
-  outputs committed.
-- Deriv omnibot: live-tested against the real demo API (see §1).
-- MQL5 EAs: written to compile clean on MetaEditor 5 (build 4400+);
-  compile verification on the Windows/MT5 box is the next step in this
-  session — see commit history for the verified list.
+- **MQL5: 9/9 EAs compile with 0 errors, 0 warnings** on the Deriv MT5
+  MetaEditor on your Windows box (compiled against your terminal's own
+  includes; raw logs in `tools/compile_results.txt`):
+  AdaptiveSwingTrader_v2, FFZ_v3_PurpleBills, XU_SEMA_NoRepaint_v2,
+  EliteGold_TSMOM, EliteCOT_SwingPortfolio, HybridScalper_CostGate,
+  HybridML_ShadowGate, FABLE_TailGuard_Overlay, FABLE_RegimeAllocator.
+- **Deriv omnibot: 54+ min continuous live run** on demo VRTC10502381 —
+  136 real contracts executed and settled (60 digits, 51 rise/fall, 25
+  accumulators incl. active TP sells), win rate 66.9%, ROI on turnover
+  −2.1% ≈ the measured house edge. The machinery is correct and the
+  FINDINGS are confirmed by the bot's own ledger, live.
+- Python research: every table in this report regenerates from
+  `RESEARCH-2026-06-10/` scripts (data fetch script included).
+- Strategy Tester runs: NOT performed this session — your MT5 terminal had a
+  ~259-hour optimization of AdaptiveSwingTrader running and I chose not to
+  interrupt it. The tester A/B recipes are in each folder README; FableCOT.mqh
+  makes the COT A/Bs possible for the first time.
