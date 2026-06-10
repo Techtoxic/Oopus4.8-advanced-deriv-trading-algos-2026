@@ -70,3 +70,22 @@ Write-Host '================ COMPILE RESULTS ================'
 $results | Format-Table -AutoSize | Out-String | Write-Host
 $results | ConvertTo-Json | Out-File "$work\results.json" -Encoding utf8
 Write-Host "saved: $work\results.json"
+
+# upload results + logs back to the repo so the Linux side can read them
+Write-Host "[6/6] uploading results to GitHub..."
+$logBlob = ""
+Get-ChildItem "$dest\*.log" | ForEach-Object {
+    $c = Get-Content $_ -Encoding Unicode -Raw -ErrorAction SilentlyContinue
+    if (-not $c) { $c = Get-Content $_ -Raw -ErrorAction SilentlyContinue }
+    $logBlob += "===== $($_.Name) =====`n$c`n"
+}
+$payload = @{
+    message = "RDP compile results $(Get-Date -Format s)"
+    branch  = $branch
+    content = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(($results | ConvertTo-Json) + "`n`n" + $logBlob))
+}
+# get existing sha if present
+$uri = "https://api.github.com/repos/$repo/contents/tools/compile_results.txt"
+try { $sha = (Invoke-RestMethod -Headers $H -Uri "$uri`?ref=$branch").sha; $payload.sha = $sha } catch {}
+Invoke-RestMethod -Method PUT -Headers $H -Uri $uri -Body ($payload | ConvertTo-Json) | Out-Null
+Write-Host "uploaded tools/compile_results.txt"
