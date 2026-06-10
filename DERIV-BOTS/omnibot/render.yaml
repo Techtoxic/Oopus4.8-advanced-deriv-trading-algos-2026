@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: fable-omnibot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    rootDir: DERIV-BOTS/omnibot
+    envVars:
+      - key: DERIV_TOKEN
+        sync: false        # paste your token in the Render dashboard, never in git
+      - key: DERIV_APP_ID
+        value: "1089"
+      - key: MODE
+        value: ACTIVE
+      - key: BASE_STAKE
+        value: "1.0"
+      - key: MAX_STAKE
+        value: "5.0"
+      - key: DAILY_LOSS_LIMIT
+        value: "50.0"
+      - key: DAILY_PROFIT_LOCK
+        value: "100.0"
+      - key: CONTROL_KEY
+        generateValue: true
