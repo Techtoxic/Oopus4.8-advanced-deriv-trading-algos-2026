@@ -117,7 +117,7 @@ void OnTick()
    if(!sprCheap)  { g_state="DISARMED: spread not in cheap regime"; if(InpHUD) Dash(); return; }
 
    // ---- 5: armed — fade extension from EMA ----
-   double ema[2], atr[2], cl[3];
+   double ema[], atr[], cl[];
    ArraySetAsSeries(ema,true); ArraySetAsSeries(atr,true); ArraySetAsSeries(cl,true);
    if(CopyBuffer(hEMA,0,0,2,ema)<2) return;
    if(CopyBuffer(hATR,0,0,2,atr)<2) return;
