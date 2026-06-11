@@ -37,7 +37,7 @@ def main():
 
     # trade rows: at tick i (digit d[i]), settle at tick i+1; gate on sig[i-1] (past steps only)
     rows = []
-    BINS = [(3.8, 4.1), (4.1, 4.25), (4.25, 4.4), (4.4, 4.55), (4.55, 4.7), (4.7, 5.0)]
+    BINS = [(3.6, 4.0), (4.0, 4.15), (4.15, 4.3), (4.3, 4.45), (4.45, 4.6), (4.6, 4.75), (4.75, 5.0)]
     md = [f"# JD100 sigma-curve validation — {n} ticks ({span_days:.1f} days), spot {ps.min():.2f}..{ps.max():.2f}\n\n",
           "| sigma bin | n(d=2) | P(U5|d2) | n(d=7) | P(O4|d7) | pooled P | theory P | EV@1.953 |\n",
           "|---|---:|---:|---:|---:|---:|---:|---:|\n"]

@@ -62,11 +62,11 @@ General rule shipped as a tool (`tools/coverage_optimizer.py`): give it any digi
 live payout surface; it finds the cheapest replication using over/under/even/odd/diff/match
 combinations (small LP). Stop paying matches prices for over/under exposure.
 
-### 1.4 The 6.04 mystery
-You remembered "1 stake gives 6.04 on matches". The full payout scan (`results/payout_surface.md`)
-shows where 6.04-style numbers actually live (different symbol/duration/stake rounding). The
-scanner prints the true multiplier for every symbol × contract × barrier × duration so the tool
-never trades on a remembered payout again — it quotes before every round.
+### 1.4 The 6.04 mystery — SOLVED
+The full payout scan (`results/payout_surface.md`) finds **nothing paying ~6.04 on any of the 20
+digit symbols at any barrier or duration** via the official `app_id 1089`. MATCH pays 8.929
+(8.333 on R_100, 8.696 on R_10). If a tool you used displayed 6.04, it was a third-party app
+skimming markup off your payouts — stop using it. The tools here quote live before every round.
 
 ### 1.5 What WOULD make the bundle +EV
 A digit-set bet on S is +EV iff **P(settle digit ∈ S) × payout(S) > 1**. Thresholds (live payouts):
@@ -137,11 +137,20 @@ conditional edge in this repo is computed against the *correct* target tick.
 
 ## 3. Results
 
-See `results/RESULTS.md` (filled as each test completes; every table regenerable via tools/).
+**See `results/RESULTS.md` — the master verdict file.** Short version:
+- H1/H4 (your adversarial/512-combo theory): **excluded by data** (steering ≥5% would be visible; measured curves are flat).
+- H2 (step physics): **REAL on JD100** — z=5.59 non-uniformity, validated σ→edge curve, +0.99%/trade
+  backtest over 14 days (+3.22%/trade in the deep regime), entirely execution-bound (n+1).
+- H3 (payout surface): no Dutch book (lock costs 1.0138), no duration spreads; **R_100/R_10 pay
+  strictly less than the other 18 symbols** for identical events.
+- H5 (accumulators): G=(1+g)·P(survive) = 0.992–0.998 — cheapest gamble on Deriv, never +EV.
+- H6 (universe): 20 digit symbols incl. forgotten RDBEAR/RDBULL/JD*/1HZ15-30-90V — all on the same
+  static grid; only JD100 is near the σ boundary today.
+- n+1: edge exists at lag 1 only (lag 2 = −1.5% EV); 30% slip flips the strategy negative.
 
 ## 4. Verdicts & what ships
 
-See bottom of `results/RESULTS.md` + `tools/README.md`. Tools ship runnable either way:
+See `results/RESULTS.md` §7 run-book + `tools/README.md`. Tools ship runnable either way:
 - `tools/coverage_optimizer.py` — cheapest replication of any digit-set view (live payouts).
 - `tools/multi_matches.py` — your 5-digit bundle, implemented properly (same-tick or spaced,
   per-leg stakes, live payout quotes, EV gate that refuses −EV rounds unless `--force`).

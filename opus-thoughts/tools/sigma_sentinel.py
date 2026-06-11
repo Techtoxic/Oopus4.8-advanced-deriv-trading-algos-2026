@@ -99,6 +99,12 @@ def main():
     for sym in a.watch:
         ws.send(json.dumps({"ticks": sym, "subscribe": 1}))
     states = {sym: SymState(pips[sym]) for sym in a.watch}
+    # warm-start sigma from history so signals are live immediately
+    for sym in a.watch:
+        h = ctl.ticks_history(sym, count=1500)
+        for t, q in zip(h["history"]["times"], h["history"]["prices"]):
+            states[sym].push(int(t), q)
+        print(f"{sym}: warm sigma={states[sym].sigma():.2f} pips")
     t_end = time.time() + a.minutes * 60
     nsig = ntrade = 0
     log = open("../results/sentinel.log", "a")
@@ -137,7 +143,7 @@ def main():
                 ntrade += 1
                 cid = br.get("buy", {}).get("contract_id") or br.get("error", {}).get("message")
                 print(f"  -> buy rtt={rtt*1000:.0f}ms contract={cid}")
-        elif nsig == 0 and int(time.time()) % 30 == 0:
+        elif len(st.vals) % 30 == 0:
             print(line)
     summary = (f"sentinel run done: signals={nsig} trades={ntrade} over {a.minutes}min on {a.watch}; "
                f"sigmas now: " + ", ".join(f"{s}={states[s].sigma() and round(states[s].sigma(),2)}" for s in a.watch))
