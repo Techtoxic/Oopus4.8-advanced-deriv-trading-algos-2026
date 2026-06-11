@@ -158,3 +158,6 @@ Digit marginals uniform (max z = 2.2 on 1.2M ticks), gap hazards geometric, pari
    0.25–0.75% of bankroll per trade.
 5. Weekly: `payout_scanner.py` + `accumulator_scan.py` + `universe_screen.py` (new symbols
    appear; any new low-priced 1s symbol is a candidate the day it lists).
+
+## 8. Time-of-day artifacts (bonus)
+Digit uniformity by second-of-minute (600 cells) and hour (240 cells) on 1.2M JD100 ticks: worst z = 3.36/3.68 — exactly the expected max-order-statistic of noise. No reseed artifacts. Tick-step sigma flat across hours (5.58–5.79): synthetics have no session seasonality to exploit.
