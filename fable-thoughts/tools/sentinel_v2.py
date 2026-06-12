@@ -71,6 +71,9 @@ def main():
     ap.add_argument("--trade", action="store_true")
     ap.add_argument("--stake", type=float, default=1.0)
     ap.add_argument("--ev-gate", type=float, default=0.01)
+    ap.add_argument("--sigma-max", type=float, default=4.35,
+                    help="hard physics gate: never trade above this rolling sigma (walk-forward "
+                         "shows the edge lives at sigma<=~4.3; sparse-table noise trades above it)")
     ap.add_argument("--max-age", type=float, default=0.45)
     ap.add_argument("--max-loss", type=float, default=100.0)
     ap.add_argument("--max-trades", type=int, default=100000)
@@ -180,6 +183,10 @@ def main():
         sigma = st.sigma()
         if sigma is None: continue
         d = st.digit()
+        if sigma > a.sigma_max:
+            if (len(st.vals) % 120) == 0:
+                print(f"{time.strftime('%H:%M:%S')} {sym} sigma={sigma:.2f} > {a.sigma_max} -> regime closed")
+            continue
         b = round(sigma / BINW)
         if b in tables:
             off = tables[b]

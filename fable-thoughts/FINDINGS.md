@@ -31,9 +31,15 @@ Continuation and hard audit of `opus-thoughts` (2026-06-11), via the **new Deriv
    runs 0.3–1.4pp below model P, and the shortfall grows with claimed edge).
 2. **Fix shipped: empirical offset tables** (`empirical_pmf.py`). P(Δ mod 10 | sigma-bin) measured
    directly on the 1.21M in-sample ticks, keyed on the SAME rolling estimator (inherits its noise,
-   killing both biases). Out-of-sample: **+2.97%/trade (t=2.46) at gate 0.5%, +3.97%/trade
-   (t=2.35) at gate 1%**. Negative control (pmf centered on wrong digit, same machinery):
-   **−8.22% (t=−4.9)** — no leakage; the edge is the digit conditioning.
+   killing both biases). Single-split OOS: +2.97%/trade (t=2.46) at gate 0.5%, +3.97%/trade
+   (t=2.35) at gate 1%. Negative control (pmf centered on wrong digit, same machinery):
+   −8.22% (t=−4.9) — no leakage; the edge is the digit conditioning.
+   **BUT the stricter day-by-day walk-forward (`results/walkforward.md`) corrects this**: without
+   a sigma gate the strategy is −0.12%/trade over 39k trades (sparse-table noise above σ 4.5 eats
+   everything); with σ≤4.5 it is **+1.52%/trade (t=1.60) on 10.5k trades**, all of it in the
+   σ≲4.3 zone — exactly where opus's validated curve put the boundary. The honest in-zone
+   estimate is +1.5–4%/trade with t≈1.6–2.4 on ~1 day of in-zone history. `sentinel_v2.py`
+   ships with a hard `--sigma-max 4.35` physics gate as a result.
 3. **Unimplemented promises in opus's sentinel.** Its docstring promised RTT-refusal; the code
    never measured RTT, had no stale-tick guard, no settlement/PnL tracking, no risk caps.
    All implemented in `sentinel_v2.py`.
