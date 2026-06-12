@@ -7,7 +7,7 @@ while [ "$(date +%s)" -lt "$UNTIL" ]; do
   LEFT_MIN=$(( ( UNTIL - $(date +%s) ) / 60 ))
   [ "$LEFT_MIN" -lt 1 ] && break
   OUT=../results/run_${TAG}_stdout.log
-  python3 sentinel_v2.py --trade --stake "$STAKE" --ev-gate "$GATE" --minutes "$LEFT_MIN" \
+  python3 -u sentinel_v2.py --trade --stake "$STAKE" --ev-gate "$GATE" --minutes "$LEFT_MIN" \
       --max-loss 100 --log ../results/sentinel_v2_${TAG}.csv >> "$OUT" 2>&1 &
   PID=$!
   echo "$(date -u +%H:%M:%S) supervisor: launched pid=$PID for ${LEFT_MIN}min" >> ../results/supervisor.log

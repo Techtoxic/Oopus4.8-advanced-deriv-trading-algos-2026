@@ -34,3 +34,16 @@ rates) gives a decisive answer. Run it, log it, re-fit the tables weekly with `e
 - Re-evaluate cumulative PnL t-stat weekly; scale stakes toward quarter-Kelly (~0.5% of
   bankroll) only after cumulative t > 2 on ≥20k live trades.
 - If spot drops under ~210, raise stakes appetite — the edge roughly triples at σ 3.8.
+
+---
+
+## Addendum (14:57 UTC) — live-vs-replay instrumentation
+Cumulative live across all runs: 3,827 trades, −0.34%/trade (model EV +1.6%). The decisive
+check: replaying the exact strategy on the exact tick window the bot traded (09:51–14:57)
+yields **+0.01%/trade over 2,912 trades — statistically identical to live**. No execution
+leak; the bot harvested what the market offered, which today was ≈ zero at σ≈4.2.
+Interpretation: within-sigma-bin edge is nonstationary day to day (pooled history says
++1.5%/trade in-zone, t=1.6; today's session said ~0). Also noteworthy: rolling sigma ROSE
+4.05→4.25 this afternoon while spot fell — consistent with Deriv nudging the vol parameter,
+which would shrink the zone from the other side. The sigma-keyed tables condition correctly
+either way; the verdict still needs more in-zone days.
