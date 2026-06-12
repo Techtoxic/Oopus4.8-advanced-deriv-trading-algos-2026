@@ -46,7 +46,7 @@ def main():
         rel = np.abs(np.diff(ps) / ps[:-1])
         for g in RATES:
             r = ws.call({"proposal": 1, "amount": 100, "basis": "stake", "contract_type": "ACCU",
-                         "currency": "USD", "symbol": sym, "growth_rate": g})
+                         "currency": "USD", "underlying_symbol": sym, "growth_rate": g})
             if "proposal" not in r:
                 continue
             cd = r["proposal"]["contract_details"]

@@ -87,7 +87,8 @@ class DerivWS:
         return self.call({"active_symbols": "full", "product_type": "basic"}).get("active_symbols", [])
 
     def contracts_for(self, symbol):
-        return self.call({"contracts_for": symbol, "currency": "USD"})
+        # new API rejects the legacy currency property
+        return self.call({"contracts_for": symbol})
 
     def ticks_history(self, symbol, count=5000, end="latest", start=None):
         p = {"ticks_history": symbol, "count": count, "end": end, "style": "ticks"}

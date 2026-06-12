@@ -61,7 +61,7 @@ def main():
             rows = []
             for ctype, barrier, p in CONTRACTS:
                 req = dict(amount=STAKE, basis="stake", contract_type=ctype, currency="USD",
-                           duration=dur, duration_unit="t", symbol=sym)
+                           duration=dur, duration_unit="t", underlying_symbol=sym)
                 if barrier is not None: req["barrier"] = str(barrier)
                 r = ws.proposal(**req)
                 if "proposal" in r:

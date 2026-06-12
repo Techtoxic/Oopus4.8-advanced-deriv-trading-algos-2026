@@ -1,18 +1,16 @@
-"""sigma_sentinel.py — THE deliverable: watches every digit-enabled symbol's tick stream,
-maintains rolling sigma_pips, prices the conditional next-digit distribution (wrapped-normal,
-validated on JD100 data), joins LIVE payouts, and reports/fires any contract whose model EV
-clears the gate. On today's regime it mostly says "no trade" — and tells you exactly how far
-each symbol is from the boundary. When any symbol's price level decays into the zone
-(JD100 < ~240 first), it starts signaling.
+"""sigma_sentinel.py — watches digit-enabled symbols' tick streams, maintains rolling
+sigma_pips, prices the conditional next-digit distribution (wrapped-normal, validated on JD100
+data), joins LIVE payouts, and reports/fires any contract whose model EV clears the gate.
+
+MIGRATED TO THE NEW DERIV API (api.derivws.com) — see deriv_api.py.
+NOTE: the maintained production bot is `fable-thoughts/tools/sentinel_v2.py` (empirical tables,
+sigma-max physics gate, RTT/stale guards, settlement tracking). This file is kept as the
+faithful new-API port of the original opus sentinel.
 
 Watch mode  : python3 sigma_sentinel.py --watch JD100 R_100 1HZ100V --minutes 10
-Trade mode  : DERIV_TOKEN=... python3 sigma_sentinel.py --watch JD100 --trade --stake 1 --ev-gate 0.01
-n+1 note    : decision fires the instant tick t arrives; buy is ONE call (no proposal RT).
-              Settlement = first tick after confirmation. If RTT > tick interval the trade
-              degrades to lag-2 (EV -1.5%): the sentinel measures its own buy RTT and refuses
-              to trade when rtt_p90 > 0.8 x tick_interval.
+Trade mode  : python3 sigma_sentinel.py --watch JD100 --trade --stake 1 --ev-gate 0.01
 """
-import argparse, json, math, time, collections
+import argparse, json, math, time, collections, os
 import websocket
 from deriv_api import DerivWS, URL, TOKEN, last_digit
 
@@ -66,9 +64,11 @@ def main():
     ap.add_argument("--trade", action="store_true")
     ap.add_argument("--stake", type=float, default=1.0)
     ap.add_argument("--ev-gate", type=float, default=0.005)
+    ap.add_argument("--sigma-max", type=float, default=4.35)
     ap.add_argument("--allow-real", action="store_true")
     a = ap.parse_args()
 
+    # Public connection for market data + proposals (no auth needed)
     ctl = DerivWS(token="")
     payouts = {}
     pips = {}
@@ -78,7 +78,7 @@ def main():
         payouts[sym] = {}
         for t, b in CONTRACTS:
             req = dict(amount=10, basis="stake", contract_type=t, currency="USD",
-                       duration=1, duration_unit="t", symbol=sym)
+                       duration=1, duration_unit="t", underlying_symbol=sym)
             if b is not None: req["barrier"] = str(b)
             r = ctl.proposal(**req)
             if "proposal" in r:
@@ -88,13 +88,15 @@ def main():
 
     trader = None
     if a.trade:
+        # Authenticated connection — new API handles REST→OTP→WS internally
         trader = DerivWS()
         acct = getattr(trader, "account", {}) or {}
-        if not acct.get("loginid"):
+        if not acct.get("account_id"):
             print("trade mode: token invalid/disabled -> watch only"); trader = None
-        elif not acct.get("is_virtual") and not a.allow_real:
+        elif acct.get("account_type") != "demo" and not a.allow_real:
             print("trade mode: REAL account, refusing without --allow-real"); trader = None
 
+    # Raw public WebSocket for tick stream (no auth required for ticks)
     ws = websocket.create_connection(URL, timeout=30)
     for sym in a.watch:
         ws.send(json.dumps({"ticks": sym, "subscribe": 1}))
@@ -104,9 +106,11 @@ def main():
         h = ctl.ticks_history(sym, count=1500)
         for t, q in zip(h["history"]["times"], h["history"]["prices"]):
             states[sym].push(int(t), q)
-        print(f"{sym}: warm sigma={states[sym].sigma():.2f} pips")
+        s = states[sym].sigma()
+        print(f"{sym}: warm sigma={s if s is None else round(s, 2)} pips")
     t_end = time.time() + a.minutes * 60
     nsig = ntrade = 0
+    os.makedirs("../results", exist_ok=True)
     log = open("../results/sentinel.log", "a")
     while time.time() < t_end:
         try:
@@ -119,6 +123,7 @@ def main():
         st.push(tk["epoch"], tk["quote"])
         sigma = st.sigma()
         if sigma is None: continue
+        if sigma > a.sigma_max: continue   # hard physics gate (see results/walkforward.md)
         d = st.digit()
         pmf = wrapped_normal_pmf(sigma, d)
         best = None
@@ -127,6 +132,7 @@ def main():
             ev = p * M - 1
             if best is None or ev > best[3]:
                 best = (t, b, p, ev, M)
+        if best is None: continue  # no payouts loaded for this symbol yet
         line = (f"{time.strftime('%H:%M:%S')} {sym} spot={tk['quote']} d={d} sigma={sigma:.2f} "
                 f"best={best[0]}{best[1] if best[1] is not None else ''} p={best[2]:.4f} EV={best[3]*100:+.2f}%")
         if best[3] > a.ev_gate:
@@ -136,8 +142,9 @@ def main():
             if trader:
                 t0 = time.time()
                 params = dict(amount=a.stake, basis="stake", contract_type=best[0], currency="USD",
-                              duration=1, duration_unit="t", symbol=sym)
+                              duration=1, duration_unit="t", underlying_symbol=sym)
                 if best[1] is not None: params["barrier"] = str(best[1])
+                # Single RTT buy — fastest path, no separate proposal call
                 br = trader.call({"buy": 1, "price": a.stake * 1.01, "parameters": params})
                 rtt = time.time() - t0
                 ntrade += 1

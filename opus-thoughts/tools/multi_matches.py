@@ -54,7 +54,7 @@ def main():
 
     # live payout for MATCH on this symbol
     r = ws.proposal(amount=a.stake, basis="stake", contract_type="DIGITMATCH", barrier="0",
-                    currency="USD", duration=1, duration_unit="t", symbol=a.symbol)
+                    currency="USD", duration=1, duration_unit="t", underlying_symbol=a.symbol)
     if "proposal" not in r:
         print("proposal error:", r.get("error")); return
     M = float(r["proposal"]["payout"]) / a.stake
@@ -97,7 +97,7 @@ def main():
         for i, d in enumerate(S):
             params = dict(amount=a.stake, basis="stake", contract_type="DIGITMATCH",
                           currency="USD", duration=1 + (i * a.spacing if a.spacing else 0),
-                          duration_unit="t", symbol=a.symbol, barrier=str(d))
+                          duration_unit="t", underlying_symbol=a.symbol, barrier=str(d))
             br = ws.call({"buy": 1, "price": a.stake * 1.001, "parameters": params})
             legs.append(br.get("buy", {}).get("contract_id") or br.get("error", {}).get("message"))
         print("  legs:", legs)

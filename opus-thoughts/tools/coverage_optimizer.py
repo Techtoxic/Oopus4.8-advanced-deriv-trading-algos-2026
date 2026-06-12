@@ -21,7 +21,7 @@ def instruments_from_surface(sym, live=False):
                      [("DIGITEVEN", None), ("DIGITODD", None)])
         for ctype, b in CONTRACTS:
             req = dict(amount=10, basis="stake", contract_type=ctype, currency="USD",
-                       duration=1, duration_unit="t", symbol=sym)
+                       duration=1, duration_unit="t", underlying_symbol=sym)
             if b is not None: req["barrier"] = str(b)
             r = ws.proposal(**req)
             if "proposal" in r:
