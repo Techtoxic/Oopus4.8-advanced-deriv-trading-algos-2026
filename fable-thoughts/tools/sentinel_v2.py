@@ -102,15 +102,27 @@ def main():
 
     trader = settler = None
     if a.trade:
-        trader = DerivWS()
+        trader = DerivWS(timeout=8)
         acct = trader.account or {}
         if not acct.get("account_id"):
             print("token invalid -> watch only"); trader = None
         elif acct.get("account_type") != "demo" and not a.allow_real:
             print("REAL account, refusing without --allow-real"); trader = None
         else:
-            settler = DerivWS()   # second conn: settlement polling never blocks buys
+            settler = DerivWS(timeout=15)   # second conn: settlement polling never blocks buys
             print(f"TRADING on {acct['account_id']} ({acct['account_type']}) bal={acct.get('balance')}")
+
+    # keepalive: authorized sockets idle out; ping trader every 25s (lock-serialized with buys)
+    def keepalive():
+        while True:
+            time.sleep(25)
+            try:
+                if trader: trader.call({"ping": 1}, retries=1)
+            except Exception:
+                try: trader._connect()
+                except Exception: pass
+    if trader:
+        threading.Thread(target=keepalive, daemon=True).start()
 
     # settlement worker
     pend = queue.Queue()
@@ -122,7 +134,14 @@ def main():
                        "model_p", "model_ev", "rtt_ms", "cid", "status", "pnl", "exit_lag_s"])
     def settle_loop():
         while True:
-            item = pend.get()
+            try:
+                item = pend.get(timeout=20)
+            except queue.Empty:
+                try: settler.call({"ping": 1}, retries=1)   # keep settler socket alive
+                except Exception:
+                    try: settler._connect()
+                    except Exception: pass
+                continue
             if item is None: return
             cid, T, sym, sig, ct, bar, mp, mev, rtt, stake = item
             time.sleep(2.0)
@@ -220,7 +239,13 @@ def main():
                               duration=1, duration_unit="t", underlying_symbol=sym)
                 if best[1] is not None: params["barrier"] = str(best[1])
                 t0 = time.time()
-                br = trader.call({"buy": 1, "price": round(a.stake * 1.02, 2), "parameters": params})
+                try:
+                    br = trader.call({"buy": 1, "price": round(a.stake * 1.02, 2), "parameters": params})
+                except Exception as e:
+                    print("  buy transport error:", e)
+                    try: trader._connect()
+                    except Exception: pass
+                    continue
                 rtt = time.time() - t0
                 rtts.append(rtt)
                 if "buy" in br:
