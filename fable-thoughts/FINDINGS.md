@@ -42,8 +42,11 @@ Continuation and hard audit of `opus-thoughts` (2026-06-11), via the **new Deriv
    callputequal contracts off `proposal` is mispricing by ~6pp. (§3)
 
 ### Live demo run (sentinel_v2, new API, $1 stakes, gate 1%)
-60 minutes, 663 trades: see `results/live_session.md` (written post-run). Mid-run checkpoint:
-309 settled, +$28.31, win rate 0.495, exit-lag histogram {1s: 308, 2s: 1}.
+60 minutes, **1,282 settled trades: −$13.97 (−1.09%/trade), t=−0.3 — statistically
+uninformative on EV, decisive on execution: 1281/1282 settled at decision-tick+1s.**
+Full forensics + honest combined-evidence EV table in `results/live_session.md`.
+Best estimate of true edge today: ≈ model EV ≈ +1.0–1.5%/trade at σ≈4.2, scaling steeply
+as JD100 spot decays. ~25–30k live trades (≈2 days continuous) decides it.
 
 ## 2. User-updated files (new Deriv API) — review
 - `deriv_api.py` (user version) worked; fixes applied in this branch's copy: trailing-slash
