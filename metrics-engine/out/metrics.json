@@ -1,0 +1,259 @@
+{
+  "overall": {
+    "settled": 141,
+    "stake": 0.35,
+    "wins": 66,
+    "win_rate": 0.46808510638297873,
+    "total_pnl": 2.4800000000000004,
+    "per_trade_pct": 5.025329280648432,
+    "t_stat": 0.455256351813253,
+    "ci95_pct": [
+      -15.988855116514685,
+      26.627659574468083
+    ],
+    "mean_model_ev_pct": 5.018085106382979,
+    "sigma_range": [
+      3.673,
+      3.722
+    ]
+  },
+  "equity": {
+    "start_balance": 241.09,
+    "end_equity": 243.57,
+    "max_drawdown_$": -4.780000000000001,
+    "max_drawdown_pct_of_peak": -1.9770856599247222,
+    "max_dd_at_trade": 86,
+    "final_cum_pnl": 2.479999999999998
+  },
+  "drawdown_episodes_top": [
+    {
+      "start_trade": 5,
+      "len": 100,
+      "depth_$": -4.780000000000001,
+      "sigma_start": 3.682,
+      "sigma_end": 3.713,
+      "sigma_rising": true
+    },
+    {
+      "start_trade": 106,
+      "len": 8,
+      "depth_$": -1.44,
+      "sigma_start": 3.712,
+      "sigma_end": 3.713,
+      "sigma_rising": true
+    },
+    {
+      "start_trade": 115,
+      "len": 13,
+      "depth_$": -1.2399999999999998,
+      "sigma_start": 3.717,
+      "sigma_end": 3.714,
+      "sigma_rising": false
+    },
+    {
+      "start_trade": 129,
+      "len": 6,
+      "depth_$": -1.09,
+      "sigma_start": 3.712,
+      "sigma_end": 3.716,
+      "sigma_rising": true
+    },
+    {
+      "start_trade": 1,
+      "len": 3,
+      "depth_$": -0.35,
+      "sigma_start": 3.687,
+      "sigma_end": 3.683,
+      "sigma_rising": false
+    }
+  ],
+  "drawdown_sigma_link": {
+    "episodes": 5,
+    "with_sigma_rising": 3,
+    "frac_rising": 0.6
+  },
+  "sigma_direction": {
+    "sigma_rising": {
+      "n": 15,
+      "per_trade_pct": 14.66666666666667,
+      "win_rate": 0.5333333333333333
+    },
+    "sigma_falling": {
+      "n": 6,
+      "per_trade_pct": 23.809523809523814,
+      "win_rate": 0.6666666666666666
+    },
+    "note": "slope = sigma(now) - sigma(8 trades ago)"
+  },
+  "correlations": {
+    "corr(sigma_level, per_trade_pnl)": 0.1043870276718516,
+    "corr(sigma_slope, per_trade_pnl)": -0.0669475330929882
+  },
+  "by_contract": {
+    "DIGITOVER": {
+      "n": 65,
+      "win_rate": 0.4,
+      "mean_pnl": -0.04076923076923077,
+      "per_trade_pct": -11.64835164835165,
+      "mean_model_ev_pct": 4.998153846153845
+    },
+    "DIGITUNDER": {
+      "n": 76,
+      "win_rate": 0.5263157894736842,
+      "mean_pnl": 0.0675,
+      "per_trade_pct": 19.28571428571429,
+      "mean_model_ev_pct": 5.03513157894737
+    }
+  },
+  "by_sigma_bin": {
+    "3.7": {
+      "n": 141,
+      "win_rate": 0.46808510638297873,
+      "mean_pnl": 0.01758865248226949,
+      "per_trade_pct": 5.025329280648426,
+      "mean_model_ev_pct": 5.018085106382981
+    }
+  },
+  "by_source": {
+    "wn": {
+      "n": 141,
+      "win_rate": 0.46808510638297873,
+      "mean_pnl": 0.01758865248226949,
+      "per_trade_pct": 5.025329280648426,
+      "mean_model_ev_pct": 5.018085106382981
+    }
+  },
+  "by_digit": {
+    "0": {
+      "n": 17,
+      "win_rate": 0.23529411764705882,
+      "mean_pnl": 0.03823529411764709,
+      "per_trade_pct": 10.924369747899169,
+      "mean_model_ev_pct": 5.516470588235293
+    },
+    "1": {
+      "n": 12,
+      "win_rate": 0.3333333333333333,
+      "mean_pnl": 0.016666666666666653,
+      "per_trade_pct": 4.761904761904758,
+      "mean_model_ev_pct": 7.133333333333333
+    },
+    "2": {
+      "n": 15,
+      "win_rate": 0.6666666666666666,
+      "mean_pnl": 0.20333333333333328,
+      "per_trade_pct": 58.09523809523809,
+      "mean_model_ev_pct": 6.3313333333333315
+    },
+    "3": {
+      "n": 18,
+      "win_rate": 0.6111111111111112,
+      "mean_pnl": 0.053333333333333344,
+      "per_trade_pct": 15.238095238095243,
+      "mean_model_ev_pct": 4.313888888888888
+    },
+    "4": {
+      "n": 14,
+      "win_rate": 0.7857142857142857,
+      "mean_pnl": 0.019285714285714288,
+      "per_trade_pct": 5.510204081632654,
+      "mean_model_ev_pct": 2.1907142857142854
+    },
+    "5": {
+      "n": 17,
+      "win_rate": 0.6470588235294118,
+      "mean_pnl": -0.045882352941176464,
+      "per_trade_pct": -13.10924369747899,
+      "mean_model_ev_pct": 2.1811764705882353
+    },
+    "6": {
+      "n": 8,
+      "win_rate": 0.375,
+      "mean_pnl": -0.10249999999999998,
+      "per_trade_pct": -29.28571428571428,
+      "mean_model_ev_pct": 4.32125
+    },
+    "7": {
+      "n": 14,
+      "win_rate": 0.35714285714285715,
+      "mean_pnl": -0.05357142857142856,
+      "per_trade_pct": -15.30612244897959,
+      "mean_model_ev_pct": 6.388571428571427
+    },
+    "8": {
+      "n": 12,
+      "win_rate": 0.4166666666666667,
+      "mean_pnl": 0.10833333333333332,
+      "per_trade_pct": 30.952380952380953,
+      "mean_model_ev_pct": 7.195833333333335
+    },
+    "9": {
+      "n": 14,
+      "win_rate": 0.14285714285714285,
+      "mean_pnl": -0.1142857142857143,
+      "per_trade_pct": -32.6530612244898,
+      "mean_model_ev_pct": 5.531428571428572
+    }
+  },
+  "ev_calibration": {
+    "2-4%": {
+      "n": 31,
+      "win_rate": 0.7096774193548387,
+      "mean_pnl": -0.016451612903225804,
+      "per_trade_pct": -4.700460829493087,
+      "mean_model_ev_pct": 2.1854838709677415
+    },
+    "4-6%": {
+      "n": 57,
+      "win_rate": 0.3508771929824561,
+      "mean_pnl": -0.014210526315789467,
+      "per_trade_pct": -4.060150375939848,
+      "mean_model_ev_pct": 4.972631578947367
+    },
+    "6-8%": {
+      "n": 53,
+      "win_rate": 0.4528301886792453,
+      "mean_pnl": 0.07169811320754714,
+      "per_trade_pct": 20.485175202156327,
+      "mean_model_ev_pct": 6.723773584905661
+    }
+  },
+  "winners_profile": {
+    "n": 66,
+    "mean_sigma": 3.7059999999999995,
+    "mean_model_ev_pct": 4.556666666666667,
+    "top_contracts": [
+      [
+        "DIGITUNDER",
+        40
+      ],
+      [
+        "DIGITOVER",
+        26
+      ]
+    ]
+  },
+  "losers_profile": {
+    "n": 75,
+    "mean_sigma": 3.704493333333333,
+    "mean_model_ev_pct": 5.424133333333332,
+    "top_contracts": [
+      [
+        "DIGITOVER",
+        39
+      ],
+      [
+        "DIGITUNDER",
+        36
+      ]
+    ]
+  },
+  "execution": {
+    "rtt_ms_p50": 161.0,
+    "rtt_ms_p90": 190.0,
+    "exit_lag_hist": {
+      "1": 141
+    },
+    "lag1_frac": 1.0
+  }
+}
