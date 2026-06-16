@@ -1,0 +1,15 @@
+monitor ticks usable: 22741  sigma 3.50-3.96
+
+=== sigma 3.5-4.0  (n=22740) ===
+offset PMF (0=repeat): [np.float64(0.1142), np.float64(0.1113), np.float64(0.0993), np.float64(0.0967), np.float64(0.0873), np.float64(0.0879), np.float64(0.0894), np.float64(0.0972), np.float64(0.1063), np.float64(0.1103)]
+  peaked at 0,+/-1? offsets 0,1,9 = 0.1142 0.1113 0.1103  vs far 4,5,6 = 0.0873 0.0879 0.0894
+
+  realised EV per contract type (best barrier shown), large-N, real grid:
+    DIGITDIFF    1  EV= -1.18%/trade  win=0.9018 payout=1.096  CI95=[-1.61,-0.75]%
+    DIGITUNDER   9  EV= -1.32%/trade  win=0.9004 payout=1.096  CI95=[-1.73,-0.88]%
+    DIGITOVER    1  EV= -1.47%/trade  win=0.7998 payout=1.232  CI95=[-2.11,-0.80]%
+    DIGITEVEN       EV= -1.85%/trade  win=0.5026 payout=1.953  CI95=[-3.04,-0.63]%
+    DIGITODD        EV= -2.85%/trade  win=0.4974 payout=1.953  CI95=[-4.07,-1.66]%
+    DIGITMATCH   0  EV= -8.86%/trade  win=0.1021 payout=8.929  CI95=[-12.40,-5.41]%
+
+  STRATEGY 'DIGITMATCH current digit every tick': hit=0.1142 (breakeven .1120)  EV=+2.01%/trade  CI95=[-1.68,+5.66]%  n=22740

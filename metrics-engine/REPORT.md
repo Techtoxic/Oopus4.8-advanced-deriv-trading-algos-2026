@@ -87,3 +87,31 @@ biased upward by construction.
 4. **Log the digit** in a fork of the bot (its CSV writes it blank) so win/loss-by-digit needs no
    side-channel.
 5. **Keep every run.** Feed winners and losers alike into `analyze.py`; selection is the enemy here.
+
+## 6. The decisive sub-4.0 measurement (`sub4_edge.py`, added live)
+
+The bot has spent this entire run at sigma ~3.5–3.9 — *below* the 4.0 table floor, on the
+wrapped-normal fallback. So I measured the digit structure of that regime directly from **22,700
+independent monitor ticks** (no bot selection). This refines section 1:
+
+- **The clustering is REAL here.** Offset PMF at sigma 3.5–4.0:
+  `[0.114, 0.111, 0.099, 0.097, 0.087, 0.088, 0.089, 0.097, 0.106, 0.110]` — peaked at offset 0/±1,
+  depressed at the far offsets. P(next digit repeats) = **0.114 vs 0.10 chance, +4.9σ**. Fable's
+  physical intuition (low sigma ⇒ the digit stays near itself) is *correct in this regime*. The
+  original tables (floor 4.0) never saw it because the regime hadn't opened during training.
+- **But Deriv's grid is calibrated almost exactly to that clustering.** Realised EV of every standard
+  contract over those 22.7k ticks, against the real payout grid, is **negative**:
+  DIGITDIFF −1.16%, DIGITUNDER −1.31%, DIGITOVER −1.45%, DIGITEVEN −1.83%, DIGITODD −2.87%
+  (CIs exclude zero on the tight ones). The mild clustering is not enough to beat the house margin.
+- **The single exception is a coin-flip.** "DIGITMATCH the current digit every tick" hits 0.114 vs the
+  **0.112 breakeven** baked into the 8.929× payout → EV **+2.0%/trade point estimate, but 95% CI
+  [−1.7%, +5.7%] straddles zero** on 22.7k ticks. It is statistically indistinguishable from
+  breakeven. The grid's DIGITMATCH breakeven sits *just above* the actual repeat rate — as if it
+  already prices in mild clustering.
+
+**Conclusion (refined, not reversed):** the premise is physically real below sigma 4.0, but the payout
+grid neutralises it. There is no reliably bankable edge. The bot bets the −EV OVER/UNDER contracts
+~97% of the time and DIGITMATCH only ~2.5%; the account being up is favourable variance plus a
+breakeven MATCH sliver. The only thing in the whole system with even a theoretical shot is
+**DIGITMATCH-on-current at the lowest sigma** — worth watching as spot decays further (does P(repeat)
+climb above 0.112 with a CI that clears zero?), but everything else is −EV and should not be sized.
