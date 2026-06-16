@@ -89,7 +89,12 @@ def drawdown(equity):
     return dd, peak
 
 
-def fig_to_b64(fig):
+def fig_to_b64(fig, name=None):
+    if name:
+        try:
+            fig.savefig(os.path.join(HERE, "out", f"{name}.png"), dpi=92, bbox_inches="tight")
+        except Exception:
+            pass
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=92, bbox_inches="tight")
     plt.close(fig)
@@ -232,12 +237,12 @@ def analyze(trades, ticks, start_balance=None):
     ax.set_title("Equity (cumulative PnL)"); ax.set_xlabel("settled trade #"); ax.set_ylabel("equity ($)")
     ax2 = ax.twinx(); ax2.plot(x, sig, color="#c33", lw=0.8, alpha=0.5)
     ax2.set_ylabel("sigma", color="#c33")
-    charts["equity_sigma"] = fig_to_b64(fig)
+    charts["equity_sigma"] = fig_to_b64(fig, "equity_sigma")
 
     fig, ax = plt.subplots(figsize=(9, 2.4))
     ax.fill_between(x, dd_abs, 0, color="#c33", alpha=0.4)
     ax.set_title("Drawdown underwater ($ below running peak)"); ax.set_xlabel("settled trade #")
-    charts["drawdown"] = fig_to_b64(fig)
+    charts["drawdown"] = fig_to_b64(fig, "drawdown")
 
     # calibration: model_ev vs realized per sigma bin
     bins = sorted(set(round(s, 1) for s in sig))
@@ -248,12 +253,12 @@ def analyze(trades, ticks, start_balance=None):
     ax.plot(bins, real_b, "s-", label="realised %/trade", color="#1a7")
     ax.axhline(0, color="#888", lw=0.7); ax.set_xlabel("sigma bin"); ax.set_ylabel("% per trade")
     ax.set_title("EV calibration: claimed vs realised"); ax.legend()
-    charts["calibration"] = fig_to_b64(fig)
+    charts["calibration"] = fig_to_b64(fig, "calibration")
 
     # per-trade pnl hist
     fig, ax = plt.subplots(figsize=(6, 3))
     ax.hist(pnl, bins=30, color="#46a")
-    ax.set_title("Per-trade PnL distribution ($)"); charts["pnl_hist"] = fig_to_b64(fig)
+    ax.set_title("Per-trade PnL distribution ($)"); charts["pnl_hist"] = fig_to_b64(fig, "pnl_hist")
 
     # win rate by contract
     ct = M["by_contract"]
@@ -261,7 +266,7 @@ def analyze(trades, ticks, start_balance=None):
     names = list(ct.keys()); wr = [ct[n]["win_rate"] for n in names]
     ax.bar(names, wr, color="#7a3"); ax.axhline(0.5, color="#888", lw=0.7)
     ax.set_title("Win rate by contract type"); ax.tick_params(axis="x", rotation=60)
-    charts["win_by_contract"] = fig_to_b64(fig)
+    charts["win_by_contract"] = fig_to_b64(fig, "win_by_contract")
 
     return M, charts
 
