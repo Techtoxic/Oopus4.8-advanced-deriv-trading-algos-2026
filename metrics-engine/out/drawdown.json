@@ -1,0 +1,134 @@
+{
+  "source_csv": "live/sentinel_trades.csv",
+  "stake": 0.35,
+  "drawdown": {
+    "n_trades": 20278,
+    "win_rate": 0.42785284544826907,
+    "sum_pnl": 263.68000000000006,
+    "mean_per_trade": 0.013003254758851961,
+    "pct_of_stake": 3.7152156453862744,
+    "t_stat": 3.618471075014849,
+    "max_dd_dollars": 28.09000000000046,
+    "max_dd_peak_equity": 49.659999999996906,
+    "max_dd_trades_down": 513,
+    "max_dd_recovery_trades": 907,
+    "longest_losing_streak": 19,
+    "equity_final": 263.6799999999661
+  },
+  "ruin_risk": {
+    "5": {
+      "p_ruin": 0.61375,
+      "p5_min_balance": -23.901499999999977,
+      "median_min_balance": -1.6449999999999951
+    },
+    "10": {
+      "p_ruin": 0.34975,
+      "p5_min_balance": -18.49050000000013,
+      "median_min_balance": 3.4450000000000345
+    },
+    "15": {
+      "p_ruin": 0.21875,
+      "p5_min_balance": -13.431000000000376,
+      "median_min_balance": 8.490000000000006
+    },
+    "20": {
+      "p_ruin": 0.129,
+      "p5_min_balance": -8.381500000000225,
+      "median_min_balance": 13.414999999999642
+    },
+    "30": {
+      "p_ruin": 0.049,
+      "p5_min_balance": 0.5769999999992286,
+      "median_min_balance": 23.440000000000012
+    },
+    "50": {
+      "p_ruin": 0.0075,
+      "p5_min_balance": 20.35699999999967,
+      "median_min_balance": 43.49
+    },
+    "100": {
+      "p_ruin": 0.0,
+      "p5_min_balance": 71.15399999999981,
+      "median_min_balance": 93.57500000000005
+    }
+  },
+  "kelly": {
+    "full_kelly_fraction": 0.018167144138207664,
+    "quarter_kelly_fraction": 0.004541786034551916,
+    "mean_return_per_stake": 0.037152156453862786,
+    "std_return_per_stake": 1.4620811600415298
+  },
+  "sigma": {
+    "per_tick_direction": {
+      "rising": {
+        "n": 6158,
+        "pct_of_stake": 2.347701016099848,
+        "win_rate": 0.42611237414745046
+      },
+      "flat": {
+        "n": 7086,
+        "pct_of_stake": 1.8414580057255756,
+        "win_rate": 0.4225232853513971
+      },
+      "falling": {
+        "n": 7034,
+        "pct_of_stake": 6.8000324952272635,
+        "win_rate": 0.4347455217514927
+      }
+    },
+    "trend_causal_k": 40,
+    "trend": {
+      "trend_up": {
+        "n": 10075,
+        "pct_of_stake": 2.408224034030487,
+        "win_rate": 0.4266997518610422
+      },
+      "trend_down": {
+        "n": 9504,
+        "pct_of_stake": 5.36736411736412,
+        "win_rate": 0.43013468013468015
+      }
+    },
+    "by_bin": {
+      "3.5-3.6": {
+        "n": 4508,
+        "pct_of_stake": 7.031943212067435,
+        "win_rate": 0.3374001774622893
+      },
+      "3.6-3.7": {
+        "n": 7859,
+        "pct_of_stake": 3.569338156435753,
+        "win_rate": 0.4477668914620181
+      },
+      "3.7-3.8": {
+        "n": 4966,
+        "pct_of_stake": 2.766238996605491,
+        "win_rate": 0.4494563028594442
+      },
+      "3.8-3.9": {
+        "n": 2474,
+        "pct_of_stake": -0.5069869499942237,
+        "win_rate": 0.47291835084882783
+      },
+      "3.9-4.0": {
+        "n": 471,
+        "pct_of_stake": 6.58780709736124,
+        "win_rate": 0.4968152866242038
+      }
+    },
+    "pause_filter_trend_rising": {
+      "rule": "skip trade if sigma[i] > sigma[i-40] (causal)",
+      "kept_trades": 10163,
+      "kept_pct_of_stake": 5.047159865618983,
+      "skipped_trades": 10075,
+      "skipped_pct_of_stake": 2.408224034030487,
+      "unfiltered_pct_of_stake": 3.7152156453862744
+    }
+  },
+  "sizing": {
+    "current_stake": 0.35,
+    "min_balance_for_current_stake_quarter_kelly": 77.06219477037304,
+    "safe_stake_at_30_quarter_kelly": 0.1362535810365575,
+    "safe_stake_at_50_quarter_kelly": 0.22708930172759578
+  }
+}
