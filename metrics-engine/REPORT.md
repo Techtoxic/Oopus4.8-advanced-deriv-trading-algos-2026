@@ -3,15 +3,27 @@
 *Read-only analysis. The original `fable-thoughts` work is untouched; this lives on a separate
 branch. Numbers below are reproducible with `edge_tests.py` and `analyze.py`.*
 
+> **UPDATE — corrected verdict (`edge_confirm.py`).** My first pass (sections 1–6) concluded "no
+> bankable edge." That was **wrong for the current regime**, and I'm flagging it loudly rather than
+> burying it. The mistake: I measured *fixed-barrier* contracts, which average over the current digit
+> and wash the signal out. The bot's *actual* rule conditions the barrier on the current digit. Replay
+> that real rule on **26,700 independent monitor ticks** → **+6.24%/trade, t=+7.0**; every placebo that
+> breaks the lag-1 link collapses to the **−3% house margin**; both data halves are independently
+> significant (t=4.4 / 5.5); and the edge **grows monotonically as sigma falls** (3.8–4.0 +4.5%, 3.6–3.8
+> +6.2%, 3.4–3.6 +8.4%). There **is** a real, currently-exploitable lag-1 digit-clustering edge below
+> sigma 4.0 — see **section 7**. It is genuine but **regime-bound**. Sections 1–6 are the superseded
+> skeptical pass, kept for the audit trail.
+
 ## TL;DR
 - **The execution engine is genuinely good.** Lag-1 settlement holds at ~100% live, the dual-socket
   design / stale-tick guard / RTT guard / risk caps all work. Nothing here leaks edge through bad
   execution. Worth preserving as-is.
-- **The *edge* itself is not demonstrated.** Run the bot's own decision rule on the repo's own
-  historical ticks and the realised result is statistically indistinguishable from zero / the house
-  margin. The strongest single number (OOS replay t=1.99) is undercut by the fact that realised EV
-  *exceeds* the model's claim there — the signature of a lucky sample, not a calibrated edge — and by
-  the authors' own stricter day-by-day walk-forward (t=1.60, not significant).
+- **The edge IS real in the current sub-4.0 regime (corrected — see section 7).** Exact-rule replay on
+  26.7k independent ticks: **+6.24%/trade, t=7.0**; placebos collapse to the house margin; stable
+  across halves; monotone in sigma. The historical ticks (sigma 4.0–4.3, sections 1–6) looked flat
+  because clustering is weak there — it is strong below 4.0 where the bot is actually trading. Live
+  realised so far +3.8% (an execution haircut vs the +6.2% replay). The real caveat is **regime
+  dependence, not significance.**
 - **Right now the bot is trading entirely outside its validated zone.** JD100 spot has fallen to
   ~210, rolling sigma ~3.7, which is **below the 4.0 floor of the empirical tables**. Every live trade
   is using the **wrapped-normal fallback** — the exact model `FINDINGS.md` flagged as OOS-overconfident
@@ -109,9 +121,63 @@ independent monitor ticks** (no bot selection). This refines section 1:
   breakeven. The grid's DIGITMATCH breakeven sits *just above* the actual repeat rate — as if it
   already prices in mild clustering.
 
-**Conclusion (refined, not reversed):** the premise is physically real below sigma 4.0, but the payout
-grid neutralises it. There is no reliably bankable edge. The bot bets the −EV OVER/UNDER contracts
-~97% of the time and DIGITMATCH only ~2.5%; the account being up is favourable variance plus a
-breakeven MATCH sliver. The only thing in the whole system with even a theoretical shot is
-**DIGITMATCH-on-current at the lowest sigma** — worth watching as spot decays further (does P(repeat)
-climb above 0.112 with a CI that clears zero?), but everything else is −EV and should not be sized.
+**Conclusion of section 6 was WRONG — superseded by section 7.** This section measured *fixed-barrier*
+contracts (one barrier applied to every tick), which average over the current digit and therefore
+cannot see the conditional edge. DIGITMATCH-on-current *is* near breakeven as a fixed strategy, true —
+but the bot does not run a fixed strategy. It picks the contract+barrier per the current digit, which
+harvests the clustering (bet "stays high" when the digit is high, "stays low" when low). That
+conditional rule is strongly +EV; see section 7.
+
+## 7. The corrected, decisive test (`edge_confirm.py`) — the edge is real but regime-bound
+
+Replaying the bot's **exact** decision rule (argmax-EV over 40 contracts, conditioned on the current
+digit and rolling sigma, gate 1%) on the **independent monitor ticks** — every tick, no bot selection,
+deterministic outcome from the real next digit:
+
+```
+CONTROLS (same rule; only the outcome link changes):
+  REAL next-tick (lag-1)        n=26,726  EV=+6.24%/tr  t=+7.04  win=0.4354
+  placebo decoupled (lag+137)   n=26,726  EV=-3.15%/tr  t=-3.67  win=0.4033
+  placebo shuffled next-digit   n=26,726  EV=-3.90%/tr  t=-4.59  win=0.4014
+STABILITY (real lag-1):
+  first half   n=13,346  EV=+5.00%/tr  t=+4.38
+  second half  n=13,380  EV=+7.48%/tr  t=+5.51
+DOSE-RESPONSE (real lag-1, by sigma):
+  3.4-3.6  EV=+8.38%  t=+3.06     3.6-3.8  EV=+6.21%  t=+5.89     3.8-4.0  EV=+4.47%  t=+2.53
+```
+
+Why this is a real effect and not a leak/variance:
+1. **Placebos kill it.** Break the current→next link any way (decouple by 137 ticks, shuffle the next
+   digit, or randomise the decision digit) and EV reverts to the **−3% house margin**. A look-ahead
+   bug would survive shuffling; this doesn't. The signal lives specifically in the lag-1 relationship.
+2. **It's stable.** Both halves of the data are independently +EV and significant.
+3. **It's mechanistic.** EV rises monotonically as sigma falls — exactly what digit clustering predicts
+   (smaller per-tick steps ⇒ the next digit lands nearer the current one ⇒ a uniform-priced grid is
+   beatable by conditioning the bet on the current digit).
+4. **Why every *fixed* contract still loses (section 6):** a fixed barrier is right half the time and
+   wrong half the time as the current digit varies; only the *conditional* rule always bets *with* the
+   clustering. The edge is in the conditioning, which is why my fixed-barrier pass missed it.
+
+### The caveats that actually matter (these, not "is it significant")
+- **Regime dependence is the whole story.** The edge exists only because JD100 spot has decayed to
+  ~200, making steps (~3.7 pips) small vs the 10-unit digit cycle. If Deriv **re-bases** the index
+  (spot jumps back toward 1000 — they can do this anytime; it's the same mechanism behind the "reset
+  tick"), sigma jumps to tens of pips, mod-10 washes the clustering out, and the strategy reverts to
+  the −3% placebo line **instantly**. Harvest-while-it-lasts, not a permanent money printer.
+- **Execution haircut is real.** Replay says +6.2%; the live bot realised +3.8%. The gap is stale-tick
+  skips and the occasional lag-2 settlement. Size on the conservative live number, and keep the
+  stale-tick / RTT guards — they are load-bearing, not optional.
+- **Counterparty risk.** If Deriv switches digit pricing from the static uniform grid to a
+  volatility-aware grid, the edge dies. They use the static grid today (verified buy-by-buy); whether
+  they keep doing so is outside our control. `sentinel_v2` already watches for grid changes on startup.
+- **Demo ≠ guaranteed real.** Everything here is the demo account. Real-account fills/latency/limits
+  are untested and could differ.
+- **Fat-tailed variance.** True edge ~+4%/trade but per-trade variance is high (8.9× MATCH payouts).
+  Drawdowns like the −8% we logged are normal; quarter-Kelly (~0.5% of bankroll/trade) is the sizing
+  that survives them.
+
+**Net:** Fable's central claim holds up under hostile testing — there is a genuine, statistically
+overwhelming lag-1 digit-clustering inefficiency in JD100's current low-sigma regime, and the bot
+exploits it correctly. I was wrong to call it noise; the controls are unambiguous. The honest framing
+for funding is not "is the edge real" (it is) but "how long does this regime last, and can execution
+hold the +4% net after the demo→real and variance haircuts."

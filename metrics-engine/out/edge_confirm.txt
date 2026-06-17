@@ -1,0 +1,19 @@
+monitor ticks: 26761  sigma 3.50-3.96
+
+CONTROLS (each is the SAME decision rule; only the outcome link changes):
+  REAL next-tick (lag-1)           n= 26726 EV=+6.241%/tr  t=+7.04  win=0.4354
+  placebo decoupled (lag+137)      n= 26726 EV=-3.145%/tr  t=-3.67  win=0.4033
+  placebo shuffled next-digit      n= 26726 EV=-3.900%/tr  t=-4.59  win=0.4014
+
+STABILITY (real lag-1, split-half):
+  first half                       n= 13346 EV=+5.003%/tr  t=+4.38
+  second half                      n= 13380 EV=+7.475%/tr  t=+5.51
+
+DOSE-RESPONSE (real lag-1, by sigma bin):
+  sigma 3.4-3.6: n=  4635 EV=+8.375%/tr  t=+3.06
+  sigma 3.6-3.8: n= 16837 EV=+6.206%/tr  t=+5.89
+  sigma 3.8-4.0: n=  5254 EV=+4.470%/tr  t=+2.53
+
+NOTE: real lag-1 strongly +EV, every placebo reverts to the ~ -3% house margin,
+both halves significant, edge grows monotonically as sigma falls. The edge is REAL
+but regime-bound: it exists only while JD100 spot is low (small steps -> digit clustering).
