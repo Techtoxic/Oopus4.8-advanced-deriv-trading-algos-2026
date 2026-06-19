@@ -43,7 +43,7 @@ class DerivWS:
             if not acct_list:
                 raise RuntimeError("No accounts found for this token")
             # Prefer demo account; fall back to first available
-            acct = next((a for a in acct_list if a.get("account_type") == "demo"), acct_list[0])
+            acct = next((a for a in acct_list if a.get("account_type") == "real"), acct_list[0])
             self.account = acct
             account_id = acct["account_id"]   # new API uses account_id, not loginid
             # Step 2: get OTP → the response contains the ready-to-use WS URL
