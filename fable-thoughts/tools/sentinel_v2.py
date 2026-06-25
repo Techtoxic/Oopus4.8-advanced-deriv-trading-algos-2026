@@ -106,7 +106,7 @@ def main():
         acct = trader.account or {}
         if not acct.get("account_id"):
             print("token invalid -> watch only"); trader = None
-        elif acct.get("account_type") != "real" and not a.allow_real:
+        elif acct.get("account_type") != "demo" and not a.allow_real:
             print("REAL account, refusing without --allow-real"); trader = None
         else:
             settler = DerivWS(timeout=15)   # second conn: settlement polling never blocks buys
