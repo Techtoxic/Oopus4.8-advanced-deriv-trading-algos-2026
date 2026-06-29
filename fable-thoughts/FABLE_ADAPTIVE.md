@@ -84,3 +84,35 @@ This is a low, high-variance edge that exists *only while JD100 spot is low*. It
 (t=5 clean OOS) but it is a few percent per trade with deep drawdowns, not a money-printer; the
 "$50→$20k in 6h intervals, 0 drawdown" path was a favorable low-σ regime + compounding, not a
 floor. Size for the drawdowns, keep the gate on, and treat any positive day above σ≈4.4 as luck.
+
+---
+
+## CRITICAL UPDATE — selection-bias bug found & fixed in live testing (2026-06-29)
+
+A 2h live demo run of the first `adaptive_sentinel.py` **lost −8.1%/$ while the model predicted
++2.1%** and halted at max-loss. Root cause (per-contract breakdown of the 1,779 live trades):
+the `best_ou` picker maximised EV over **all 17** OVER/UNDER barriers, and a noisy trailing table
+systematically over-estimates the mass of the **narrow high-payout** contracts → it kept buying
+the traps:
+
+| contract | model P | real P | PnL |
+|---|---|---|---|
+| UNDER3 (win {0,1,2}) | 0.319 | **0.284** | −$35 |
+| OVER6  (win {7,8,9}) | 0.321 | **0.278** | −$22 |
+| OVER7  (win {8,9})   | 0.215 | **0.197** | −$17 |
+| OVER5 (win {6..9})   | 0.423 | 0.498 | +$12 |
+| UNDER6 (win {0..5})  | 0.621 | 0.680 | +$6 |
+
+This is the optimizer's-curse the June-13 session warned about — but it only affects the **narrow**
+contracts, not the whole edge. **Fix:** `best_ou` is now restricted to the wide ~even-money
+windows only (`OVER3/4`, `UNDER5/6`, win-size 5–6, prob 0.4–0.6), where a small table error can't
+flip the sign.
+
+**Validation of the fix (hostile, cross-period):** table **frozen from June-11 data, applied to
+June-29 ticks 18 days later**, restricted ladder, σ-gated, gate 1% → **+1.94%/trade, t=3.18 over
+22,718 trades.** (Also confirms retraining is not required for the edge — the June-11 offset table
+still prices June-29 correctly; only the σ regime gate must be live.) Live re-confirmation traded
+*only* UNDER5/OVER4 at win-rate 0.518 (above the 0.512 breakeven); longer live sample accumulating.
+
+**Bottom line unchanged but sharper:** keep the σ≤4.25 gate AND the restricted wide-window ladder.
+The narrow high-payout digit contracts are never to be traded on a fitted table.
