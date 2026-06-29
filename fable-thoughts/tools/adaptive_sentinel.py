@@ -95,6 +95,10 @@ def main():
     ap.add_argument("--ev-gate",type=float,default=0.01)
     ap.add_argument("--sigma-max",type=float,default=4.25)
     ap.add_argument("--trail",type=int,default=60000)
+    ap.add_argument("--stake",type=float,default=0.0,
+                    help="FLAT stake per trade (recommended). If 0, use quarter-Kelly (only safe on "
+                         "large balances; proportional sizing on a small balance amplifies sequencing "
+                         "variance and can show a $ loss even with a +EV win rate — see FABLE_ADAPTIVE.md).")
     ap.add_argument("--kelly-frac",type=float,default=0.25)
     ap.add_argument("--max-frac",type=float,default=0.005)
     ap.add_argument("--min-stake",type=float,default=0.35)
@@ -206,15 +210,17 @@ def main():
         nsig+=1
         age=time.time()-tk["epoch"]
         if age>0.45: continue
-        # quarter-Kelly sizing
+        # sizing: flat stake (recommended) or quarter-Kelly
         with R["lock"]:
             rets=list(R["rets"]); bal=R["bal"]
-        if len(rets)>=200:
+        if a.stake and a.stake>0:
+            stake=max(a.min_stake, round(a.stake,2))
+        elif len(rets)>=200:
             mu=sum(rets)/len(rets); var=sum((x-mu)**2 for x in rets)/len(rets)
             f=max(0.0,min(a.max_frac, a.kelly_frac*(mu/var) if var>0 else 0))
+            stake=max(a.min_stake, round(bal*f,2))
         else:
-            f=a.max_frac*0.5
-        stake=max(a.min_stake, round(bal*f,2))
+            stake=max(a.min_stake, round(bal*a.max_frac*0.5,2))
         line=f"{time.strftime('%H:%M:%S')} {sym} d={dig} sig={sg:.2f} {ct}{bar} p={p:.4f} EV={ev*100:+.2f}% stake=${stake:.2f} bal=${bal:.0f}"
         if not trader:
             if nsig%20==1: print(line)

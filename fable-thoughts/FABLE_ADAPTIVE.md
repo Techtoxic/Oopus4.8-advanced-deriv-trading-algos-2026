@@ -116,3 +116,34 @@ still prices June-29 correctly; only the σ regime gate must be live.) Live re-c
 
 **Bottom line unchanged but sharper:** keep the σ≤4.25 gate AND the restricted wide-window ladder.
 The narrow high-payout digit contracts are never to be traded on a fitted table.
+
+---
+
+## SIZING UPDATE — use FLAT stake, not balance-proportional Kelly (2026-06-29)
+
+The 4h restricted-ladder live confirmation showed a subtle but critical operational trap:
+- **win rate 0.5278 (above the 0.512 breakeven)** — the edge held —
+- yet **dollar PnL was −$37 (−5.2%/stake), t=−2.1.**
+
+Recomputing the identical trade sequence at **flat $1 stake → +$39, +2.18%/trade.** The dollar
+loss was entirely a **sizing-sequencing artifact**: quarter-Kelly scales the stake with balance,
+so a losing cluster early (balance high → big stakes) followed by wins later (balance low → small
+stakes) produces a dollar loss from a +EV win-rate sequence. On a *small* balance this dominates.
+
+**Fix:** `adaptive_sentinel.py --stake` is now a FLAT stake and is the recommended mode; Kelly is
+opt-in (set `--stake 0`) and only safe on large balances. This matches the `metrics-engine`
+drawdown study (flat $0.35, $50 floor). **Evaluate the edge by win-rate vs breakeven and
+flat-stake PnL, never by the $ path of a proportionally-sized small account.**
+
+### Final, honest scorecard of the JD100 edge (all clean, separated tests)
+| test | trades | result |
+|---|---|---|
+| fixed-window OOS (no selection) | 43,168 | +2.35%/t, t=5.0 |
+| restricted ladder, June-11 table → June-29 (18-day purge) | 22,718 | +1.94%/t, t=3.18 |
+| restricted ladder OOS, gate 1% | 43,690 | +1.47%/t, t=3.27 |
+| live 4h, restricted, flat-stake equiv | 1,798 | +2.18%/t, t=0.95 (low power) |
+| null (decoupled digit) | — | −3.2% (correct) |
+
+The edge is **real, small (~+1.5–2.4%/trade), high-variance, and regime-bounded** (σ≲4.4 only).
+Trade it flat-staked, σ-gated, wide-windows-only, sized for deep drawdowns — and treat the
+"$50→$20k" path as a favorable-regime tail, not the expectation.
