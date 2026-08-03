@@ -1,70 +1,76 @@
-# H5b CORRECTION — BOOM/CRASH accumulator "G>1" was a modelling error
+# H5b STATUS: UNKNOWN (was prematurely marked dead)
 
 `accu_boom.py` returned **G > 1 in 70/70 cells**, best BOOM900 @ g=0.05 with G=1.04909.
-That is **not an edge**. Verified dead via `accu_verify.py`.
+An earlier version of this note declared the hypothesis dead based on Deriv's
+`contract_details.ticks_stayed_in`. **That conclusion was withdrawn.** It does not survive
+scrutiny. Status is UNKNOWN pending direct measurement via `accu_holdtest.py`.
 
-## Ground truth: Deriv's own `ticks_stayed_in`
+## Why the kill was wrong
 
-The ACCU proposal response carries `contract_details.ticks_stayed_in` — Deriv's published
-distribution of contract survival. `mean/(1+mean)` implies their p.
+### 1. The "first-passage" explanation was fitted, not tested
 
-| symbol | g | mean ticks | p_deriv | **G_deriv** |
+The claim was that the accumulator dies when *cumulative* drift exits an absolute band, so
+mean survival ~ (band/step)^2. The step sd was back-solved from Deriv's mean at g=0.05, and
+the resulting match (19.1 vs 19.16) was presented as confirmation. That is circular.
+
+Tested across the full growth-rate range, it fails:
+
+| g | tsb | Deriv mean | first-passage predicts | error |
 |---|---:|---:|---:|---:|
-| BOOM900 | 0.01 | 69.51 | 0.98582 | 0.99568 |
-| BOOM900 | 0.02 | 37.50 | 0.97403 | 0.99351 |
-| BOOM900 | 0.03 | 29.95 | 0.96769 | 0.99672 |
-| BOOM900 | 0.04 | 22.70 | 0.95781 | 0.99612 |
-| BOOM900 | 0.05 | 19.16 | 0.95040 | 0.99792 |
-| R_100 | 0.01 | 61.50 | 0.98400 | 0.99384 |
-| R_100 | 0.05 | 17.32 | 0.94541 | 0.99269 |
+| 0.01 | 4.331e-05 | 69.51 | 30.41 | **2.29x** |
+| 0.02 | 4.048e-05 | 37.50 | 26.56 | 1.41x |
+| 0.03 | 3.797e-05 | 29.95 | 23.37 | 1.28x |
+| 0.04 | 3.612e-05 | 22.70 | 21.15 | 1.07x |
+| 0.05 | 3.438e-05 | 19.16 | 19.16 | 1.00 (fitted) |
 
-Mean house margin: **BOOM900 0.401%, R_100 0.400%** — identical to three decimals.
-Same pricing engine, correctly calibrated. Matches opus's `accumulator_rtp.md` finding
-on the Gaussian symbols.
+Mean should scale as tsb^2 -> 1.59x spread from g=.01 to g=.05. Observed: 3.63x.
 
-## The error
+### 2. The per-tick model also fails
 
-`accu_boom.py` modelled survival as an **i.i.d. per-tick test**: survive iff
-`|return_t| <= tick_size_barrier`. The real accumulator is a **first-passage problem** —
-the band is absolute and the contract dies when *cumulative* drift exits it.
+Predicts mean 1031-1149 ticks vs Deriv's 19-70, and a g=.01/.05 ratio of 1.11 vs
+observed 3.63.
 
-These diverge enormously when steps are small relative to the band. BOOM900 @ g=0.05:
+**Neither model fits.** That is evidence about the field, not the barrier.
 
-- band = ±0.331 price units (rel 3.438e-05), spot 9626.205
-- implied step sd = 0.331/sqrt(19.16) = **0.0756 units** (rel 7.86e-06)
-- one step is 0.23 of the band -> P(single-step breach) = **1.2e-05** -> measured p = 0.99913
-- cumulative exit time = (0.331/0.0756)^2 = **19.1 ticks** -> true p = 0.95040
+### 3. `ticks_stayed_in` is not clean barrier-breach data
 
-Deriv's published mean is 19.16. **The reconciliation is exact.** Both measurements were
-correct; they answered different questions.
+- `maximum_ticks` = 50 on both symbols, but the samples contain **104, 98** (BOOM900) and
+  **99** (R_100). Contracts cannot survive past the cap.
+- R_100's sample contains a **0**. A zero-tick contract did not breach a barrier.
 
-## Units check (section B of accu_verify.py)
+Likely legacy statistics, or a mix that includes voluntary early sells. Either way it cannot
+serve as ground truth for P(survive one tick).
 
-`tick_size_barrier` *is* the relative barrier — confirmed against `high_barrier`/`low_barrier`:
-rel_hi/tsb = 1.0001 (BOOM900), 1.0029 (R_100). The units were never the problem.
+## What IS established
 
-Also: tsb is **not** uniform across all symbols as first suspected. BOOM900 3.44e-05 vs
-R_100 4.86e-04 — 14x apart. It is constant within the BOOM/CRASH family only, which is
-legitimate if their drift vol is similar and only spike frequency differs.
+| finding | status |
+|---|---|
+| `tick_size_barrier` is the relative barrier | CONFIRMED (rel_hi/tsb = 1.0001 BOOM900, 1.0029 R_100) |
+| barrier static intraday | CONFIRMED (range 0.000e+00 over 6x20s) |
+| spike decomposition accurate | CONFIRMED (recovered 50/159/345/462/638/1111/937 vs named 50/150/300/500/600/900/1000) |
+| survival mechanic | **UNKNOWN** |
+| G < 1 | **NOT ESTABLISHED** |
 
-## Barrier stability
+## The decisive test
 
-Static over 6x20s (range exactly 0.000e+00). Single-snapshot scans are valid; the barrier
-is not vol-responsive intraday.
+`accu_holdtest.py` — buy on demo, never sell, record actual survival. Decision metric is the
+hold-to-N EV factor from the empirical survival curve:
 
-## What was sound in accu_boom.py
+    EV_factor(N) = (1+g)^N * S(N)
 
-The tick fetch and the MAD spike decomposition. Recovered spike periods 50/159/345/462/638/
-1111/937 against symbols named 50/150/300/500/600/900/1000 — accurate enough to reuse.
+The hypotheses are far apart, so ~25 contracts suffices:
 
-## Lesson
+| hypothesis | S(50) | EV factor at N=50 |
+|---|---:|---:|
+| accu_boom (p=0.999) | 0.9526 | **10.92 (+992%)** |
+| ticks_stayed_in (mean 19.16) | 0.0686 | 0.79 (-21%) |
 
-Cross-check against the counterparty's **own published statistics** before believing a model.
-`ticks_stayed_in` was in the proposal response the entire time. Cost of the check: ~3 minutes,
-zero dollars. Cost of skipping it: a month of paper trading a phantom edge.
+~14x apart at N=50.
 
-## Scoreboard
+## Process note
 
-Nine structural hypotheses tested across this repo; one real (JD100 digit window, killed by a
-book-wide reprice within two months of being traded at size). H5b joins the correctly-priced
-column. Reset-spanning contracts (H-C) confirmed disallowed by the exchange.
+The premature kill came from anchoring on the prior that eight of nine hypotheses in this
+repo came back correctly priced, then accepting the first piece of confirming evidence
+without testing the explanation that supported it. The correct order is: test the model
+across its full parameter range BEFORE using it to close a question. A prior that strong
+should raise the bar for confirming evidence, not lower it.
