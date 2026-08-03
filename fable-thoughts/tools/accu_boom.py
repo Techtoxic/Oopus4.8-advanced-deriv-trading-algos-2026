@@ -1,5 +1,30 @@
 """accu_boom.py — H5b: accumulator RTP on the 14 BOOM/CRASH indices.
 
+!!! RESULT: HYPOTHESIS DEAD. THIS SCRIPT'S SURVIVAL MODEL IS WRONG. !!!
+Kept for the record and for its tick-fetch / spike-decomposition parts, which are sound.
+See accu_verify.py and results/accu_boom_CORRECTION.md.
+
+    This script returned G>1 in 70/70 cells. That was a modelling error, not an edge.
+    It models survival as an I.I.D. PER-TICK test: survive iff |this tick's return| <= tsb.
+    The real accumulator is a FIRST-PASSAGE problem: the band is absolute, and the contract
+    dies when CUMULATIVE drift exits it. When steps are small relative to the band these
+    diverge enormously.
+
+    BOOM900 @ g=0.05: band +/-0.331 units, implied step sd 0.0756. One step is 0.23 of the
+    band, so P(single-step breach) = 1.2e-05 -> this script measured p=0.99913. But cumulative
+    drift exits in (0.331/0.0756)^2 = 19.1 ticks -> true p=0.95040. Deriv's own published
+    ticks_stayed_in gives mean 19.16. The reconciliation is exact.
+
+    Ground truth from Deriv's ticks_stayed_in: BOOM900 G = 0.99351-0.99792 (mean margin
+    0.401%); R_100 G = 0.99268-0.99880 (mean margin 0.400%). Identical to 3 d.p. The
+    BOOM/CRASH accumulator book is correctly priced, same as the Gaussian symbols opus
+    scanned. No hold/sell pattern is +EV on this family.
+
+    Lesson: cross-check against the counterparty's OWN published statistics before believing
+    a model. ticks_stayed_in was in the proposal response the whole time.
+
+--- original rationale below ---
+
 Why these symbols: opus's accumulator_rtp.md scanned only R_100 / 1HZ100V / 1HZ10V and found
 G < 1 everywhere (tightest 0.998). Correct for near-Gaussian symbols. BOOM/CRASH were never
 scanned, and they are the one family where a variance-calibrated barrier is genuinely hard to
