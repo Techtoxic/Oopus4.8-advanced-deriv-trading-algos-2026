@@ -121,13 +121,43 @@ def fetch_ticks(ws, symbol, target, page=PAGE, verbose=True, strict=True):
     return ks, vs, pip
 
 
-def contiguous_pairs(t, v):
-    """Boolean mask of positions i where t[i+1] == t[i]+1, i.e. a genuine next tick."""
-    return np.diff(t) == 1
+def native_interval(t):
+    """
+    Median inter-tick gap. NOT every symbol is 1/sec: the R_* series tick every 2s.
+    Assuming 1s there yields zero contiguous pairs (density 50% is the giveaway).
+    """
+    d = np.diff(t)
+    d = d[d > 0]
+    return int(np.median(d)) if len(d) else 1
 
 
-def sigma_series(v, mask=None, w=1800, jump=20):
+def contiguous_pairs(t, v, interval=None):
+    """Mask of positions i where t[i+1] is exactly one native tick after t[i]."""
+    iv = interval if interval else native_interval(t)
+    return np.diff(t) == iv
+
+
+def jump_threshold(v, mask=None, pct=99.5):
+    """
+    Adaptive jump cutoff. A fixed 20-pip filter is calibrated for JD100 at sigma ~3.9;
+    on JD25/JD50 (sigma 11-13) it rejects almost every step, the rolling window never
+    reaches its minimum count, and sigma comes back all-NaN. Use a high percentile of
+    |step| instead so the cutoff scales with the symbol.
+    """
+    st = np.diff(v)
+    if mask is not None:
+        st = st[mask]
+    a = np.abs(st.astype(float))
+    a = a[a > 0]
+    if len(a) < 100:
+        return 20.0
+    return float(max(np.percentile(a, pct), 3.0))
+
+
+def sigma_series(v, mask=None, w=1800, jump=None):
     """Causal rolling RMS of jump-filtered steps. sig[i] uses steps strictly before i."""
+    if jump is None:
+        jump = jump_threshold(v, mask)
     st = np.diff(v)
     if mask is not None:
         st = np.where(mask, st, 0)
