@@ -89,8 +89,19 @@ ALLOWED = [("DIGITOVER", 4), ("DIGITUNDER", 5)]
 # Best guess is a jump-component floor the filter does not fully remove. It does not affect
 # the fit quality but is the one part of the process without a clean physical account.
 # ---------------------------------------------------------------------------
-SIGMA_A = 0.51126
-SIGMA_B = 1.543886e-04
+# CORRECTED 2026-08-06 by jump_decompose.py.
+# The original 0.51126 intercept was a FITTING ARTIFACT. sigma_from_spot regressed 800k
+# per-tick rolling sigmas against the spot AT each tick -- but a rolling sigma reflects the
+# mean spot over its TRAILING 1800 ticks. When spot trends those differ systematically, the
+# slope absorbs the mismatch, and a spurious intercept appears. Refitting on 444 INDEPENDENT
+# 1800-tick blocks, pairing each block's sigma with that block's mean spot, gives:
+#
+#     sigma = 0.03982 + 1.746764e-04 * spot     (intercept ~ 0: pure GBM, as theory says)
+#
+# Consequence: the gate opens at spot 196.95, not 192.29. Nearly 5 points closer, and the
+# last 9.26 days already touched a low of 197.21 (sigma 3.485).
+SIGMA_A = 0.03982
+SIGMA_B = 1.746764e-04
 
 
 def sigma_from_spot(spot_pips):
