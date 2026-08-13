@@ -1,5 +1,15 @@
 """adaptive_sentinel_v3.py — updated 2026-08-04 for the JD100 repricing.
 
+UPDATE 2026-08-13 — THIRD REPRICING. payout_audit re-run live: OVER4/UNDER5 now executes
+at 1.800 (breakeven 55.56%), the whole grid re-cut, and the proposal grid moved to 1.886
+(still overstating execution). Constants below updated: grid -> fresh executed values,
+sigma gate 3.48 -> 3.42 (spot 193.5), recheck reference 1.953 -> 1.886. On 200k fresh
+out-of-sample ticks (Aug 11-13, sigma 3.2-3.8) NO entry digit clears the new breakeven at
+Wilson-99: best cell is d=2 UNDER5 at p=0.5654 (+1.77%% point estimate, LB 0.5507 < 0.5556).
+The concentration physics is unchanged — the payout cuts alone moved breakeven above it.
+Deriv has cut this grid three times in six weeks; treat any remaining sliver as being
+repriced away faster than sigma decays. Full ledger: ../SESSION_2026-08-13.md.
+
 WHAT CHANGED FROM v2 AND WHY
 
 1. PAYOUTS NOW COME FROM EXECUTED BUYS, NOT PROPOSALS.  <-- the critical fix
@@ -51,15 +61,17 @@ def window_contract(dig):
         if wins == {5,6,7,8,9}: return ("DIGITOVER","4",wins)
     return (None, None, wins)
 
-# Executed JD100 grid, measured by payout_audit.py at $10 stake on 2026-08-04.
-# NEVER read these from proposals: on JD100 the proposal endpoint returns the pre-cut grid.
+# Executed JD100 grid, measured by payout_audit.py at $0.35 stake on 2026-08-13.
+# THIRD repricing: OVER4/UNDER5 1.953 (June) -> 1.8286 (Aug-4) -> 1.818 -> 1.800 (Aug-13).
+# The proposal grid also moved (1.953 -> 1.886) and STILL overstates execution.
+# NEVER read these from proposals: on JD100 the proposal endpoint returns a stale grid.
 JD100_EXECUTED = {
-    ("DIGITOVER", 0): 1.053, ("DIGITOVER", 1): 1.176, ("DIGITOVER", 2): 1.333,
-    ("DIGITOVER", 3): 1.538, ("DIGITOVER", 4): 1.818, ("DIGITOVER", 5): 2.222,
-    ("DIGITOVER", 6): 2.857, ("DIGITOVER", 7): 4.000, ("DIGITOVER", 8): 6.667,
-    ("DIGITUNDER", 1): 6.667, ("DIGITUNDER", 2): 4.000, ("DIGITUNDER", 3): 2.857,
-    ("DIGITUNDER", 4): 2.222, ("DIGITUNDER", 5): 1.818, ("DIGITUNDER", 6): 1.538,
-    ("DIGITUNDER", 7): 1.333, ("DIGITUNDER", 8): 1.176, ("DIGITUNDER", 9): 1.053,
+    ("DIGITOVER", 0): 1.057, ("DIGITOVER", 1): 1.171, ("DIGITOVER", 2): 1.314,
+    ("DIGITOVER", 3): 1.514, ("DIGITOVER", 4): 1.800, ("DIGITOVER", 5): 2.200,
+    ("DIGITOVER", 6): 2.800, ("DIGITOVER", 7): 3.886, ("DIGITOVER", 8): 6.343,
+    ("DIGITUNDER", 1): 6.343, ("DIGITUNDER", 2): 3.886, ("DIGITUNDER", 3): 2.800,
+    ("DIGITUNDER", 4): 2.200, ("DIGITUNDER", 5): 1.800, ("DIGITUNDER", 6): 1.514,
+    ("DIGITUNDER", 7): 1.314, ("DIGITUNDER", 8): 1.171, ("DIGITUNDER", 9): 1.057,
 }
 
 # Only the two ~even-money 5-wide windows. v2 also allowed OVER3/UNDER6, which at the
@@ -187,9 +199,10 @@ def main():
     ap.add_argument("--trade",action="store_true")
     ap.add_argument("--balance",type=float,default=1000.0)
     ap.add_argument("--ev-gate",type=float,default=0.01)
-    ap.add_argument("--sigma-max",type=float,default=3.48,
-                    help="EV crosses zero here at the executed 1.818 grid "
-                         "(redo_all.py: EV%% = 25.18 - 7.07*sigma)")
+    ap.add_argument("--sigma-max",type=float,default=3.42,
+                    help="EV crosses zero here at the executed 1.800 grid of 2026-08-13 "
+                         "(p(sigma) from redo_all.py's EV%% = 25.18 - 7.07*sigma at M=1.818, "
+                         "re-solved for M=1.800: sigma*=3.42, spot 193.5). Was 3.48 at 1.818.")
     ap.add_argument("--rolling-sigma",action="store_true",
                     help="use the noisy lagged W=1800 estimator instead of affine sigma")
     ap.add_argument("--recheck-min",type=float,default=30,
@@ -386,7 +399,9 @@ def main():
                             underlying_symbol=sym,barrier="4")
             if "proposal" in pr:
                 q=float(pr["proposal"]["payout"])/10
-                if abs(q-1.953)>0.01:
+                # 1.886 is the CURRENT proposal quote for OVER4 (2026-08-13); it tracks the
+                # grid loosely, so any move from it means Deriv repriced yet again.
+                if abs(q-1.886)>0.01:
                     print(f"*** PROPOSAL GRID MOVED to {q:.4f} — re-run payout_audit.py. HALTING.")
                     break
         line=f"{time.strftime('%H:%M:%S')} {sym} d={dig} sig={sg:.2f} {ct}{bar} p={p:.4f} EV={ev*100:+.2f}% stake=${stake:.2f} bal=${bal:.0f}"

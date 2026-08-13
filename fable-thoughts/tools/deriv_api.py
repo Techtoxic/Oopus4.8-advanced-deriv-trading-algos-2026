@@ -96,22 +96,40 @@ class DerivWS:
         return self.call(p)
 
     def history_paged(self, symbol, total, sleep=0.35, progress=None):
-        """Fetch `total` most-recent ticks by paging backwards. Returns (times, prices, pip)."""
-        times, prices, pip = [], [], None
-        end = "latest"
-        while len(times) < total:
-            r = self.ticks_history(symbol, count=min(5000, total - len(times)), end=end)
+        """Fetch `total` most-recent ticks by paging backwards. Returns (times, prices, pip).
+
+        FIXED 2026-08-13: always send an explicit `start` and dedup on epoch. Without
+        `start`, style=ticks defaults the window to 1 day ago; once `end` pages earlier
+        than that the server returns the LATEST page again and the loop silently
+        duplicates data (the tick_integrity.py bug — 87k unique of 1.6M fetched).
+        Same logic as clean_fetch.fetch_backward, now at the root so every tool gets it."""
+        seen, pip = {}, None
+        end, page, stall = "latest", 5000, 0
+        while len(seen) < total:
+            req = {"ticks_history": symbol, "count": min(page, total - len(seen)),
+                   "end": end, "style": "ticks"}
+            if isinstance(end, int):
+                req["start"] = int(end - page * 2 - 60)
+            r = self.call(req)
             if "error" in r:
                 raise RuntimeError(f"{symbol}: {r['error']}")
             h = r.get("history", {})
             t, p = h.get("times", []), h.get("prices", [])
-            if pip is None: pip = r.get("pip_size") or len(str(p[0]).split(".")[-1])
             if not t: break
-            times = t + times; prices = p + prices
-            end = t[0] - 1
-            if progress: progress(len(times))
+            if pip is None: pip = r.get("pip_size") or len(str(p[0]).split(".")[-1])
+            before = len(seen)
+            for t_, p_ in zip(t, p):
+                seen[int(t_)] = float(p_)
+            if len(seen) == before:
+                stall += 1
+                if stall >= 3: break
+            else:
+                stall = 0
+            end = min(int(x) for x in t) - 1
+            if progress: progress(len(seen))
             time.sleep(sleep)
-        return times, prices, r.get("pip_size")
+        ks = sorted(seen)
+        return ks, [seen[k] for k in ks], pip
 
     def proposal(self, **kw):
         kw.pop("subscribe", None)

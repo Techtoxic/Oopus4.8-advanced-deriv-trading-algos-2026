@@ -117,13 +117,21 @@ def r_ends_out(v, i, N, w=None, **kw):
 
 
 def r_touch(v, i, N, w=None, **kw):
+    """ONETOUCH is ONE-SIDED: barrier '+0.50' sits at entry+w and only an upside touch
+    wins. The first version of this rule used abs() — a two-sided touch — which roughly
+    DOUBLES the empirical P and manufactured a fake +44%/+80% EV candidate on 2026-08-13.
+    (w is signed pips: positive barrier above entry, negative below.)"""
     seg = v[i + 1: i + N + 1]
-    return bool(np.any(np.abs(seg - v[i]) >= w))
+    if w >= 0:
+        return bool(np.any(seg - v[i] >= w))
+    return bool(np.any(seg - v[i] <= w))
 
 
 def r_notouch(v, i, N, w=None, **kw):
     seg = v[i + 1: i + N + 1]
-    return bool(np.all(np.abs(seg - v[i]) < w))
+    if w >= 0:
+        return bool(np.all(seg - v[i] < w))
+    return bool(np.all(seg - v[i] > w))
 
 
 def r_digit_over(v, i, N, bar=None, **kw):
