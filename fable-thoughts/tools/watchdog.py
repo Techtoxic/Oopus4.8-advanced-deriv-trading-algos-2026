@@ -105,7 +105,10 @@ def measure(ws, sym, n_ticks):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ticks", type=int, default=100000)
-    ap.add_argument("--stake", type=float, default=0.35)
+    ap.add_argument("--stake", type=float, default=10.0,
+                    help="MUST be >= 10. Payouts quote to the cent, so at $0.35 the "
+                         "resolution is 0.029 and 1.953 reads back as 1.8857 — a 3.4pp "
+                         "error in breakeven that would mask a real signal.")
     ap.add_argument("--execute", action="store_true")
     ap.add_argument("--loop", type=float, default=0,
                     help="seconds between runs; 0 = run once")
@@ -113,6 +116,9 @@ def main():
     a = ap.parse_args()
 
     while True:
+        if a.stake < 5:
+            print(f"WARNING: stake ${a.stake} is too small to resolve payouts. "
+                  f"Resolution is {0.01/a.stake:.4f}; use --stake 10 or more.")
         reg = load_registry()
         known = reg["symbols"]
         stamp = dt.datetime.now(dt.UTC).isoformat(timespec="seconds")

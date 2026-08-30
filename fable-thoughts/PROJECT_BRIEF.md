@@ -352,3 +352,68 @@ true executed payouts via one minimum-stake demo buy per symbol.
 
 This is the correct posture now. The search is closed by argument; what remains is noticing
 when a parameter drifts out of calibration again.
+
+---
+
+## 10. WATCHDOG FINDINGS AND ACCUMULATOR RE-AUDIT (2026-08-30)
+
+### The proposal lie is NOT JD100-only
+
+`watchdog.py` on its first correct run found three more symbols where the executed payout is
+below the proposal:
+
+| symbol | sigma | proposal | executed | gap |
+|---|---:|---:|---:|---:|
+| 1HZ100V | 14.30 | 1.9530 | **1.9230** | 1.6% |
+| 1HZ10V | 17.27 | 1.9530 | **1.9230** | 1.6% |
+| R_100 | 14.70 | 1.9530 | **1.9230** | 1.6% |
+| JD100 | 3.99 | 1.9530 | 1.7940 | 8.9% |
+
+**Those are the four lowest-sigma symbols in the entire book.** Every uncut symbol sits at
+sigma 88 to 95,000. At sigma 14 the digits are still uniform (p ~ 0.500), so there is no
+edge to close — Deriv is pricing ahead of the physics, presumably having learned from JD100.
+
+Breakeven on the cut symbols is 52.00%, not 51.20%. Any earlier analysis that read a payout
+from a proposal on 1HZ100V, 1HZ10V or R_100 is overstated by 1.6%.
+
+### Stakes below ~$5 are penalised beyond rounding
+
+At $0.35 stake, OVER4 quotes $0.66 — a 1.8857 multiplier. At $10 it is 1.9530. Rounding
+alone predicts $0.68 (1.9429), so something reduces the rate further at small stakes. Read
+payouts at $10 or more; the watchdog now warns below $5.
+
+### Accumulators: correctly priced, and structurally immune to the JD100 failure
+
+`accu_audit.py`, barriers read from executed contracts:
+
+| g=0.01 | rel barrier | P(stay) | G | flip@ |
+|---|---:|---:|---:|---:|
+| BOOM1000 | 0.0000028 | 0.98538 | 0.99523 | +5.06% |
+| 1HZ10V | 0.0000434 | 0.98451 | 0.99436 | +5.73% |
+| R_100 | 0.0006132 | 0.98526 | 0.99511 | +5.68% |
+
+**P(stay) is 0.9843-0.9857 on all 19 symbols while the relative barrier spans a factor of
+220.** Deriv sizes each barrier so survival lands at ~0.985 whatever the symbol's
+volatility. The house edge is a uniform ~0.5% per tick, and `flip@` shows the barrier would
+need to be 4.6-6.4% wider to break even — not a marginal call.
+
+That calibration is why the JD100 failure mode cannot occur here. The digit edge existed
+because a FIXED pip grid stopped matching a drifting sigma. Accumulator barriers are quoted
+fresh and targeted at a survival probability, so they cannot fall out of step the same way.
+
+### Two more units errors, caught by their own signature
+
+First pass compared an ABSOLUTE `barrier_spot_distance` against RELATIVE tick moves, and
+fell back to a longcode regex that matched the GROWTH RATE rather than the barrier. Result:
+P(stay) = 1.000000 on all 95 cells and G = 1+g exactly. **A saturated statistic across every
+cell is arithmetic showing through, not measurement.** A guard now rejects any cell with
+P(stay) >= 0.99999.
+
+Second pass then flagged 1HZ75V at G = 1.00075 (t = 3.50). That was spot-drift bias: an
+absolute barrier quoted at current spot, applied to 200k historical ticks during which spot
+moved, overstates survival. Converting to a fraction of the quote spot moved P(stay) from
+0.990845 to 0.985000 and the flag vanished.
+
+**Still open in this tool:** most `g > 0.01` cells return no barrier field, and higher growth
+rates carry tighter barriers where knockouts actually bite. The execute path likely needs a
+longer wait before reading the contract.
