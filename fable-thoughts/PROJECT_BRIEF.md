@@ -291,3 +291,64 @@ Genuinely open, in descending order of plausibility:
 State what result would prove you wrong before proposing a test. If your honest conclusion
 is that nothing remains, say so and name the argument that closes the last case — that is a
 useful answer, not a failure.
+
+---
+
+## 9. EXTERNAL REVIEW ROUND 3 — assessment and what was built
+
+A third reviewer worked inside the constraints rather than around them and proposed seven
+frontiers. Assessment:
+
+**Genuinely new:**
+
+- **New symbol launch monitor.** The best suggestion anyone has made. A launch is a fresh
+  instance of the exact structural error that made JD100 tradable: a grid set on assumptions
+  that the instrument's physics later violates. `regime_forecast.py` did a fraction of this
+  manually.
+- **Proposal/execution scan, REVERSE direction.** The known lie is that proposals OVERSTATE
+  on JD100, which is a trap. Nobody has ever scanned for `executed > proposal`, which would
+  mean the execution grid is stale in your favour. Untested on every symbol, and it is the
+  only condition that could appear and vanish within hours.
+- **pip_size TRANSITION.** We knew a change would end JD100. The transition itself — orphan
+  contracts, stale grid during the switch — was never considered.
+- **Cross-market correlation.** Correctly identified as outside the bound:
+  I(real market ; next synthetic digit) is not I(past synthetic ; next). Untested. The
+  reservation is that any such correlation would be directional at minute scale while digit
+  contracts resolve in one tick, so it would matter for CALL/PUT and multipliers rather than
+  digits.
+
+**Partially closed:**
+
+- **Generator algebraic tests.** The LCG lattice/spectral test and p-adic valuation
+  periodicity ARE different from Lempel-Ziv, which only tests compressibility and cannot
+  separate a good PRNG from true randomness. Worth running as a finite test. But the
+  reviewer acknowledges then sets aside the fatal issue: deltas are differences of ROUNDED
+  CUMULATIVE SUMS, not generator output. A negative result cannot distinguish "CSPRNG" from
+  "the transform destroyed the algebraic structure."
+- **Mechanism/documentation mismatch.** Historically the best-yielding category here — it
+  found the Step Index off-by-one (a "15 second" contract spans 14 tick intervals) and the
+  accumulator KO rule (tick_size_barrier in shortcode, not the rounded longcode band).
+  Both real, both correctly priced. Expensive to scan systematically.
+
+**Already closed:**
+
+- **Server side-channels.** Even if jitter predicted volatility, volatility does not predict
+  DIRECTION, and sigma is already recovered exactly from spot by a deterministic law.
+  Knowing it 50 ms earlier is worth nothing.
+
+## What was built: `watchdog.py`
+
+The three cheap conditions fold into one daemon. It persists a registry to
+`results/watchdog_registry.json` and diffs each run against history:
+
+  1. **new or delisted symbols**, and any change in digit availability
+  2. **sigma below 5.0** on any digit-offering symbol (the concentration threshold)
+  3. **pip_size changes** (0.01 -> 0.001 scales sigma_pips by 10x and ends an instrument)
+  4. **executed vs proposal**, flagging BOTH directions — overstatement as a known trap, and
+     `executed > proposal` as the untested case that would be free money
+
+Run `python3 watchdog.py --loop 21600` for a check every six hours, or `--execute` to read
+true executed payouts via one minimum-stake demo buy per symbol.
+
+This is the correct posture now. The search is closed by argument; what remains is noticing
+when a parameter drifts out of calibration again.
