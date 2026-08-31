@@ -417,3 +417,72 @@ moved, overstates survival. Converting to a fraction of the quote spot moved P(s
 **Still open in this tool:** most `g > 0.01` cells return no barrier field, and higher growth
 rates carry tighter barriers where knockouts actually bite. The execute path likely needs a
 longer wait before reading the contract.
+
+---
+
+## 11. TURBOS AND VANILLAS RE-AUDITED (2026-08-30) — growth-based family closed
+
+`option_audit.py` prices both against fair value measured empirically from tick paths. No
+Black-Scholes, no volatility assumption: the distribution of T-step moves is taken from the
+data, and turbos are evaluated on real paths because the knockout is path-dependent.
+
+| product | cells | ratio range | median margin |
+|---|---:|---|---:|
+| TURBOSLONG | 21 | 1.0193 - 1.1061 | **+5.21%** |
+| TURBOSSHORT | 21 | 1.0098 - 1.0848 | **+5.71%** |
+| VANILLALONGCALL | 30 | 0.9571 - 2.5869 | +10.14% |
+| VANILLALONGPUT | 30 | 1.0173 - 2.3375 | +12.04% |
+
+Every ratio above 1.0. The single sub-1.0 cell (1HZ25V call 900s, 0.9571) is 1.1 SE — noise.
+
+**Turbos are the tightest-priced option product, roughly half the vanilla margin.** The
+knockout caps Deriv's exposure, so they charge less for it. Margin also shrinks with
+duration on every symbol: 1HZ100V calls run 1.3101 -> 1.1322 -> 1.0614 across 60s/300s/900s.
+
+### The whole book in one frame
+
+| product | house edge |
+|---|---:|
+| digits @ 1.953 | **2.35% per trade** |
+| turbos | 5.2 - 5.7% per trade |
+| vanillas | 10 - 12% per trade |
+| accumulators | 0.5% **per tick** (39% over 100 ticks) |
+
+Digits are the cheapest thing on the platform, which is why this project ended up there.
+
+### Four bugs, all found by reading the server's own error text
+
+1. **`display_number_of_contracts`, not `number_of_contracts`** — every vanilla row skipped.
+2. **Barrier format `+0.00`, not `+0.0`** — and the rejection ENUMERATES the valid set:
+   `"Barriers available are +2.40, +1.30, +0.00, -1.20, -2.40."`
+3. **Turbos need `payout_per_point` from a per-symbol ladder** —
+   R_100: `4.5, 3.6, 2.7, 1.8, 0.9`, 1HZ10V: `3, 2.4, 1.8, 1.2, 0.6`. A regex of
+   `\d+\.\d+` dropped the bare `3`, so the top rung was never tried.
+4. **No top-level `barrier` on turbos** — it is `contract_details.barrier` (absolute
+   price), with `barrier_spot_distance` alongside.
+
+### And one statistical error worth remembering
+
+The first pass drew 4000 RANDOM start points per cell and treated them as independent. At a
+900-tick horizon those windows overlap almost completely: 200k ticks contain only
+200000/900 = **222** independent windows, so the true standard error was ~4x the nominal.
+That produced **five spurious "underpriced" cells**, all at the longest horizons where the
+overlap is worst. Switching to non-overlapping windows removed every one of them —
+1HZ100V put 900s went 0.9205 -> 1.1035.
+
+A 500-window minimum then silently dropped every 900s cell (only 222 available), so the
+cells where the spurious flags had appeared became untested rather than cleared. Fixed by
+lowering the threshold, printing skips, and running at 1M ticks.
+
+### Unmeasured cells
+
+- **12 turbo cells** need a minimum stake above $10 (1HZ25V $33.87, 1HZ50V $18.15) because
+  the tool picks the highest payout_per_point, which is the tightest barrier. A run at
+  `--stake 50` would cover them.
+- **6 R_10 turbo cells** hit the `P(surv) = 1` guard. That may be genuine — R_10 is
+  low-volatility and its tightest barrier could sit beyond any 900-tick move — rather than a
+  units error. The guard cannot distinguish the two.
+- **`g > 0.01` accumulator barriers** mostly return no barrier field.
+
+18 of 60 turbo cells unmeasured. The 42 measured cluster at 1.01-1.11, so these would have
+to be wildly out of line to change anything, but the audit is incomplete rather than clean.
