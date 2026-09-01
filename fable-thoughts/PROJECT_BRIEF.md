@@ -486,3 +486,89 @@ lowering the threshold, printing skips, and running at 1M ticks.
 
 18 of 60 turbo cells unmeasured. The 42 measured cluster at 1.01-1.11, so these would have
 to be wildly out of line to change anything, but the audit is incomplete rather than clean.
+
+---
+
+## 12. REAL MARKETS (2026-08-31) — session volatility is real and unreachable
+
+Every closing argument before this was measured on SYNTHETIC indices, where Deriv generates
+the price. Real-market symbols (forex, metals, OTC indices) are different: Deriv tracks a
+price rather than making one, and real markets have SESSIONS, which synthetics do not.
+
+### The premise is real, and the controls are clean
+
+`session_vol.py`, realised volatility by UTC hour:
+
+| symbol | quiet h | busy h | ratio |
+|---|---:|---:|---:|
+| frxXAGUSD | 09h | 01h | **4.04x** |
+| OTC_NDX | 09h | 14h | **3.83x** |
+| frxGBPUSD | 09h | 01h | **3.52x** |
+| frxEURUSD | 09h | 01h | 2.90x |
+| frxXAUUSD | 09h | 01h | 2.29x |
+| **R_100 (control)** | — | — | **1.03x** |
+| **1HZ100V (control)** | — | — | **1.04x** |
+
+The synthetic controls came back flat exactly as they must — they have no sessions — so the
+2-4x variation on real markets is measurement, not artifact.
+
+### But the instrument that would express it does not exist
+
+`contracts_for` on frxEURUSD, ONETOUCH and NOTOUCH:
+
+    min_contract_duration = 1d
+    max_contract_duration = 365d
+    expiry_type = daily
+    barrier = 1.16360        (absolute level, not an offset)
+
+**Touch contracts on forex are daily-only.** A one-day minimum spans every session, so any
+barrier contract integrates over the whole volatility cycle. There is no intraday instrument
+in which a session view can be taken.
+
+(This also explains the "Barrier is not an offset" rejection: daily contracts take an
+absolute level; the offset convention belongs to intraday contracts that do not exist here.)
+
+### CALL/PUT could never have tested it anyway
+
+The first attempt quoted CALL. But CALL/PUT payoffs depend on DIRECTION, and P(up) is ~0.5
+in a quiet hour and a busy hour alike — volatility does not enter the payoff. Only barrier
+and range contracts are volatility-sensitive, and those are the ones restricted to daily.
+
+### And the hurdle was severe regardless
+
+Measured CALL payouts on real markets: frxEURUSD 1.7140 (breakeven 58.34%), frxGBPUSD
+1.7360, frxUSDJPY 1.7960, OTC_NDX 1.8190. That is a **16.6% house edge on EUR/USD against
+2.35% on synthetic digits** — seven times the margin.
+
+### The generalisation
+
+This is the THIRD instance of one design principle:
+
+| structure | information present | contract offered? |
+|---|---|---|
+| step indices | 2.32 bits (8 of 10 digits impossible) | **no digit contracts** |
+| Boom/Crash | 0.0066-0.0617 bits | **no digit contracts** |
+| forex session vol | 2-4x hourly variation | **no intraday barriers** |
+
+**Deriv offers the contract precisely where the exploitable structure is not reachable.**
+Not a coincidence three times over — a policy, and the most useful generalisation this
+project has produced. It also predicts where NOT to look: wherever a measurement shows
+strong structure, check first whether an instrument exists to trade it.
+
+### Incidental: barrier precision is per symbol and relatively uneven
+
+The offset decimal cap differs by symbol (frxXAGUSD 4dp, frxXAUUSD 2dp), tracking price
+magnitude so that the minimum barrier is ~0.03 bp of spot on both metals — but **0.86 bp on
+frxEURUSD**, some 30x coarser in relative terms. A fixed quantisation meeting instruments at
+different price levels is structurally the same shape as the JD100 edge. Untested, and the
+only real-market lead with the right form.
+
+### Still untested on real markets
+
+- **Feed lead-lag against an external reference.** I(Binance BTC ; Deriv cryBTCUSD next) is
+  not bounded by anything measured here, because Deriv does not generate that price.
+  cryBTCUSD offers only MULTUP/MULTDOWN, so any lead must beat the multiplier spread and
+  commission — which `mult_trunc` found to be the dominant cost in paired positions.
+- **OTC indices while their home exchange is shut.** OTC_NDX returned `exchange_is_open = 0`
+  at 23:54 UTC, so these follow exchange hours rather than quoting round the clock. That
+  removes the "Deriv synthesises a price during closure" angle for that family.
