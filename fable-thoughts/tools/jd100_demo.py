@@ -15,9 +15,22 @@ def select(quote, pip, maximum=185):
     return {2: ('DIGITUNDER', '5'), 7: ('DIGITOVER', '4')}.get(digit)
 
 
+def measure_latency(trader):
+    samples = []
+    for _ in range(5):
+        started = time.monotonic()
+        response = trader._call({'ping': 1})
+        if response.get('error') or 'ping' not in response:
+            raise RuntimeError('Authenticated latency check failed')
+        samples.append(time.monotonic() - started)
+        time.sleep(0.1)
+    return max(samples)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--trade', action='store_true')
+    ap.add_argument('--check-latency', action='store_true', help='Check demo connection without buying')
     ap.add_argument('--minutes', type=float, default=10)
     ap.add_argument('--stake', type=float, default=1)
     ap.add_argument('--max-loss', type=float, default=10)
@@ -29,7 +42,7 @@ def main():
     if round(a.stake, 2) != a.stake:
         ap.error('Stake must have at most two decimal places')
     trader = None
-    if a.trade:
+    if a.trade or a.check_latency:
         token = os.environ.get('DERIV_TOKEN')
         app = os.environ.get('DERIV_APP_ID')
         if not token or not app:
@@ -47,9 +60,26 @@ def main():
             line = json.dumps(row)
             print(line, flush=True)
             log.write(line + '\n')
-        emit({'event': 'start', 'demo_trade': bool(trader), 'stake': a.stake})
+        emit({'event': 'start', 'demo_trade': bool(trader) and not a.check_latency, 'stake': a.stake})
+        latency = None
+        checked = 0
+        if trader:
+            latency = measure_latency(trader)
+            checked = time.monotonic()
+            emit({'event': 'latency', 'max_ping_rtt': latency, 'limit': 0.4,
+                  'passed': latency <= 0.4, 'note': 'Ping is a screen, not a guarantee of buy latency'})
+            if a.check_latency or latency > 0.4:
+                emit({'event': 'summary', 'trades': 0, 'pnl': 0,
+                      'reason': 'diagnostic only' if a.check_latency else 'connection too slow'})
+                return
         while time.monotonic() < deadline and count < a.max_trades:
             time.sleep(0.25)
+            if trader and time.monotonic() - checked > 30:
+                latency = measure_latency(trader)
+                checked = time.monotonic()
+                if latency > 0.4:
+                    emit({'event': 'halt', 'reason': 'connection too slow', 'max_ping_rtt': latency})
+                    break
             if pnl - a.stake < -a.max_loss:
                 emit({'event': 'halt', 'reason': 'remaining loss budget smaller than stake'})
                 break
@@ -71,6 +101,8 @@ def main():
             age = time.time() - epoch
             if not contract or not 0 <= age <= 0.35:
                 continue
+            if trader and age + latency + 0.25 >= 1:
+                continue
             ct, barrier = contract
             if not trader:
                 emit({'event': 'signal', 'epoch': epoch, 'quote': quote, 'contract': ct})
@@ -90,8 +122,9 @@ def main():
             cid = buy['contract_id']
             count += 1
             multiplier = float(buy['payout']) / float(buy['buy_price'])
+            buy_rtt = time.monotonic() - started
             emit({'event': 'buy', 'cid': cid, 'epoch': epoch, 'quote': quote, 'contract': ct,
-                  'multiplier': multiplier, 'rtt': time.monotonic() - started})
+                  'multiplier': multiplier, 'rtt': buy_rtt, 'decision_age': age})
             settled = None
             until = time.monotonic() + 20
             while time.monotonic() < until:
@@ -108,8 +141,9 @@ def main():
             exit_time = settled.get('exit_spot_time')
             lag = int(exit_time) - epoch if exit_time is not None else None
             emit({'event': 'settled', 'cid': cid, 'profit': profit, 'pnl': pnl, 'lag': lag})
-            if multiplier < 1.79 or lag != 1:
-                emit({'event': 'halt', 'reason': 'payout below 1.79 or next-tick settlement not confirmed'})
+            if multiplier < 1.79 or lag != 1 or buy_rtt > 0.4:
+                emit({'event': 'halt', 'reason': 'payout, settlement or buy latency guard failed',
+                      'payout_ok': multiplier >= 1.79, 'lag': lag, 'buy_rtt': buy_rtt})
                 break
         emit({'event': 'summary', 'trades': count, 'pnl': pnl})
 
