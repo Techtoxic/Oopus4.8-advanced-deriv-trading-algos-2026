@@ -3,6 +3,17 @@
 Everything needed after a fresh clone. The tools directory is already patched — there are
 no patch scripts to run.
 
+## First run after a clone
+
+```bash
+pip install -r requirements.txt
+```
+
+The requirements pin **`websocket-client`**, not `websockets`. They are different packages
+with similar names: `websocket-client` is synchronous and provides `import websocket`, which
+is what `deriv_api.py` uses. Installing `websockets` instead gives
+`ModuleNotFoundError: No module named 'websocket'` even though pip reports success.
+
 ## Daily order
 
 ```bash

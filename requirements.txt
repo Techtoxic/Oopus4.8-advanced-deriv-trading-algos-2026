@@ -1,5 +1,17 @@
+# Deriv synthetic-index research and trading stack.
+#
+# Install:  pip install -r requirements.txt
+
+# WEBSOCKET: this must be websocket-client, NOT websockets.
+#   websocket-client  -> synchronous, provides `import websocket`   <- what deriv_api.py uses
+#   websockets        -> asyncio library, provides `import websockets`
+# The two are different packages with confusingly similar names. Installing the wrong one
+# gives "ModuleNotFoundError: No module named 'websocket'" even though pip reported success.
+websocket-client>=1.6
+
 numpy>=1.26
+
+# Used by parts of the analysis suite, not by the trading path.
 scipy>=1.11
 pandas>=2.0
 matplotlib>=3.7
-websockets>=12.0
