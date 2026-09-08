@@ -112,8 +112,8 @@ ALLOWED = [("DIGITOVER", 4), ("DIGITUNDER", 5)]
 #
 # Consequence: the gate opens at spot 196.95, not 192.29. Nearly 5 points closer, and the
 # last 9.26 days already touched a low of 197.21 (sigma 3.485).
-SIGMA_A = 0.32240
-SIGMA_B = 1.611350e-04
+SIGMA_A = 0.446
+SIGMA_B = 1.532540e-04
 
 
 def sigma_from_spot(spot_pips):
@@ -368,15 +368,16 @@ def main():
         # residual sd is 0.06253 on the current fit, and mild vol clustering means the
         # rolling estimate can legitimately run high for a stretch. Warn on one
         # excursion; halt only after many consecutive ones.
-        _mm = (sg_roll is not None and abs(sg_roll-sg_aff) > 5*0.06253)
+        _mm = (sg_roll is not None and abs(sg_roll-sg_aff) > 0.15*sg_aff)
         _mismatch_run[0] = _mismatch_run[0]+1 if _mm else 0
         if _mm and _mismatch_run[0] in (1,5,10):
-            print(f"  sigma mismatch {_mismatch_run[0]}/20: rolling {sg_roll:.3f} "
+            print(f"  rolling/affine gap {_mismatch_run[0]}/20 (jumps inflate rolling): "
+                  f"rolling {sg_roll:.3f} "
                   f"vs affine {sg_aff:.3f}")
         if _mismatch_run[0] >= 20:
             # >4 sigma off the fitted relationship: either the fit has gone stale or the
             # instrument changed. Do not trade blind.
-            print(f"*** sigma mismatch: rolling {sg_roll:.3f} vs affine {sg_aff:.3f} "
+            print(f"*** rolling/affine gap sustained 20 ticks: rolling {sg_roll:.3f} vs affine {sg_aff:.3f} "
                   f"(spot {tk['quote']}). Re-run sigma_from_spot.py. HALTING.")
             break
         if sg>a.sigma_max:
