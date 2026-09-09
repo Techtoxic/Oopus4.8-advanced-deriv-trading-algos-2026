@@ -196,6 +196,13 @@ def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--watch",nargs="+",default=["JD100"])
     ap.add_argument("--minutes",type=float,default=10)
+    ap.add_argument("--token", default=None,
+                    help="Deriv API token for THIS instance. Without it the module-level "
+                         "TOKEN in deriv_api.py is used, which means two windows sharing "
+                         "the same checkout trade the SAME account the moment one restarts.")
+    ap.add_argument("--tag", default="",
+                    help="suffix for output files so parallel instances do not clobber "
+                         "each other's results")
     ap.add_argument("--trade",action="store_true")
     ap.add_argument("--balance",type=float,default=1000.0)
     ap.add_argument("--ev-gate",type=float,default=0.01)
@@ -242,11 +249,11 @@ def main():
 
     trader=settler=None
     if a.trade:
-        trader=DerivWS(timeout=8); acct=trader.account or {}
+        trader=DerivWS(token=a.token, timeout=8); acct=trader.account or {}
         if not acct.get("account_id"): print("token invalid -> watch"); trader=None
         elif acct.get("account_type")!="demo" and not a.allow_real: print("REAL acct, refusing"); trader=None
         else:
-            settler=DerivWS(timeout=15)
+            settler=DerivWS(token=a.token, timeout=15)
             print(f"TRADING {acct['account_id']} ({acct['account_type']}) bal={acct.get('balance')}")
             try: a.balance=float(acct.get("balance",a.balance))
             except: pass

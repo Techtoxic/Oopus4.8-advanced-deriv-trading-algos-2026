@@ -125,7 +125,34 @@ and therefore the most likely to be cut again. A fifth cut can land mid-session.
 Also watch `pip_size`. If JD100 moves from 0.01 to 0.001, sigma_pips jumps from ~3 to ~30
 and the edge ends permanently. `watchdog.py` checks this.
 
-## Multi-account
+## Running several accounts
+
+Two ways, and they fail differently.
+
+### Separate windows, one per account (simple, isolated)
+
+```bash
+# window 1
+python3 adaptive_sentinel_v3.py --trade --stake 2 --minutes 360 --token TOK_A --tag _a
+
+# window 2
+python3 adaptive_sentinel_v3.py --trade --stake 2 --minutes 360 --token TOK_B --tag _b
+```
+
+**Always pass `--token`.** Without it every instance falls back to the module-level TOKEN in
+`deriv_api.py`, so editing that file to switch accounts creates a trap: window 1 restarts
+after a halt and silently comes back on window 2's account, doubling stake on one account
+while the other sits idle. Nothing in the logs would look wrong.
+
+`--tag` keeps the result files apart; without it both instances write the same path.
+
+Each window opens its own tick subscription, so the two can decide on marginally different
+ticks. Harmless, just slightly wasteful. The advantage is isolation: one crashing does not
+stop the other.
+
+### One process, N accounts (efficient, shared fate)
+
+
 
 `multi_trader.py` fires the same signal across N accounts on independent connections, in
 parallel. Sequential firing would put account 5 about 750ms behind account 1 on a 1000ms
@@ -134,6 +161,9 @@ tick — parallel keeps all of them inside ~165ms.
 ```bash
 python3 multi_trader.py --tokens TOK1 TOK2 ... --rounds 10
 ```
+
+One tick feed, one decision, N parallel fills on independent connections. All accounts trade
+identically. The trade-off is shared fate — if the process dies, everything stops.
 
 Test standalone first and check that every account's median round trip clusters with the
 others. One slow connection means worse slippage on that account alone.
