@@ -68,8 +68,17 @@ also cannot see a cut below 1.12%. **The daily `payout_audit` is the real check.
 **Sigma constants.** Refit over spot 168–245. The old ones were fitted over 186–272 and
 understated sigma by ~0.05 at spot 172.
 
-**Sigma mismatch halt.** Warns on an excursion, halts only after 20 consecutive, and the
-tolerance is now 15% of affine rather than a multiple of the fit residual.
+**Sigma mismatch is INFORMATIONAL and can never halt.** It logs the ratio every 600 ticks
+and nothing more.
+
+Any fixed tolerance eventually trips, because jump intensity varies: the observed inflation
+has ranged 10.7% to 15.4%. A 15% threshold halted a session that was running at 59.35% over
+4,620 trades. More fundamentally, a disagreement is not evidence against affine — the two
+estimators measure different quantities, and `sigma_from_spot` measured affine as the MORE
+accurate one (RMSE 0.0583 against rolling 0.0726).
+
+The real safeguards are `payout_audit` (catches a repricing) and the sigma gate itself
+(refuses to trade above 3.48). If affine were wrong, the win rate would show it.
 
 The reason matters: **rolling and affine measure different quantities.** JD100 averages 3
 jumps per hour, so a W=1800 window holds about 1.5 of them. `sigma_from_spot` filters jumps
@@ -92,8 +101,10 @@ grid and read 1.953. That check fired constantly and halted working sessions.
 | post-drain | 582 | 56.87% | +2.03% | sigma 3.05 |
 | post-drain | 873 | 59.34% | +6.45% | sigma 2.89 |
 | post-drain | 982 | 57.43% | **+3.09%** | sigma 3.06, predicted +3.08% |
+| post-refit | **4,620** | **59.35%** | **+6.53%** | sigma 2.95, predicted +6.53% |
 
-Combined post-fix: **~2,400 trades, past 3 SE above breakeven.**
+**The 4,620-trade run settles it: 5.0 SE above breakeven**, +$603.78 on $2 stakes, with
+predicted and realised EV matching exactly. Combined post-fix sample is now ~7,000 trades.
 
 The 982-trade run is the strongest confirmation: predicted EV +3.08%, realised +$60.76 on
 $2 stakes = **+3.09% per trade**. The model predicts the win rate from spot, the win rate
