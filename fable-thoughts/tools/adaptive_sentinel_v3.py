@@ -251,7 +251,7 @@ def main():
     if a.trade:
         trader=DerivWS(token=a.token, timeout=8); acct=trader.account or {}
         if not acct.get("account_id"): print("token invalid -> watch"); trader=None
-        elif acct.get("account_type")!="real" and not a.allow_real: print("REAL acct, refusing"); trader=None
+        elif acct.get("account_type")!="demo" and not a.allow_real: print("REAL acct, refusing"); trader=None
         else:
             settler=DerivWS(token=a.token, timeout=15)
             print(f"TRADING {acct['account_id']} ({acct['account_type']}) bal={acct.get('balance')}")
