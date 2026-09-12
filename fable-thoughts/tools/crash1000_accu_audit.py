@@ -7,10 +7,63 @@ import math
 import os
 import time
 
+import websocket
+
 from deriv_api import DerivWS
 
 
 BARRIER = 2.3454e-6
+TRANSPORT_ERRORS = (websocket.WebSocketException, ConnectionError, TimeoutError, OSError)
+
+
+def read_request(client, payload, emit, account_id, deadline):
+    fields = {
+        'ticks_history': {'ticks_history', 'count', 'end', 'style'},
+        'proposal': {'proposal', 'amount', 'basis', 'contract_type', 'currency',
+                     'underlying_symbol', 'growth_rate', 'limit_order'},
+        'proposal_open_contract': {'proposal_open_contract', 'contract_id'},
+    }
+    kinds = [kind for kind, allowed in fields.items() if kind in payload and set(payload) <= allowed]
+    if len(kinds) != 1:
+        raise ValueError('Only explicitly supported read requests may be retried')
+    reconnect = False
+    for attempt in range(4):
+        if time.monotonic() >= deadline:
+            raise TimeoutError('Read recovery deadline reached')
+        if client.account.get('account_type') != 'demo' or client.account.get('account_id') != account_id:
+            raise RuntimeError('Account changed; refusing to continue')
+        try:
+            if reconnect:
+                old = getattr(client, 'ws', None)
+                if old is not None:
+                    try:
+                        old.close()
+                    except TRANSPORT_ERRORS:
+                        pass
+                client._connect()
+                if client.account.get('account_type') != 'demo' or client.account.get('account_id') != account_id:
+                    raise RuntimeError('Reconnected to a different account; refusing to continue')
+                reconnect = False
+            if time.monotonic() >= deadline:
+                raise TimeoutError('Read recovery deadline reached')
+            response = client._call(payload)
+        except TRANSPORT_ERRORS as exc:
+            reconnect = True
+            error = type(exc).__name__
+        else:
+            if (response.get('error') or {}).get('code') != 'RateLimit':
+                if attempt:
+                    emit({'event': 'read_recovered', 'request': kinds[0], 'attempt': attempt + 1,
+                          'cid': payload.get('contract_id'), 'same_demo_account': True})
+                return response
+            error = 'RateLimit'
+        if attempt == 3:
+            raise RuntimeError('Read recovery attempts exhausted')
+        delay = min(2 ** attempt, max(0, deadline - time.monotonic()))
+        emit({'event': 'read_retry', 'request': kinds[0], 'attempt': attempt + 1,
+              'cid': payload.get('contract_id'), 'error_type': error, 'delay_seconds': delay})
+        time.sleep(delay)
+    raise RuntimeError('Read recovery exhausted')
 
 
 def money(value):
@@ -88,8 +141,9 @@ def eligible(q, pip, stake=Decimal('1'), take_profit=Decimal('1.19')):
 
 
 def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), max_loss=Decimal('10')):
-    if client.account.get('account_type') != 'demo':
+    if client.account.get('account_type') != 'demo' or not client.account.get('account_id'):
         raise RuntimeError('Refusing non-demo account')
+    account_id = client.account['account_id']
     deadline = time.monotonic() + seconds
     pnl = Decimal('0')
     count = 0
@@ -104,8 +158,11 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
             if execute and not check_only and pnl - stake < -max_loss:
                 reason = 'remaining session loss budget smaller than stake'
                 break
-            h = client._call({'ticks_history': 'CRASH1000', 'count': 1, 'end': 'latest', 'style': 'ticks'})
-            r = client._call({'proposal': 1, **params})
+            h = read_request(client, {'ticks_history': 'CRASH1000', 'count': 1, 'end': 'latest', 'style': 'ticks'},
+                             emit, account_id, deadline)
+            if time.monotonic() >= deadline:
+                break
+            r = read_request(client, {'proposal': 1, **params}, emit, account_id, deadline)
             q = r.get('proposal', {})
             if not q:
                 raise RuntimeError('Quote unavailable')
@@ -140,7 +197,10 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
             c = {}
             while time.monotonic() < until:
                 time.sleep(.4)
-                response = client._call({'proposal_open_contract': 1, 'contract_id': pending})
+                if time.monotonic() >= until:
+                    break
+                response = read_request(client, {'proposal_open_contract': 1, 'contract_id': pending},
+                                        emit, account_id, until)
                 c = response.get('proposal_open_contract', {})
                 if not c:
                     raise RuntimeError('Pending contract cannot be read')
@@ -165,7 +225,12 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
                 elapsed = int(endpoint) - int(c.get('entry_spot_time') or endpoint)
                 if (mismatch or elapsed >= 22) and not close_attempted:
                     close_attempted = True
-                    sold = client._call({'sell': pending, 'price': 0})
+                    try:
+                        sold = client._call({'sell': pending, 'price': 0})
+                    except TRANSPORT_ERRORS as exc:
+                        emit({'event': 'close_result_unknown', 'cid': pending, 'error_type': type(exc).__name__,
+                              'reason': 'Close will not be retried; reconciling the known contract'})
+                        continue
                     emit({'event': 'manual_close', 'cid': pending, 'spec_mismatch': mismatch,
                           'accepted': 'sell' in sold, 'error_code': (sold.get('error') or {}).get('code'),
                           'reason': 'specification mismatch' if mismatch else 'take profit not confirmed by tick 22'})
@@ -194,7 +259,8 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
         emit({'event': 'summary', 'reason': reason, 'contracts': count, 'pnl': str(pnl), 'pending': pending})
     except BaseException as exc:
         emit({'event': 'halt', 'error_type': type(exc).__name__, 'contracts': count,
-              'pnl': str(pnl), 'pending': pending, 'reason': 'No retry; inspect demo portfolio if pending'})
+              'pnl': str(pnl), 'pending': pending,
+              'reason': 'Could not safely continue; buy requests are never retried; inspect demo portfolio if pending'})
         raise SystemExit(1) from None
 
 

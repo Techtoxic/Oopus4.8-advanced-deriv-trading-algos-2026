@@ -21,10 +21,12 @@ class Clock:
 
 
 class Client:
-    account = {'account_type': 'demo'}
+    account = {'account_type': 'demo', 'account_id': 'demo-test'}
 
     def __init__(self, clock, spot=6000, profit=None, error=None, entry=6000, pending=False):
         self.clock = clock
+        self.account = dict(type(self).account)
+        self.reconnects = 0
         self.spot = spot
         self.profit = profit
         self.error = error
@@ -35,6 +37,9 @@ class Client:
         self.closed_manually = False
         self.stake = Decimal('1')
         self.take_profit = Decimal('1.19')
+
+    def _connect(self):
+        self.reconnects += 1
 
     def _call(self, r):
         self.calls.append(r)
@@ -222,6 +227,7 @@ class Tests(unittest.TestCase):
         c, logs = self.run_audit(error=TimeoutError())
         self.assertEqual(c.buys, 1)
         self.assertEqual(logs[-1]['pending'], 'buy outcome unknown')
+        self.assertEqual(c.reconnects, 0)
 
     def test_interrupt_preserves_pending_state(self):
         c, logs = self.run_audit(error=KeyboardInterrupt())
@@ -354,6 +360,143 @@ class Tests(unittest.TestCase):
             client, logs = self.run_audit()
         self.assertEqual(client.buys, 1)
         self.assertEqual(logs[-1]['reason'], 'path model mismatch or unavailable audit; halted for review')
+
+    def test_quote_disconnect_recovers_without_resetting_session(self):
+        original = Client._call
+        failed = False
+
+        def disconnected(client, request):
+            nonlocal failed
+            if 'ticks_history' in request and not failed:
+                failed = True
+                client.calls.append(request)
+                raise bot.websocket.WebSocketConnectionClosedException()
+            return original(client, request)
+
+        with patch.object(Client, '_call', disconnected):
+            client, logs = self.run_audit(seconds=60)
+        self.assertEqual(client.reconnects, 1)
+        self.assertGreater(client.buys, 0)
+        self.assertTrue(any(r['event'] == 'read_recovered' for r in logs))
+        self.assertEqual(logs[-1]['reason'], 'time limit reached')
+
+    def test_pending_read_recovery_preserves_prior_pnl_and_loss_budget(self):
+        original = Client._call
+        failed = False
+
+        def disconnected(client, request):
+            nonlocal failed
+            if 'proposal_open_contract' in request and client.buys == 2 and not failed:
+                failed = True
+                client.calls.append(request)
+                raise bot.websocket.WebSocketConnectionClosedException()
+            return original(client, request)
+
+        with patch.object(Client, '_call', disconnected):
+            client, logs = self.run_audit(profit='-1', max_loss=Decimal('2'))
+        self.assertEqual(client.reconnects, 1)
+        self.assertEqual(client.buys, 2)
+        self.assertEqual(logs[-1]['pnl'], '-2')
+        self.assertIsNone(logs[-1]['pending'])
+        self.assertEqual(logs[-1]['reason'], 'remaining session loss budget smaller than stake')
+        recovered = next(r for r in logs if r['event'] == 'read_recovered')
+        self.assertEqual(recovered['cid'], 2)
+
+    def test_reconnect_account_change_blocks_further_requests(self):
+        original = Client._call
+
+        def disconnected(client, request):
+            if 'ticks_history' in request:
+                client.calls.append(request)
+                raise ConnectionError()
+            return original(client, request)
+
+        def wrong_account(client):
+            client.reconnects += 1
+            client.account = {'account_type': 'demo', 'account_id': 'different-demo'}
+
+        with patch.object(Client, '_call', disconnected), patch.object(Client, '_connect', wrong_account):
+            client, logs = self.run_audit()
+        self.assertEqual(client.buys, 0)
+        self.assertEqual(len(client.calls), 1)
+        self.assertEqual(logs[-1]['event'], 'halt')
+
+    def test_read_recovery_is_bounded(self):
+        def disconnected(client, request):
+            client.calls.append(request)
+            raise ConnectionError()
+
+        with patch.object(Client, '_call', disconnected):
+            client, logs = self.run_audit()
+        self.assertEqual(client.reconnects, 3)
+        self.assertEqual(len(client.calls), 4)
+        self.assertEqual(client.buys, 0)
+        self.assertEqual(logs[-1]['event'], 'halt')
+
+    def test_recovery_does_not_extend_session_deadline(self):
+        def disconnected(client, request):
+            client.calls.append(request)
+            raise ConnectionError()
+
+        with patch.object(Client, '_call', disconnected):
+            client, logs = self.run_audit(seconds=1)
+        self.assertEqual(len(client.calls), 1)
+        self.assertEqual(client.reconnects, 0)
+        self.assertEqual(client.clock.value, 1)
+        self.assertEqual(client.buys, 0)
+
+    def test_retry_helper_refuses_trading_requests(self):
+        client = Client(Clock())
+        for payload in [{'buy': 1}, {'sell': 1}, {'proposal': 1, 'buy': 1}]:
+            with self.assertRaises(ValueError):
+                bot.read_request(client, payload, lambda _: None, 'demo-test', 100000000)
+        self.assertEqual(client.calls, [])
+
+    def test_rate_limit_retries_without_reconnecting(self):
+        original = Client._call
+        failed = False
+
+        def rate_limited(client, request):
+            nonlocal failed
+            if 'proposal' in request and not failed:
+                failed = True
+                client.calls.append(request)
+                return {'error': {'code': 'RateLimit'}}
+            return original(client, request)
+
+        with patch.object(Client, '_call', rate_limited):
+            client, logs = self.run_audit(check=True)
+        self.assertEqual(client.reconnects, 0)
+        self.assertEqual(client.buys, 0)
+        self.assertEqual(logs[-1]['reason'], 'check only; no purchases')
+        self.assertTrue(any(r['event'] == 'read_recovered' for r in logs))
+
+    def test_ambiguous_close_is_not_retried_and_known_contract_is_reconciled(self):
+        original = Client._call
+        close_count = 0
+        drop_read = False
+
+        def disconnected(client, request):
+            nonlocal close_count, drop_read
+            if 'sell' in request:
+                client.calls.append(request)
+                close_count += 1
+                client.pending = False
+                drop_read = True
+                raise ConnectionError()
+            if 'proposal_open_contract' in request and drop_read:
+                client.calls.append(request)
+                drop_read = False
+                raise ConnectionError()
+            return original(client, request)
+
+        with patch.object(Client, '_call', disconnected):
+            client, logs = self.run_audit(pending=True, seconds=60)
+        self.assertEqual(close_count, 1)
+        self.assertEqual(client.reconnects, 1)
+        self.assertGreater(client.buys, 1)
+        self.assertTrue(any(r['event'] == 'close_result_unknown' for r in logs))
+        self.assertTrue(all(r['path_check']['matched'] for r in logs if r['event'] == 'settled'))
 
 
 if __name__ == '__main__':

@@ -93,6 +93,30 @@ manual close even though the broker-side take-profit or maximum tick limit still
 The duration limit stops new buys; an already-open contract is reconciled before exit,
 so the process can finish shortly after the requested duration.
 
+## Connection recovery
+
+Read-only history, proposal and open-contract requests now have bounded recovery: up to
+three additional attempts, with 1/2/4-second backoff. A transport failure reconnects and
+verifies the original demo account ID before repeating the read. Rate-limit responses
+back off without reconnecting. Recovery is subject to the existing session or settlement
+deadline; individual connection/API timeouts still apply.
+
+The running session's P&L, trade count, deadline, loss budget and pending contract ID stay
+in memory across reconnects. No new purchase is allowed until a known pending contract
+is confirmed closed and its actual profit and path are reconciled. `read_retry` and
+`read_recovered` events make this visible. Account changes, exhausted recovery, invalid
+contract data and model mismatches still halt the audit.
+
+Buy requests are never automatically repeated. A disconnect during a buy whose contract
+ID was not received still halts with an unknown outcome. A disconnected manual close is
+also not resubmitted; its known contract is read and reconciled instead. This distinction
+prevents duplicate purchases and treats the broker's final state as authoritative.
+
+Recovery applies to a running process; it does not restore counters from an old log after
+manual restart. Check any pending contract from a stopped run before restarting, and retain
+the old log when evaluating the complete experiment. A real forced-socket-close test on
+a previously settled demo contract verified same-account recovery with zero new orders.
+
 Earlier checks verified proposal take-profit acceptance; three separate demo mechanics
 probes checked growth resale behavior without a take-profit order. Automatic take-profit
 execution inside the candidate state was subsequently observed in the September-12
