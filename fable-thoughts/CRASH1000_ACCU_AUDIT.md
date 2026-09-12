@@ -13,11 +13,12 @@ environment. Never put tokens in source or shell command arguments. From
 python3 crash1000_accu_audit.py --check
 python3 crash1000_accu_audit.py --minutes 60
 python3 crash1000_accu_audit.py --execute --minutes 60
+python3 crash1000_accu_audit.py --execute --minutes 300 --stake 1 --max-loss 200
 ```
 
 `--check` makes one state check and exits with no purchases, even if combined with
-`--execute`. Without `--execute`, the program only watches and reports. Use the last
-command only when you want the bounded demo audit. It can still wait if the condition
+`--execute`. Without `--execute`, the program only watches and reports. Use execution
+commands only when you want the bounded demo audit. It can still wait if the condition
 is false; it does not force purchases just because it is running. `--minutes` is limited
 to six hours. A uniquely named JSONL file is created in the current directory; optional
 `--out` must name a new file, never an existing one.
@@ -39,15 +40,32 @@ execution. Internal versus displayed-price knockout rounding remains unresolved.
 These results are not a profitability guarantee. Three earlier mechanics probes outside
 the candidate state did not validate this strategy.
 
-## Fixed execution limits
+## Configurable session limits
 
-Demo accounts only, with no real-account override. Stake is fixed at $1. At most 20
-contracts per session and $10 realized loss; another buy requires room for its full
-$1 possible loss. There is at most one pending contract. Restarting resets the limits;
-do not repeatedly restart to evade the loss cap or run multiple copies simultaneously.
+Demo accounts only, with no real-account override. `--stake` is fixed for the session
+(default $1, minimum $1, at most two decimal places); broker limits also apply. The
+20-contract cap is removed. Purchases are limited by `--minutes`, `--max-loss` (default
+$10), the candidate condition and all execution checks. At most one contract is pending.
 
-The proposal must accept a **$1.19 profit target**, aiming at $2.19 total value after
-20 surviving growth steps. A buy uses the same parameters, with max price $1 and no
+`--max-loss` is the maximum **net realized loss from this session's starting point**,
+not drawdown from the highest session profit and not losses from other bots/accounts.
+Another buy requires room for the entire stake to be lost. For example, at stake $2.03
+and max loss $5, two full losses stop the session at -$4.06 rather than risk crossing
+-$5. With stake $1 and max loss $200, it never opens a trade that could take session
+P&L below -$200 under the full-stake-loss assumption. Restarting resets these limits;
+do not repeatedly restart to evade them or run multiple copies simultaneously.
+
+The take-profit target scales with stake for the unchanged 20-growth-tick policy:
+`floor_to_cent(stake * (1.04^20 - 1))`. Flooring avoids asking for a fraction of a cent
+above the raw twentieth-tick profit and accidentally requiring another tick. The expected
+sale value is the cent-rounded `stake * 1.04^20`, verified after settlement. For $1,
+the profit target remains **$1.19**, with expected total value **$2.19**; for $2 it is
+$2.38, with total $4.38. Non-integer stakes can have a target below the final displayed
+profit: $2.03 targets $2.41 profit and expects a $4.45 sale. Larger-stake executions
+remain experimental and halt if actual payment differs from this model.
+
+The proposal must accept the configured stake and derived target. A buy uses those same
+parameters, with maximum price equal to the stake and no
 automatic retry. After entry, the audit checks the actual entry state, growth rate,
 stake, shortcode barrier and active take-profit order. A mismatch prompts a manual
 demo close and stops further purchases. If automatic take profit has not closed the
@@ -57,7 +75,7 @@ Every observed contract response is logged, including audit ticks and actual sal
 The console shows concise settlement summaries; the full contract stays in the JSONL
 file. Each eligible completed path is checked against the displayed-price knockout model.
 The first modeled breach must coincide with a losing exit; a winning take-profit exit
-must have 20 protected ticks and pay $2.19. Missing/inconsistent paths or disagreement
+must have 20 protected ticks and pay the expected stake-scaled amount. Missing/inconsistent paths or disagreement
 halt further buys. `path_check.matched` confirms that observation, NOT positive expected
 value. A knockout on the twentieth tick is a loss, not a successful 20-tick survival.
 `tick_count` is not treated as elapsed growth count; entry/current timestamps are used.
@@ -66,6 +84,8 @@ candidate validation. A network failure during buy leaves its outcome unknown; n
 buy is attempted. Inspect the demo portfolio before restarting after any pending-state
 warning. Ctrl+C does not cancel broker-side contracts. A lost connection may prevent a
 manual close even though the broker-side take-profit or maximum tick limit still exists.
+The duration limit stops new buys; an already-open contract is reconciled before exit,
+so the process can finish shortly after the requested duration.
 
 Earlier checks verified proposal take-profit acceptance; three separate demo mechanics
 probes checked growth resale behavior without a take-profit order. Automatic take-profit
@@ -83,7 +103,8 @@ python3 -m unittest discover -s fable-thoughts/tools -p test_crash1000_accu_audi
 ```
 
 Tests cover eligibility, changed specifications, read-only modes, real-account refusal,
-fixed loss/count limits, no buy retry, pending interruption, entry mismatch and fallback
-close. These use fake executions. Live smoke checks only checked quotes and placed no
-trades while the candidate was inactive. Send the JSONL file for execution review before
-considering any larger experiment.
+configurable stake/loss budgets, sessions exceeding 20 contracts, duration enforcement,
+stake-scaled take profit and payment, no buy retry, pending interruption, entry mismatch
+and fallback close. These use fake executions. Live smoke checks only checked quotes;
+no orders were placed for the session-limit update. Keep and, if large, zip the JSONL
+file for review. A longer run does not guarantee a positive result.

@@ -1,7 +1,7 @@
 """Bounded CRASH1000 candidate-state demo audit. No real-account override."""
 import argparse
 from datetime import datetime, timezone
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation, ROUND_DOWN, ROUND_HALF_UP
 import json
 import math
 import os
@@ -13,7 +13,24 @@ from deriv_api import DerivWS
 BARRIER = 2.3454e-6
 
 
-def reconcile_path(contract):
+def money(value):
+    try:
+        amount = Decimal(str(value))
+        if not amount.is_finite() or amount <= 0 or amount != amount.quantize(Decimal('.01')):
+            raise ValueError
+        return amount
+    except (InvalidOperation, ValueError):
+        raise argparse.ArgumentTypeError('Use a finite positive amount with at most two decimal places') from None
+
+
+def payout_terms(stake):
+    raw_value = stake * Decimal('1.04') ** 20
+    target = (raw_value - stake).quantize(Decimal('.01'), rounding=ROUND_DOWN)
+    sale = raw_value.quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
+    return target, sale
+
+
+def reconcile_path(contract, stake=Decimal('1')):
     try:
         entry = int(contract['entry_spot_time'])
         end = int(contract['exit_spot_time'])
@@ -40,10 +57,11 @@ def reconcile_path(contract):
                 break
         sale = Decimal(str(contract['sell_price']))
         profit = Decimal(str(contract['profit']))
+        _, expected_sale = payout_terms(stake)
         if contract.get('status') == 'lost':
-            matched = bool(first_breach and first_breach['epoch'] == end and sale == 0 and profit == -1)
+            matched = bool(first_breach and first_breach['epoch'] == end and sale == 0 and profit == -stake)
         elif contract.get('status') == 'won':
-            matched = not first_breach and end - entry == 20 and sale == Decimal('2.19') and profit == Decimal('1.19')
+            matched = not first_breach and end - entry == 20 and sale == expected_sale and profit == expected_sale - stake
         else:
             matched = False
         return {'matched': matched, 'protected_ticks': end - entry, 'first_model_breach': first_breach,
@@ -52,15 +70,15 @@ def reconcile_path(contract):
         return {'matched': None, 'reason': 'audit path or terminal fields unavailable; cannot verify'}
 
 
-def eligible(q, pip):
+def eligible(q, pip, stake=Decimal('1'), take_profit=Decimal('1.19')):
     details = q.get('contract_details', {})
     b = float(details.get('tick_size_barrier', 0))
     if pip != 3 or not math.isfinite(b) or abs(b - BARRIER) > 1e-16 or int(details.get('maximum_ticks', 0)) < 20:
         raise RuntimeError('Contract specification changed')
-    if float(q.get('ask_price', 0)) != 1:
+    if Decimal(str(q.get('ask_price', 0))) != stake:
         raise RuntimeError('Unexpected quoted stake')
     tp = q.get('limit_order', {}).get('take_profit', {}).get('order_amount')
-    if tp is None or not math.isfinite(float(tp)) or abs(float(tp) - 1.19) > 1e-8:
+    if tp is None or Decimal(str(tp)) != take_profit:
         raise RuntimeError('Take-profit specification missing')
     phase = float(q['spot']) * b * 1000
     if not math.isfinite(phase) or phase <= 0:
@@ -68,7 +86,7 @@ def eligible(q, pip):
     return 14 <= phase < 14.25
 
 
-def run(client, seconds, execute, emit, check_only=False):
+def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), max_loss=Decimal('10')):
     if client.account.get('account_type') != 'demo':
         raise RuntimeError('Refusing non-demo account')
     deadline = time.monotonic() + seconds
@@ -77,19 +95,20 @@ def run(client, seconds, execute, emit, check_only=False):
     pending = None
     last_report = -float('inf')
     reason = 'time limit reached'
-    params = dict(amount=1, basis='stake', contract_type='ACCU', currency='USD',
-                  underlying_symbol='CRASH1000', growth_rate=.04, limit_order={'take_profit': 1.19})
+    take_profit, _ = payout_terms(stake)
+    params = dict(amount=float(stake), basis='stake', contract_type='ACCU', currency='USD',
+                  underlying_symbol='CRASH1000', growth_rate=.04, limit_order={'take_profit': float(take_profit)})
     try:
         while time.monotonic() < deadline:
-            if count >= 20 or pnl - 1 < -10:
-                reason = 'contract count or loss budget reached'
+            if execute and not check_only and pnl - stake < -max_loss:
+                reason = 'remaining session loss budget smaller than stake'
                 break
             h = client._call({'ticks_history': 'CRASH1000', 'count': 1, 'end': 'latest', 'style': 'ticks'})
             r = client._call({'proposal': 1, **params})
             q = r.get('proposal', {})
             if not q:
                 raise RuntimeError('Quote unavailable')
-            ready = eligible(q, h.get('pip_size'))
+            ready = eligible(q, h.get('pip_size'), stake, take_profit)
             age = time.time() - int(q['spot_time'])
             if time.monotonic() - last_report >= 60 or ready:
                 emit({'event': 'state', 'spot': q['spot'], 'spot_time': q['spot_time'],
@@ -104,8 +123,10 @@ def run(client, seconds, execute, emit, check_only=False):
             if not execute or not ready or not 0 <= age <= 2:
                 time.sleep(min(10, max(0, deadline - time.monotonic())))
                 continue
+            if time.monotonic() >= deadline:
+                break
             pending = 'buy outcome unknown'
-            bought = client._call({'buy': 1, 'price': 1, 'parameters': params})
+            bought = client._call({'buy': 1, 'price': float(stake), 'parameters': params})
             if 'buy' not in bought:
                 reason = 'buy rejected or unconfirmed; inspect demo portfolio'
                 break
@@ -130,10 +151,10 @@ def run(client, seconds, execute, emit, check_only=False):
                     parts = c.get('shortcode', '').split('_')
                     contract_ok = (len(parts) >= 8 and parts[0] == 'ACCU' and parts[1] == 'CRASH1000'
                                    and abs(float(parts[6]) - BARRIER) <= 1e-16
-                                   and float(c.get('growth_rate', 0)) == .04 and float(c.get('buy_price', 0)) == 1)
+                                   and float(c.get('growth_rate', 0)) == .04 and Decimal(str(c.get('buy_price', 0))) == stake)
                     mismatch = mismatch or not (14 <= actual_state < 14.25) or not contract_ok
                     if not c.get('is_sold'):
-                        mismatch = mismatch or tp is None or abs(float(tp) - 1.19) > 1e-8
+                        mismatch = mismatch or tp is None or Decimal(str(tp)) != take_profit
                 if c.get('is_sold'):
                     if entry is None:
                         mismatch = True
@@ -154,7 +175,7 @@ def run(client, seconds, execute, emit, check_only=False):
             if not profit.is_finite():
                 raise RuntimeError('Invalid settlement profit')
             pnl += profit
-            path_check = (reconcile_path(c) if not mismatch else
+            path_check = (reconcile_path(c, stake) if not mismatch else
                           {'matched': None, 'reason': 'not assessed because execution specification mismatched'})
             emit({'event': 'settled', 'cid': pending, 'profit': str(profit), 'pnl': str(pnl),
                   'status': c.get('status'), 'entry_time': c.get('entry_spot_time'),
@@ -178,12 +199,16 @@ def run(client, seconds, execute, emit, check_only=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--minutes', type=float, default=60)
+    parser.add_argument('--stake', type=money, default=Decimal('1'), help='Fixed stake in USD, at least $1; broker limits still apply')
+    parser.add_argument('--max-loss', type=money, default=Decimal('10'), help='Maximum net realized loss for this session in USD')
     parser.add_argument('--execute', action='store_true', help='Permit bounded demo purchases inside the tested state')
     parser.add_argument('--check', action='store_true', help='Check the current state once, without purchasing')
     parser.add_argument('--out', default=None, help='New JSONL file; existing files are never overwritten')
     args = parser.parse_args()
     if not math.isfinite(args.minutes) or not 0 < args.minutes <= 360:
         parser.error('Duration must be greater than zero and no more than 360 minutes')
+    if args.stake < 1:
+        parser.error('Stake must be at least $1; the broker also validates its limits')
     token, app = os.environ.get('DERIV_TOKEN'), os.environ.get('DERIV_APP_ID')
     if not token or not app:
         parser.error('Set DERIV_TOKEN and DERIV_APP_ID securely in your environment')
@@ -205,10 +230,11 @@ def main():
                 emit({'event': 'halt', 'reason': 'Refusing non-demo account; no purchases'})
                 return
             emit({'event': 'start', 'demo_execute': args.execute and not args.check,
-                  'minutes': args.minutes, 'stake': 1, 'growth': .04, 'take_profit': 1.19,
-                  'maximum_contracts': 20, 'maximum_realized_loss': 10, 'log': filename,
+                  'minutes': args.minutes, 'stake': str(args.stake), 'growth': .04,
+                  'take_profit': str(payout_terms(args.stake)[0]), 'maximum_contracts': None,
+                  'maximum_realized_loss': str(args.max_loss), 'log': filename,
                   'warning': 'Historical candidate, not proven live profitability. This uses the Options API, not MT5.'})
-            run(client, args.minutes * 60, args.execute, emit, args.check)
+            run(client, args.minutes * 60, args.execute, emit, args.check, args.stake, args.max_loss)
         finally:
             client.ws.close()
 
