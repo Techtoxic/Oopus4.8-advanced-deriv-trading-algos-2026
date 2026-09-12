@@ -69,7 +69,13 @@ parameters, with maximum price equal to the stake and no
 automatic retry. After entry, the audit checks the actual entry state, growth rate,
 stake, shortcode barrier and active take-profit order. A mismatch prompts a manual
 demo close and stops further purchases. If automatic take profit has not closed the
-contract by 22 elapsed growth ticks, it requests a close and halts for review.
+contract by 22 elapsed growth ticks, it requests a close once and waits for the final
+contract response. A known exit timestamp takes precedence over `current_spot_time`,
+which can keep advancing after the actual exit. A rejected fallback sell such as
+`ContractAlreadySold` does not itself imply a strategy mismatch: a subsequently confirmed
+20-tick take-profit exit may continue after full reconciliation. Actual specification
+mismatches remain sticky; genuinely late exits, losses after tick 20, invalid payments,
+or closure still unconfirmed after the bounded polling period halt further purchases.
 
 Every observed contract response is logged, including audit ticks and actual sale values.
 The console shows concise settlement summaries; the full contract stays in the JSONL

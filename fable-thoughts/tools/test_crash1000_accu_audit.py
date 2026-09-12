@@ -56,10 +56,11 @@ class Client:
             self.closed_manually = True
             return {'sell': {'sold_for': 1}}
         if 'proposal_open_contract' in r:
-            _, sale = bot.payout_terms(self.stake)
+            elapsed = 22 if self.closed_manually else 20
+            sale = (self.stake * Decimal('1.04') ** elapsed).quantize(Decimal('.01'))
             profit = self.profit if self.profit is not None else str(sale - self.stake)
             won = float(profit) > 0
-            prices = [self.entry + i * .001 for i in range(21)]
+            prices = [self.entry + i * .001 for i in range(elapsed + 1)]
             if not won:
                 prices[-1] = prices[-2] + .02
             return {'proposal_open_contract': {
@@ -68,7 +69,8 @@ class Client:
                 'shortcode': f'ACCU_CRASH1000_{self.stake:.2f}_0_0.04_1_0.0000023454_1_0',
                 'profit': profit, 'status': 'won' if won else 'lost',
                 'entry_spot_time': 1000000, 'current_spot_time': 1000022,
-                'exit_spot_time': 1000020, 'sell_price': str(sale) if won else '0.00',
+                'exit_spot_time': None if self.pending and not self.closed_manually else 1000000 + elapsed,
+                'sell_price': str(sale) if won else '0.00',
                 'audit_details': {'all_ticks': [{'epoch': 1000000 + i, 'tick': round(p, 3)}
                                                for i, p in enumerate(prices)]},
                 'limit_order': {'take_profit': {'order_amount': str(self.take_profit)}}}}
@@ -235,7 +237,88 @@ class Tests(unittest.TestCase):
         c, logs = self.run_audit(pending=True)
         self.assertEqual(c.buys, 1)
         self.assertTrue(c.closed_manually)
-        self.assertEqual(logs[-1]['reason'], 'mechanics mismatch; audit halted for review')
+        self.assertEqual(logs[-1]['reason'], 'path model mismatch or unavailable audit; halted for review')
+
+    def test_completed_exit_waits_for_sold_status_without_forced_close(self):
+        original = Client._call
+        reads = 0
+
+        def delayed(client, request):
+            nonlocal reads
+            response = original(client, request)
+            if 'proposal_open_contract' in response and client.buys == 1:
+                reads += 1
+                if reads <= 2:
+                    contract = response['proposal_open_contract']
+                    contract['is_sold'] = 0
+                    contract['current_spot_time'] = 1000025
+                    contract.pop('limit_order')
+            return response
+
+        with patch.object(Client, '_call', delayed):
+            client, logs = self.run_audit(seconds=60)
+        self.assertGreater(client.buys, 1)
+        self.assertFalse(any('sell' in r for r in client.calls))
+        settled = [r for r in logs if r['event'] == 'settled']
+        self.assertTrue(settled[0]['path_check']['matched'])
+        self.assertFalse(settled[0]['spec_mismatch'])
+
+    def test_already_sold_close_race_reconciles_without_false_mismatch(self):
+        original = Client._call
+        reads = 0
+        closes = 0
+
+        def race(client, request):
+            nonlocal reads, closes
+            if 'sell' in request:
+                client.calls.append(request)
+                closes += 1
+                return {'error': {'code': 'ContractAlreadySold'}}
+            response = original(client, request)
+            if 'proposal_open_contract' in response and client.buys == 1:
+                reads += 1
+                if reads <= 3:
+                    contract = response['proposal_open_contract']
+                    contract['is_sold'] = 0
+                    contract['exit_spot_time'] = None if reads == 1 else 1000020
+                    contract['current_spot_time'] = 1000022 + reads
+            return response
+
+        with patch.object(Client, '_call', race):
+            client, logs = self.run_audit(seconds=60)
+        self.assertEqual(closes, 1)
+        self.assertGreater(client.buys, 1)
+        first = next(r for r in logs if r['event'] == 'settled')
+        self.assertTrue(first['close_attempted'])
+        self.assertFalse(first['spec_mismatch'])
+        self.assertTrue(first['path_check']['matched'])
+        close = next(r for r in logs if r['event'] == 'manual_close')
+        self.assertEqual(close['error_code'], 'ContractAlreadySold')
+
+    def test_breach_after_target_horizon_is_not_a_valid_strategy_loss(self):
+        client = Client(Clock(), profit='-1')
+        client.closed_manually = True
+        c = client._call({'proposal_open_contract': 1})['proposal_open_contract']
+        self.assertFalse(bot.reconcile_path(c)['matched'])
+
+    def test_rejected_close_with_unconfirmed_settlement_still_halts(self):
+        original = Client._call
+        closes = 0
+
+        def unresolved(client, request):
+            nonlocal closes
+            if 'sell' in request:
+                client.calls.append(request)
+                closes += 1
+                return {'error': {'code': 'ContractAlreadySold'}}
+            return original(client, request)
+
+        with patch.object(Client, '_call', unresolved):
+            client, logs = self.run_audit(pending=True)
+        self.assertEqual(client.buys, 1)
+        self.assertEqual(closes, 1)
+        self.assertEqual(logs[-1]['reason'], 'closure unconfirmed; inspect demo portfolio')
+        self.assertEqual(logs[-1]['pending'], 1)
 
     def test_real_account_refused(self):
         c = Client(Clock())

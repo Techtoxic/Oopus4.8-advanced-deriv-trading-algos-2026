@@ -59,7 +59,8 @@ def reconcile_path(contract, stake=Decimal('1')):
         profit = Decimal(str(contract['profit']))
         _, expected_sale = payout_terms(stake)
         if contract.get('status') == 'lost':
-            matched = bool(first_breach and first_breach['epoch'] == end and sale == 0 and profit == -stake)
+            matched = bool(first_breach and first_breach['epoch'] == end and end - entry <= 20
+                           and sale == 0 and profit == -stake)
         elif contract.get('status') == 'won':
             matched = not first_breach and end - entry == 20 and sale == expected_sale and profit == expected_sale - stake
         else:
@@ -135,6 +136,7 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
             emit({'event': 'buy', 'cid': pending, 'quoted_spot': q['spot'], 'buy_price': bought['buy'].get('buy_price')})
             until = time.monotonic() + 90
             mismatch = False
+            close_attempted = False
             c = {}
             while time.monotonic() < until:
                 time.sleep(.4)
@@ -153,21 +155,20 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
                                    and abs(float(parts[6]) - BARRIER) <= 1e-16
                                    and float(c.get('growth_rate', 0)) == .04 and Decimal(str(c.get('buy_price', 0))) == stake)
                     mismatch = mismatch or not (14 <= actual_state < 14.25) or not contract_ok
-                    if not c.get('is_sold'):
+                    if not c.get('is_sold') and not c.get('exit_spot_time'):
                         mismatch = mismatch or tp is None or Decimal(str(tp)) != take_profit
                 if c.get('is_sold'):
                     if entry is None:
                         mismatch = True
                     break
-                elapsed = int(c.get('current_spot_time', 0)) - int(c.get('entry_spot_time') or c.get('current_spot_time', 0))
-                if mismatch or elapsed >= 22:
+                endpoint = c.get('exit_spot_time') or c.get('current_spot_time', 0)
+                elapsed = int(endpoint) - int(c.get('entry_spot_time') or endpoint)
+                if (mismatch or elapsed >= 22) and not close_attempted:
+                    close_attempted = True
                     sold = client._call({'sell': pending, 'price': 0})
                     emit({'event': 'manual_close', 'cid': pending, 'spec_mismatch': mismatch,
-                          'accepted': 'sell' in sold, 'reason': 'specification mismatch' if mismatch else 'take profit not confirmed by tick 22'})
-                    mismatch = True
-                    time.sleep(.5)
-                    c = client._call({'proposal_open_contract': 1, 'contract_id': pending}).get('proposal_open_contract', {})
-                    break
+                          'accepted': 'sell' in sold, 'error_code': (sold.get('error') or {}).get('code'),
+                          'reason': 'specification mismatch' if mismatch else 'take profit not confirmed by tick 22'})
             if not c.get('is_sold'):
                 reason = 'closure unconfirmed; inspect demo portfolio'
                 break
@@ -180,6 +181,7 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
             emit({'event': 'settled', 'cid': pending, 'profit': str(profit), 'pnl': str(pnl),
                   'status': c.get('status'), 'entry_time': c.get('entry_spot_time'),
                   'exit_time': c.get('exit_spot_time'), 'spec_mismatch': mismatch,
+                  'close_attempted': close_attempted,
                   'path_check': path_check,
                   'contract': {k: v for k, v in c.items() if k not in ('account_id', 'transaction_ids')}})
             pending = None
