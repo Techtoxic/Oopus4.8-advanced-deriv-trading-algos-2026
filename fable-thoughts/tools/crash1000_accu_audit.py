@@ -13,6 +13,45 @@ from deriv_api import DerivWS
 BARRIER = 2.3454e-6
 
 
+def reconcile_path(contract):
+    try:
+        entry = int(contract['entry_spot_time'])
+        end = int(contract['exit_spot_time'])
+        if not entry <= end <= entry + 65:
+            raise ValueError('Invalid audit duration')
+        ticks = {}
+        for tick in contract.get('audit_details', {}).get('all_ticks', []):
+            epoch = int(tick['epoch'])
+            if not entry <= epoch <= end:
+                continue
+            value = Decimal(str(tick['tick']))
+            if not value.is_finite() or value <= 0 or (epoch in ticks and ticks[epoch] != value):
+                raise ValueError('Invalid audit price')
+            ticks[epoch] = value
+        if sorted(ticks) != list(range(entry, end + 1)):
+            raise ValueError('Incomplete audit path')
+        first_breach = None
+        for epoch in range(entry + 1, end + 1):
+            move = abs(ticks[epoch] - ticks[epoch - 1])
+            limit = Decimal(str(BARRIER)) * ticks[epoch - 1]
+            if move >= limit:
+                first_breach = {'epoch': epoch, 'previous': str(ticks[epoch - 1]),
+                                'next': str(ticks[epoch]), 'move': str(move), 'limit': str(limit)}
+                break
+        sale = Decimal(str(contract['sell_price']))
+        profit = Decimal(str(contract['profit']))
+        if contract.get('status') == 'lost':
+            matched = bool(first_breach and first_breach['epoch'] == end and sale == 0 and profit == -1)
+        elif contract.get('status') == 'won':
+            matched = not first_breach and end - entry == 20 and sale == Decimal('2.19') and profit == Decimal('1.19')
+        else:
+            matched = False
+        return {'matched': matched, 'protected_ticks': end - entry, 'first_model_breach': first_breach,
+                'reason': 'path and payment match' if matched else 'outcome, target timing or payment disagrees with model'}
+    except (KeyError, ValueError, TypeError, ArithmeticError):
+        return {'matched': None, 'reason': 'audit path or terminal fields unavailable; cannot verify'}
+
+
 def eligible(q, pip):
     details = q.get('contract_details', {})
     b = float(details.get('tick_size_barrier', 0))
@@ -115,13 +154,19 @@ def run(client, seconds, execute, emit, check_only=False):
             if not profit.is_finite():
                 raise RuntimeError('Invalid settlement profit')
             pnl += profit
+            path_check = (reconcile_path(c) if not mismatch else
+                          {'matched': None, 'reason': 'not assessed because execution specification mismatched'})
             emit({'event': 'settled', 'cid': pending, 'profit': str(profit), 'pnl': str(pnl),
                   'status': c.get('status'), 'entry_time': c.get('entry_spot_time'),
                   'exit_time': c.get('exit_spot_time'), 'spec_mismatch': mismatch,
+                  'path_check': path_check,
                   'contract': {k: v for k, v in c.items() if k not in ('account_id', 'transaction_ids')}})
             pending = None
             if mismatch:
                 reason = 'mechanics mismatch; audit halted for review'
+                break
+            if path_check['matched'] is not True:
+                reason = 'path model mismatch or unavailable audit; halted for review'
                 break
         emit({'event': 'summary', 'reason': reason, 'contracts': count, 'pnl': str(pnl), 'pending': pending})
     except BaseException as exc:
@@ -154,7 +199,7 @@ def main():
             line = json.dumps(row, allow_nan=False)
             out.write(line + '\n')
             if row['event'] != 'contract':
-                print(line, flush=True)
+                print(json.dumps({k: v for k, v in row.items() if k != 'contract'}, allow_nan=False), flush=True)
         try:
             if client.account.get('account_type') != 'demo':
                 emit({'event': 'halt', 'reason': 'Refusing non-demo account; no purchases'})

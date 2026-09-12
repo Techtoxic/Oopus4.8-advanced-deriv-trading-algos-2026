@@ -48,12 +48,19 @@ class Client:
             self.closed_manually = True
             return {'sell': {'sold_for': 1}}
         if 'proposal_open_contract' in r:
+            won = float(self.profit) > 0
+            prices = [self.entry + i * .001 for i in range(21)]
+            if not won:
+                prices[-1] = prices[-2] + .02
             return {'proposal_open_contract': {
                 'is_sold': int(not self.pending or self.closed_manually), 'entry_spot': self.entry,
                 'growth_rate': .04, 'buy_price': 1,
                 'shortcode': 'ACCU_CRASH1000_1.00_0_0.04_1_0.0000023454_1_0',
                 'profit': self.profit, 'status': 'won' if float(self.profit) > 0 else 'lost',
                 'entry_spot_time': 1000000, 'current_spot_time': 1000022,
+                'exit_spot_time': 1000020, 'sell_price': '2.19' if won else '0.00',
+                'audit_details': {'all_ticks': [{'epoch': 1000000 + i, 'tick': round(p, 3)}
+                                               for i, p in enumerate(prices)]},
                 'limit_order': {'take_profit': {'order_amount': 1.19}}}}
         raise AssertionError(r)
 
@@ -64,6 +71,36 @@ class Client:
 
 
 class Tests(unittest.TestCase):
+    def test_path_verifies_twentieth_tick_take_profit(self):
+        c = Client(Clock())._call({'proposal_open_contract': 1})['proposal_open_contract']
+        self.assertTrue(bot.reconcile_path(c)['matched'])
+
+    def test_path_verifies_breach_on_twentieth_tick_as_loss(self):
+        c = Client(Clock(), profit='-1')._call({'proposal_open_contract': 1})['proposal_open_contract']
+        r = bot.reconcile_path(c)
+        self.assertTrue(r['matched'])
+        self.assertEqual(r['first_model_breach']['epoch'], c['exit_spot_time'])
+
+    def test_loss_without_modeled_breach_rejected(self):
+        c = Client(Clock())._call({'proposal_open_contract': 1})['proposal_open_contract']
+        c.update(status='lost', profit='-1', sell_price='0')
+        self.assertFalse(bot.reconcile_path(c)['matched'])
+
+    def test_missing_audit_not_claimed_as_matching(self):
+        c = Client(Clock())._call({'proposal_open_contract': 1})['proposal_open_contract']
+        c['audit_details']['all_ticks'].pop(5)
+        self.assertIsNone(bot.reconcile_path(c)['matched'])
+
+    def test_ticks_after_exit_are_excluded(self):
+        c = Client(Clock())._call({'proposal_open_contract': 1})['proposal_open_contract']
+        c['audit_details']['all_ticks'].append({'epoch': 1000021, 'tick': 1})
+        self.assertTrue(bot.reconcile_path(c)['matched'])
+
+    def test_wrong_take_profit_payment_rejected(self):
+        c = Client(Clock())._call({'proposal_open_contract': 1})['proposal_open_contract']
+        c['sell_price'] = '2.28'
+        self.assertFalse(bot.reconcile_path(c)['matched'])
+
     def run_audit(self, execute=True, check=False, **options):
         clock = Clock()
         client = Client(clock, **options)
@@ -149,6 +186,34 @@ class Tests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             bot.run(c, 1, True, lambda _: None)
         self.assertEqual(c.calls, [])
+
+    def test_path_disagreement_stops_further_buys(self):
+        original = Client._call
+
+        def inconsistent(client, request):
+            response = original(client, request)
+            if 'proposal_open_contract' in response:
+                response['proposal_open_contract']['audit_details']['all_ticks'][-1]['tick'] = client.entry + .02
+            return response
+
+        with patch.object(Client, '_call', inconsistent):
+            client, logs = self.run_audit(profit='-1')
+        self.assertEqual(client.buys, 1)
+        self.assertEqual(logs[-1]['reason'], 'path model mismatch or unavailable audit; halted for review')
+
+    def test_unavailable_path_stops_further_buys(self):
+        original = Client._call
+
+        def incomplete(client, request):
+            response = original(client, request)
+            if 'proposal_open_contract' in response:
+                response['proposal_open_contract'].pop('audit_details')
+            return response
+
+        with patch.object(Client, '_call', incomplete):
+            client, logs = self.run_audit()
+        self.assertEqual(client.buys, 1)
+        self.assertEqual(logs[-1]['reason'], 'path model mismatch or unavailable audit; halted for review')
 
 
 if __name__ == '__main__':

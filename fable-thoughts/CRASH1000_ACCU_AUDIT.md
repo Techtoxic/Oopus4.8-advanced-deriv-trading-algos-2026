@@ -54,6 +54,12 @@ demo close and stops further purchases. If automatic take profit has not closed 
 contract by 22 elapsed growth ticks, it requests a close and halts for review.
 
 Every observed contract response is logged, including audit ticks and actual sale values.
+The console shows concise settlement summaries; the full contract stays in the JSONL
+file. Each eligible completed path is checked against the displayed-price knockout model.
+The first modeled breach must coincide with a losing exit; a winning take-profit exit
+must have 20 protected ticks and pay $2.19. Missing/inconsistent paths or disagreement
+halt further buys. `path_check.matched` confirms that observation, NOT positive expected
+value. A knockout on the twentieth tick is a loss, not a successful 20-tick survival.
 `tick_count` is not treated as elapsed growth count; entry/current timestamps are used.
 An entry slipping outside the band is labeled a mismatch, not counted as successful
 candidate validation. A network failure during buy leaves its outcome unknown; no second
@@ -63,8 +69,10 @@ manual close even though the broker-side take-profit or maximum tick limit still
 
 Earlier checks verified proposal take-profit acceptance; three separate demo mechanics
 probes checked growth resale behavior without a take-profit order. Automatic take-profit
-execution inside the candidate state has not yet been validated. The audit is designed
-to record that evidence, not assume it.
+execution inside the candidate state was subsequently observed in the September-12
+20-contract user run: all six winners paid $2.19 after 20 growth ticks, and all fourteen
+knockouts matched the displayed-price model. This verifies those observed executions,
+not the expected profitability of future trades. See [the live review](CRASH1000_LIVE_REVIEW_2026-09-12.md).
 
 ## Tests
 
