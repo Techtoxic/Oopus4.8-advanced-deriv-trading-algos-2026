@@ -12,7 +12,8 @@ import websocket
 from deriv_api import DerivWS
 
 
-BARRIER = 2.3454e-6
+BARRIERS = {'CRASH1000': 2.3454e-6, 'CRASH500': 4.7141e-6}
+BARRIER = BARRIERS['CRASH1000']
 TRANSPORT_ERRORS = (websocket.WebSocketException, ConnectionError, TimeoutError, OSError)
 
 
@@ -83,8 +84,13 @@ def payout_terms(stake):
     return target, sale
 
 
-def reconcile_path(contract, stake=Decimal('1')):
+def reconcile_path(contract, stake=Decimal('1'), symbol='CRASH1000'):
     try:
+        barrier = BARRIERS[symbol]
+        parts = contract.get('shortcode', '').split('_')
+        if (len(parts) < 8 or parts[0] != 'ACCU' or parts[1] != symbol
+                or Decimal(parts[6]) != Decimal(str(barrier))):
+            return {'matched': False, 'reason': 'contract symbol or barrier mismatch'}
         entry = int(contract['entry_spot_time'])
         end = int(contract['exit_spot_time'])
         if not entry <= end <= entry + 65:
@@ -103,7 +109,7 @@ def reconcile_path(contract, stake=Decimal('1')):
         first_breach = None
         for epoch in range(entry + 1, end + 1):
             move = abs(ticks[epoch] - ticks[epoch - 1])
-            limit = Decimal(str(BARRIER)) * ticks[epoch - 1]
+            limit = Decimal(str(barrier)) * ticks[epoch - 1]
             if move >= limit:
                 first_breach = {'epoch': epoch, 'previous': str(ticks[epoch - 1]),
                                 'next': str(ticks[epoch]), 'move': str(move), 'limit': str(limit)}
@@ -124,10 +130,10 @@ def reconcile_path(contract, stake=Decimal('1')):
         return {'matched': None, 'reason': 'audit path or terminal fields unavailable; cannot verify'}
 
 
-def eligible(q, pip, stake=Decimal('1'), take_profit=Decimal('1.19')):
+def eligible(q, pip, stake=Decimal('1'), take_profit=Decimal('1.19'), symbol='CRASH1000'):
     details = q.get('contract_details', {})
     b = float(details.get('tick_size_barrier', 0))
-    if pip != 3 or not math.isfinite(b) or abs(b - BARRIER) > 1e-16 or int(details.get('maximum_ticks', 0)) < 20:
+    if pip != 3 or not math.isfinite(b) or abs(b - BARRIERS[symbol]) > 1e-16 or int(details.get('maximum_ticks', 0)) < 20:
         raise RuntimeError('Contract specification changed')
     if Decimal(str(q.get('ask_price', 0))) != stake:
         raise RuntimeError('Unexpected quoted stake')
@@ -140,10 +146,11 @@ def eligible(q, pip, stake=Decimal('1'), take_profit=Decimal('1.19')):
     return 14 <= phase < 14.25
 
 
-def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), max_loss=Decimal('10')):
+def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), max_loss=Decimal('10'), symbol='CRASH1000'):
     if client.account.get('account_type') != 'demo' or not client.account.get('account_id'):
         raise RuntimeError('Refusing non-demo account')
     account_id = client.account['account_id']
+    barrier = BARRIERS[symbol]
     deadline = time.monotonic() + seconds
     pnl = Decimal('0')
     count = 0
@@ -152,13 +159,13 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
     reason = 'time limit reached'
     take_profit, _ = payout_terms(stake)
     params = dict(amount=float(stake), basis='stake', contract_type='ACCU', currency='USD',
-                  underlying_symbol='CRASH1000', growth_rate=.04, limit_order={'take_profit': float(take_profit)})
+                  underlying_symbol=symbol, growth_rate=.04, limit_order={'take_profit': float(take_profit)})
     try:
         while time.monotonic() < deadline:
             if execute and not check_only and pnl - stake < -max_loss:
                 reason = 'remaining session loss budget smaller than stake'
                 break
-            h = read_request(client, {'ticks_history': 'CRASH1000', 'count': 1, 'end': 'latest', 'style': 'ticks'},
+            h = read_request(client, {'ticks_history': symbol, 'count': 1, 'end': 'latest', 'style': 'ticks'},
                              emit, account_id, deadline)
             if time.monotonic() >= deadline:
                 break
@@ -166,14 +173,14 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
             q = r.get('proposal', {})
             if not q:
                 raise RuntimeError('Quote unavailable')
-            ready = eligible(q, h.get('pip_size'), stake, take_profit)
+            ready = eligible(q, h.get('pip_size'), stake, take_profit, symbol)
             age = time.time() - int(q['spot_time'])
             if time.monotonic() - last_report >= 60 or ready:
-                emit({'event': 'state', 'spot': q['spot'], 'spot_time': q['spot_time'],
-                      'barrier': BARRIER, 'candidate': ready, 'quote_age': age,
+                emit({'event': 'state', 'symbol': symbol, 'spot': q['spot'], 'spot_time': q['spot_time'],
+                      'barrier': barrier, 'candidate': ready, 'quote_age': age,
                       'fresh_quote': 0 <= age <= 2,
-                      'minimum_spot': 14 / (BARRIER * 1000),
-                      'maximum_spot_exclusive': 14.25 / (BARRIER * 1000)})
+                      'minimum_spot': 14 / (barrier * 1000),
+                      'maximum_spot_exclusive': 14.25 / (barrier * 1000)})
                 last_report = time.monotonic()
             if check_only:
                 reason = 'check only; no purchases'
@@ -190,7 +197,7 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
                 break
             pending = bought['buy']['contract_id']
             count += 1
-            emit({'event': 'buy', 'cid': pending, 'quoted_spot': q['spot'], 'buy_price': bought['buy'].get('buy_price')})
+            emit({'event': 'buy', 'symbol': symbol, 'cid': pending, 'quoted_spot': q['spot'], 'buy_price': bought['buy'].get('buy_price')})
             until = time.monotonic() + 90
             mismatch = False
             close_attempted = False
@@ -208,11 +215,11 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
                 emit({'event': 'contract', 'cid': pending, 'contract': safe})
                 entry = c.get('entry_spot')
                 if entry is not None:
-                    actual_state = float(entry) * BARRIER * 1000
+                    actual_state = float(entry) * barrier * 1000
                     tp = c.get('limit_order', {}).get('take_profit', {}).get('order_amount')
                     parts = c.get('shortcode', '').split('_')
-                    contract_ok = (len(parts) >= 8 and parts[0] == 'ACCU' and parts[1] == 'CRASH1000'
-                                   and abs(float(parts[6]) - BARRIER) <= 1e-16
+                    contract_ok = (len(parts) >= 8 and parts[0] == 'ACCU' and parts[1] == symbol
+                                   and abs(float(parts[6]) - barrier) <= 1e-16
                                    and float(c.get('growth_rate', 0)) == .04 and Decimal(str(c.get('buy_price', 0))) == stake)
                     mismatch = mismatch or not (14 <= actual_state < 14.25) or not contract_ok
                     if not c.get('is_sold') and not c.get('exit_spot_time'):
@@ -241,9 +248,9 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
             if not profit.is_finite():
                 raise RuntimeError('Invalid settlement profit')
             pnl += profit
-            path_check = (reconcile_path(c, stake) if not mismatch else
+            path_check = (reconcile_path(c, stake, symbol) if not mismatch else
                           {'matched': None, 'reason': 'not assessed because execution specification mismatched'})
-            emit({'event': 'settled', 'cid': pending, 'profit': str(profit), 'pnl': str(pnl),
+            emit({'event': 'settled', 'symbol': symbol, 'cid': pending, 'profit': str(profit), 'pnl': str(pnl),
                   'status': c.get('status'), 'entry_time': c.get('entry_spot_time'),
                   'exit_time': c.get('exit_spot_time'), 'spec_mismatch': mismatch,
                   'close_attempted': close_attempted,
@@ -256,16 +263,18 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
             if path_check['matched'] is not True:
                 reason = 'path model mismatch or unavailable audit; halted for review'
                 break
-        emit({'event': 'summary', 'reason': reason, 'contracts': count, 'pnl': str(pnl), 'pending': pending})
+        emit({'event': 'summary', 'symbol': symbol, 'reason': reason, 'contracts': count, 'pnl': str(pnl), 'pending': pending})
     except BaseException as exc:
-        emit({'event': 'halt', 'error_type': type(exc).__name__, 'contracts': count,
+        emit({'event': 'halt', 'symbol': symbol, 'error_type': type(exc).__name__, 'contracts': count,
               'pnl': str(pnl), 'pending': pending,
               'reason': 'Could not safely continue; buy requests are never retried; inspect demo portfolio if pending'})
         raise SystemExit(1) from None
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+def main(symbol='CRASH1000'):
+    if symbol not in BARRIERS:
+        raise ValueError('Unsupported candidate configuration')
+    parser = argparse.ArgumentParser(description=f'{symbol} candidate-state accumulator demo audit; no real-account override')
     parser.add_argument('--minutes', type=float, default=60)
     parser.add_argument('--stake', type=money, default=Decimal('1'), help='Fixed stake in USD, at least $1; broker limits still apply')
     parser.add_argument('--max-loss', type=money, default=Decimal('10'), help='Maximum net realized loss for this session in USD')
@@ -280,7 +289,7 @@ def main():
     token, app = os.environ.get('DERIV_TOKEN'), os.environ.get('DERIV_APP_ID')
     if not token or not app:
         parser.error('Set DERIV_TOKEN and DERIV_APP_ID securely in your environment')
-    filename = args.out or 'crash1000_accu_' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '.jsonl'
+    filename = args.out or symbol.lower() + '_accu_' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '.jsonl'
     try:
         client = DerivWS(token=token, app_id=app, timeout=10)
     except Exception as exc:
@@ -298,11 +307,12 @@ def main():
                 emit({'event': 'halt', 'reason': 'Refusing non-demo account; no purchases'})
                 return
             emit({'event': 'start', 'demo_execute': args.execute and not args.check,
+                  'symbol': symbol,
                   'minutes': args.minutes, 'stake': str(args.stake), 'growth': .04,
                   'take_profit': str(payout_terms(args.stake)[0]), 'maximum_contracts': None,
                   'maximum_realized_loss': str(args.max_loss), 'log': filename,
                   'warning': 'Historical candidate, not proven live profitability. This uses the Options API, not MT5.'})
-            run(client, args.minutes * 60, args.execute, emit, args.check, args.stake, args.max_loss)
+            run(client, args.minutes * 60, args.execute, emit, args.check, args.stake, args.max_loss, symbol)
         finally:
             client.ws.close()
 

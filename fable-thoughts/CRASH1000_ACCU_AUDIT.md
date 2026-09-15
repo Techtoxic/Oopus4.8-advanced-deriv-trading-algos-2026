@@ -3,6 +3,10 @@
 This is a bounded demo experiment, not a validated profitable bot. It uses Deriv's
 Options API, not MT5. It does not trade JD100 or adapt to other symbols or growth rates.
 
+A separate [CRASH500 entry point](CRASH500_ACCU_AUDIT.md) now shares this engine with its
+own fixed barrier and spot interval. The `crash1000_accu_audit.py` command still defaults
+only to CRASH1000; it does not switch markets automatically.
+
 ## Commands
 
 Install `websocket-client`. Configure `DERIV_TOKEN` and `DERIV_APP_ID` securely in your
