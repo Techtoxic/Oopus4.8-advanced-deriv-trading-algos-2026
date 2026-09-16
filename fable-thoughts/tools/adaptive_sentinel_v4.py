@@ -125,7 +125,7 @@ def run(args, public, trader, emit):
                 continue
             last_epoch = epoch
             age = time.time() - epoch
-            if signal is None or not 0 <= age <= .35:
+            if signal is None or not 0 <= age <= getattr(args, 'max_age', .45):
                 time.sleep(.25)
                 continue
             if not trader:
@@ -192,7 +192,8 @@ def main():
     parser.add_argument('--trade', action='store_true')
     parser.add_argument('--check-latency', action='store_true')
     parser.add_argument('--continuous', action='store_true', help='Stream ticks and reconcile settlements on a separate connection')
-    parser.add_argument('--max-pending', type=int, default=3, help='Continuous-mode pending-contract cap, 1–10')
+    parser.add_argument('--max-pending', type=int, default=0, help='Continuous-mode pending-contract cap, 0 disables the count cap')
+    parser.add_argument('--max-age', type=float, default=.45, help='Maximum tick age in seconds, matching v2/v3 by default')
     parser.add_argument('--stake', type=float, default=1)
     parser.add_argument('--minutes', type=float, default=10)
     parser.add_argument('--max-loss', type=float, default=10)
@@ -203,8 +204,9 @@ def main():
     if not (math.isfinite(args.stake) and 1 <= args.stake <= 10 and round(args.stake, 2) == args.stake
             and math.isfinite(args.minutes) and 0 < args.minutes <= 1440
             and math.isfinite(args.max_loss) and args.max_loss > 0 and args.max_trades > 0
-            and math.isfinite(args.ev_gate) and .01 <= args.ev_gate <= .1 and 1 <= args.max_pending <= 10):
-        parser.error('Use a $1–$10 cent-rounded stake, positive limits, an EV gate of .01–.10, and max-pending of 1–10')
+            and math.isfinite(args.ev_gate) and .01 <= args.ev_gate <= .1 and 0 <= args.max_pending <= 10
+            and math.isfinite(args.max_age) and 0 < args.max_age <= 1):
+        parser.error('Use a $1–$10 cent-rounded stake, positive limits, EV gate .01–.10, max-pending 0–10, and max-age in (0, 1]')
     token, app = os.environ.get('DERIV_TOKEN'), os.environ.get('DERIV_APP_ID')
     if (args.trade or args.check_latency) and (not token or not app):
         parser.error('Configure DERIV_TOKEN and DERIV_APP_ID securely in the environment')
@@ -225,6 +227,7 @@ def main():
             public = DerivWS(token='', timeout=5)
             emit({'event': 'start', 'demo_trade': bool(trader) and not args.check_latency,
                   'continuous': args.continuous, 'max_pending': args.max_pending if args.continuous else 1,
+                  'max_age': args.max_age,
                   'stake': args.stake, 'ev_gate': args.ev_gate, 'log': filename,
                   'warning': 'Model extrapolation, not a verified profitable regime; proposals can overstate fills'})
             run(args, public, trader, emit)

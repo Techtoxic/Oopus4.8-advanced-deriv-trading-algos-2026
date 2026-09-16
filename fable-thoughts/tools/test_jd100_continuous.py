@@ -36,6 +36,12 @@ class BookTests(unittest.TestCase):
         self.book.pnl = Decimal('100')
         self.assertFalse(self.book.can_buy(Decimal('1'), Decimal('200'), 1))
 
+    def test_disabled_count_cap_still_reserves_pending_losses(self):
+        self.add(1)
+        self.add(2)
+        self.assertTrue(self.book.can_buy(Decimal('1'), Decimal('3'), 0))
+        self.assertFalse(self.book.can_buy(Decimal('1'), Decimal('2'), 0))
+
     def test_out_of_order_settlements_and_duplicate(self):
         self.add(1)
         self.add(2)
@@ -152,6 +158,7 @@ class Scenario:
         self.orders = []
         self.owners = {}
         self.second_buy = threading.Event()
+        self.release_at = 2
         self.second_before_first_settlement = False
         self.account_id = 'demo-id'
         self.account_type = 'demo'
@@ -190,7 +197,7 @@ class Scenario:
                     if scenario.error:
                         raise scenario.error
                     cid = len(scenario.orders)
-                    if cid == 2:
+                    if cid == scenario.release_at:
                         scenario.second_buy.set()
                     return {'buy': {'contract_id': cid, 'buy_price': 1, 'payout': scenario.payout}}
                 if 'proposal_open_contract' in request:
@@ -248,6 +255,27 @@ class StreamingTests(unittest.TestCase):
         self.assertFalse(scenario.second_before_first_settlement)
         self.assertEqual(events[-1]['trades'], 2)
         self.assertTrue(all(e['pending_count'] <= 1 for e in events if 'pending_count' in e))
+
+    def test_disabled_count_cap_sends_five_before_first_settlement(self):
+        scenario = Scenario()
+        scenario.release_at = 5
+        events = self.run_case(scenario, max_pending=0, max_trades=5)
+        order = [e['event'] for e in events if e['event'] in ('buy', 'settled')]
+        self.assertEqual(order[:5], ['buy'] * 5)
+        self.assertEqual(events[-1]['trades'], 5)
+        self.assertEqual(events[-1]['pending_contracts'], [])
+
+    def test_v3_age_window_accepts_four_hundred_ms_ticks(self):
+        scenario = Scenario()
+        scenario.stale = .4
+        self.assertEqual(self.run_case(scenario)[-1]['trades'], 2)
+
+    def test_explicit_stricter_age_limit_reports_skipped_ticks(self):
+        scenario = Scenario()
+        scenario.stale = .4
+        result = self.run_case(scenario, max_age=.35, minutes=.001)[-1]
+        self.assertEqual(result['trades'], 0)
+        self.assertGreater(result['skipped']['stale_tick'], 0)
 
     def test_loss_budget_includes_pending_losses(self):
         scenario = Scenario()

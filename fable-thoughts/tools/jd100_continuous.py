@@ -31,7 +31,7 @@ class Book:
         return sum((r['stake'] for r in self.pending.values()), self.unknown_stake)
 
     def can_buy(self, stake, max_loss, max_pending):
-        return (self.halt is None and not self.unknown_buy and len(self.pending) < max_pending
+        return (self.halt is None and not self.unknown_buy and (max_pending == 0 or len(self.pending) < max_pending)
                 and self.pnl - self.reserved() - stake >= -max_loss)
 
     def add(self, buy, signal, epoch, stake):
@@ -133,6 +133,8 @@ def run_continuous(args, public, trader, emit):
     deadline = time.monotonic() + args.minutes * 60
     reason = 'session complete'
     stake, max_loss = Decimal(str(args.stake)), Decimal(str(args.max_loss))
+    max_age = getattr(args, 'max_age', .45)
+    skipped = {'not_eligible': 0, 'stale_tick': 0, 'stale_quote': 0, 'pending_cap': 0, 'loss_budget': 0}
 
     def harvest():
         nonlocal future, job, payouts, quoted_at
@@ -220,6 +222,7 @@ def run_continuous(args, public, trader, emit):
                 emit({'event': 'status', 'continuous': True, 'spot': spot, 'model_only': True,
                       'pnl': float(book.pnl), 'trades': book.count, 'pending_count': len(book.pending),
                       'ping_rtt': ping_rtt,
+                      'skipped': dict(skipped),
                       'reserved_stake': float(book.reserved()),
                       'gates': [{'contract': ct, 'barrier': bar, 'assumed_payout': m,
                                 'model_spot_gate': model.threshold(m, args.ev_gate)} for (ct, bar), m in payouts.items()]})
@@ -228,14 +231,20 @@ def run_continuous(args, public, trader, emit):
                 continue
             last_epoch = epoch
             age = time.time() - epoch
-            if signal is None or not 0 <= age <= .35:
+            if signal is None:
+                skipped['not_eligible'] += 1
+                continue
+            if not 0 <= age <= max_age:
+                skipped['stale_tick'] += 1
                 continue
             if time.monotonic() - quoted_at > QUOTE_MAX_AGE_SECONDS:
+                skipped['stale_quote'] += 1
                 continue
             if not trader:
                 emit({'event': 'signal', 'epoch': epoch, 'spot': spot, **signal})
                 continue
             if not book.can_buy(stake, max_loss, args.max_pending):
+                skipped['pending_cap' if args.max_pending and len(book.pending) >= args.max_pending else 'loss_budget'] += 1
                 if not book.pending:
                     reason = 'remaining loss budget smaller than stake'
                     break
@@ -245,9 +254,11 @@ def run_continuous(args, public, trader, emit):
                 continue
             signal = model.choose(spot, tick.get('pip_size'), payouts, args.ev_gate)
             if signal is None:
+                skipped['not_eligible'] += 1
                 continue
             age = time.time() - epoch
-            if not 0 <= age <= .35:
+            if not 0 <= age <= max_age:
+                skipped['stale_tick'] += 1
                 continue
             params = dict(amount=args.stake, basis='stake', currency='USD', underlying_symbol='JD100',
                           contract_type=signal['contract'], barrier=signal['barrier'], duration=1, duration_unit='t')
@@ -288,5 +299,6 @@ def run_continuous(args, public, trader, emit):
             except Exception as exc:
                 emit({'event': 'close_error', 'error_type': type(exc).__name__})
         emit({'event': 'summary', 'continuous': True, 'reason': book.halt or reason,
+              'skipped': dict(skipped),
               'trades': book.count, 'pnl': float(book.pnl), 'pending_contracts': list(book.pending),
               'unknown_buy_outcome': book.unknown_buy, 'reserved_stake': float(book.reserved())})
