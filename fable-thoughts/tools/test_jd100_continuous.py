@@ -19,7 +19,7 @@ class BookTests(unittest.TestCase):
 
     def add(self, cid=1, **kw):
         buy = {'contract_id': cid, 'buy_price': 1, 'payout': 1.54, **kw}
-        self.book.add(buy, self.signal, 1000, Decimal('1'), .1)
+        self.book.add(buy, self.signal, 1000, Decimal('1'))
 
     def settled(self, cid=1, **kw):
         return {'contract_id': cid, 'is_sold': 1, 'status': 'won', 'profit': '.54', 'exit_spot_time': 1001, **kw}
@@ -88,9 +88,9 @@ class BookTests(unittest.TestCase):
                 self.assertIsNotNone(self.book.halt)
                 self.assertIn(1, self.book.pending)
 
-    def test_slow_buy_halts_immediately(self):
-        self.book.add({'contract_id': 1, 'buy_price': 1, 'payout': 1.54}, self.signal, 1000, Decimal('1'), .401)
-        self.assertIsNotNone(self.book.halt)
+    def test_valid_terms_allow_another_pending_buy(self):
+        self.book.add({'contract_id': 1, 'buy_price': 1, 'payout': 1.54}, self.signal, 1000, Decimal('1'))
+        self.assertTrue(self.book.can_buy(Decimal('1'), Decimal('10'), 3))
 
     def test_wrong_stake_still_records_actual_payment_when_reconciled(self):
         self.add(buy_price=.9)
@@ -153,6 +153,7 @@ class Scenario:
         self.control_account = None
         self.ping_result = {'ping': 'pong'}
         self.ping_delay = 0
+        self.buy_delay = 0
 
     def tick(self):
         return {'tick': {'symbol': 'JD100', 'epoch': self.epoch, 'quote': self.spot, 'pip_size': 2}}
@@ -179,6 +180,7 @@ class Scenario:
                 if 'proposal' in request:
                     return {'proposal': {'ask_price': request['amount'], 'payout': request['amount'] * 1.54}}
                 if 'buy' in request:
+                    time.sleep(scenario.buy_delay)
                     scenario.orders.append({'epoch': scenario.epoch, 'time': time.monotonic()})
                     if scenario.error:
                         raise scenario.error
@@ -214,9 +216,11 @@ class StreamingTests(unittest.TestCase):
         if not trade:
             trader = None
             control.account = {}
-        with patch.object(bot, 'DerivWS', return_value=control), patch.object(bot.model, 'measure_latency', return_value=.05), \
+        with patch.object(bot, 'DerivWS', return_value=control), patch.object(bot.model, 'measure_latency', return_value=.8) as measure, \
              patch.object(bot.time, 'time', side_effect=lambda: scenario.epoch + scenario.stale):
             bot.run_continuous(args, public, trader, emit)
+        if not args.check_latency:
+            measure.assert_not_called()
         self.assertEqual(events[-1]['event'], 'summary')
         self.assertEqual(emitting_threads, {threading.get_ident()})
         return events
@@ -362,13 +366,21 @@ class StreamingTests(unittest.TestCase):
         self.assertEqual(events[-1]['trades'], 0)
         self.assertIn('heartbeat', events[-1]['reason'])
 
-    def test_slow_buyer_ping_prevents_purchase(self):
+    def test_slow_buyer_ping_does_not_prevent_purchase(self):
         scenario = Scenario()
         scenario.ping_delay = .41
         with patch.object(bot, 'PING_INTERVAL_SECONDS', 0):
             events = self.run_case(scenario)
-        self.assertEqual(events[-1]['trades'], 0)
-        self.assertIn('heartbeat', events[-1]['reason'])
+        self.assertEqual(events[-1]['trades'], 2)
+        self.assertEqual(events[-1]['reason'], 'session complete')
+
+    def test_slow_buy_is_logged_without_halting(self):
+        scenario = Scenario()
+        scenario.buy_delay = .45
+        events = self.run_case(scenario)
+        self.assertEqual(events[-1]['trades'], 2)
+        self.assertEqual(events[-1]['reason'], 'session complete')
+        self.assertTrue(all(e['rtt'] > .4 for e in events if e['event'] == 'buy'))
 
     def test_expired_settlement_deadline_stops_entries_then_drains(self):
         original = bot.Book.add

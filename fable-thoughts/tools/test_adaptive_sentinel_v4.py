@@ -25,7 +25,7 @@ class Clock:
 
 class Client:
     def __init__(self, clock, spot=148.02, payout=1.56, lag=1, buy_error=None, settle=True,
-                 profit='.56', stale=0):
+                 profit='.56', stale=0, buy_delay=0):
         self.clock = clock
         self.spot = spot
         self.payout = payout
@@ -34,17 +34,21 @@ class Client:
         self.settle = settle
         self.profit = profit
         self.stale = stale
+        self.buy_delay = buy_delay
         self.calls = []
         self.epoch = 1000
 
     def _call(self, request):
         self.calls.append(request)
+        if 'ping' in request:
+            return {'ping': 'pong'}
         if 'proposal' in request:
             return {'proposal': {'ask_price': request['amount'], 'payout': request['amount'] * 1.563}}
         if 'ticks_history' in request:
             self.epoch = int(self.clock.time()) - self.stale
             return {'pip_size': 2, 'history': {'times': [self.epoch], 'prices': [self.spot]}}
         if 'buy' in request:
+            self.clock.sleep(self.buy_delay)
             if self.buy_error:
                 raise self.buy_error
             return {'buy': {'contract_id': 12, 'buy_price': 1, 'payout': self.payout}}
@@ -130,10 +134,15 @@ class V4Tests(unittest.TestCase):
         client, _ = self.execute(spot=168.02)
         self.assertFalse(any('buy' in c for c in client.calls))
 
-    def test_slow_connection_never_buys(self):
+    def test_slow_connection_does_not_block_buys(self):
         client, logs = self.execute(latency=.5)
-        self.assertFalse(any('buy' in c for c in client.calls))
-        self.assertEqual(logs[-1]['reason'], 'connection too slow')
+        self.assertTrue(any('buy' in c for c in client.calls))
+        self.assertEqual(logs[-1]['reason'], 'session complete')
+
+    def test_slow_buy_does_not_halt(self):
+        client, logs = self.execute(buy_delay=.6)
+        self.assertGreater(sum('buy' in c for c in client.calls), 1)
+        self.assertEqual(logs[-1]['reason'], 'session complete')
 
     def test_lower_fill_settles_then_halts(self):
         client, logs = self.execute(payout=1.50)

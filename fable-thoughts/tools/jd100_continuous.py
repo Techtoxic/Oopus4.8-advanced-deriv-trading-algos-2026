@@ -1,5 +1,4 @@
 """Opt-in streamed JD100 decisions with separately polled settlements."""
-from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal, InvalidOperation
 import json
@@ -16,7 +15,7 @@ from deriv_api import DerivWS
 
 QUOTE_REFRESH_SECONDS = 60
 QUOTE_MAX_AGE_SECONDS = 75
-PING_INTERVAL_SECONDS = 6
+PING_INTERVAL_SECONDS = 25
 
 
 class Book:
@@ -35,7 +34,7 @@ class Book:
         return (self.halt is None and not self.unknown_buy and len(self.pending) < max_pending
                 and self.pnl - self.reserved() - stake >= -max_loss)
 
-    def add(self, buy, signal, epoch, stake, rtt):
+    def add(self, buy, signal, epoch, stake):
         cid = buy['contract_id']
         if type(cid) is not int or cid <= 0 or cid in self.pending:
             raise RuntimeError('Invalid or duplicate contract ID in buy response')
@@ -53,8 +52,8 @@ class Book:
             self.pending[cid]['stake'] = price
         if not price.is_finite() or not payout.is_finite() or price != stake or price <= 0:
             self.halt = 'invalid contracted stake or payout'
-        elif float(payout / price) + 1e-9 < signal['assumed_payout'] or rtt > .4:
-            self.halt = 'executed payout or buy latency guard failed'
+        elif float(payout / price) + 1e-9 < signal['assumed_payout']:
+            self.halt = 'executed payout below decision assumption'
         return cid
 
     def settle(self, cid, c):
@@ -173,11 +172,10 @@ def run_continuous(args, public, trader, emit):
             future = pool.submit(reader._call, {'proposal_open_contract': 1, 'contract_id': cid})
 
     try:
-        latency = model.measure_latency(trader) if trader else 0
-        if trader:
-            emit({'event': 'latency', 'max_ping_rtt': latency, 'passed': latency <= .4})
-        if args.check_latency or latency > .4:
-            reason = 'latency diagnostic only' if args.check_latency else 'connection too slow'
+        if args.check_latency:
+            emit({'event': 'latency', 'max_ping_rtt': model.measure_latency(trader) if trader else None,
+                  'diagnostic_only': True})
+            reason = 'latency diagnostic only'
             return
         control = DerivWS(token=trader.token if trader else '', app_id=trader.app_id if trader else None, timeout=3)
         if trader and (trader.account.get('account_type') != 'demo' or not trader.account.get('account_id')
@@ -193,7 +191,7 @@ def run_continuous(args, public, trader, emit):
         last_epoch = 0
         reported = -math.inf
         last_ping = time.monotonic()
-        ping_samples = deque([latency] * 5, maxlen=5)
+        ping_rtt = None
         while time.monotonic() < deadline and book.count < args.max_trades:
             harvest()
             if book.halt:
@@ -206,11 +204,10 @@ def run_continuous(args, public, trader, emit):
             if trader and time.monotonic() - last_ping >= PING_INTERVAL_SECONDS:
                 started = time.monotonic()
                 response = trader._call({'ping': 1})
-                ping_samples.append(time.monotonic() - started)
-                latency = max(ping_samples)
+                ping_rtt = time.monotonic() - started
                 last_ping = time.monotonic()
-                if 'ping' not in response or latency > .4:
-                    reason = 'buyer heartbeat failed or slow'
+                if 'ping' not in response:
+                    reason = 'buyer heartbeat failed'
                     break
             tick = newest_tick(public, initial)
             initial = None
@@ -221,7 +218,7 @@ def run_continuous(args, public, trader, emit):
             if time.monotonic() - reported >= 30:
                 emit({'event': 'status', 'continuous': True, 'spot': spot, 'model_only': True,
                       'pnl': float(book.pnl), 'trades': book.count, 'pending_count': len(book.pending),
-                      'max_ping_rtt': max(ping_samples) if trader else None,
+                      'ping_rtt': ping_rtt,
                       'reserved_stake': float(book.reserved()),
                       'gates': [{'contract': ct, 'barrier': bar, 'assumed_payout': m,
                                 'model_spot_gate': model.threshold(m, args.ev_gate)} for (ct, bar), m in payouts.items()]})
@@ -230,7 +227,7 @@ def run_continuous(args, public, trader, emit):
                 continue
             last_epoch = epoch
             age = time.time() - epoch
-            if signal is None or not 0 <= age <= .35 or age + latency + .25 >= 1:
+            if signal is None or not 0 <= age <= .35:
                 continue
             if time.monotonic() - quoted_at > QUOTE_MAX_AGE_SECONDS:
                 continue
@@ -249,7 +246,7 @@ def run_continuous(args, public, trader, emit):
             if signal is None:
                 continue
             age = time.time() - epoch
-            if not 0 <= age <= .35 or age + latency + .25 >= 1:
+            if not 0 <= age <= .35:
                 continue
             params = dict(amount=args.stake, basis='stake', currency='USD', underlying_symbol='JD100',
                           contract_type=signal['contract'], barrier=signal['barrier'], duration=1, duration_unit='t')
@@ -258,11 +255,10 @@ def run_continuous(args, public, trader, emit):
             started = time.monotonic()
             response = trader._call({'buy': 1, 'price': args.stake, 'parameters': params})
             rtt = time.monotonic() - started
-            latency = max(latency, rtt)
             if 'buy' not in response:
                 reason = 'buy rejected or unconfirmed; inspect demo portfolio'
                 break
-            cid = book.add(response['buy'], signal, epoch, stake, rtt)
+            cid = book.add(response['buy'], signal, epoch, stake)
             emit({'event': 'buy', 'cid': cid, 'epoch': epoch, 'spot': spot, 'stake': args.stake,
                   'rtt': rtt, 'decision_age': age, 'pending_count': len(book.pending),
                   'reserved_stake': float(book.reserved()), **signal})

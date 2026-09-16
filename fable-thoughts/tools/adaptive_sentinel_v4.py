@@ -82,14 +82,10 @@ def run(args, public, trader, emit):
     reason = 'session complete'
     deadline = time.monotonic() + args.minutes * 60
     try:
-        latency = measure_latency(trader) if trader else 0
-        if trader:
-            emit({'event': 'latency', 'max_ping_rtt': latency, 'passed': latency <= .4})
         if args.check_latency:
+            emit({'event': 'latency', 'max_ping_rtt': measure_latency(trader) if trader else None,
+                  'diagnostic_only': True})
             reason = 'latency diagnostic only'
-            return
-        if latency > .4:
-            reason = 'connection too slow'
             return
         checked = time.monotonic()
         payouts = prices(trader or public, args.stake)
@@ -101,10 +97,10 @@ def run(args, public, trader, emit):
                 reason = 'remaining loss budget smaller than stake'
                 break
             if trader and time.monotonic() - checked >= 30:
-                latency = measure_latency(trader)
+                response = trader._call({'ping': 1})
                 checked = time.monotonic()
-                if latency > .4:
-                    reason = 'connection too slow'
+                if 'ping' not in response:
+                    reason = 'buyer heartbeat failed'
                     break
             if time.monotonic() - quoted >= 60:
                 payouts = prices(trader or public, args.stake)
@@ -129,7 +125,7 @@ def run(args, public, trader, emit):
                 continue
             last_epoch = epoch
             age = time.time() - epoch
-            if signal is None or not 0 <= age <= .35 or age + latency + .25 >= 1:
+            if signal is None or not 0 <= age <= .35:
                 time.sleep(.25)
                 continue
             if not trader:
@@ -177,8 +173,8 @@ def run(args, public, trader, emit):
             if not math.isfinite(actual) or actual + 1e-9 < signal['assumed_payout']:
                 reason = 'executed payout below decision assumption'
                 break
-            if abs(buy_price - args.stake) > .000001 or lag != 1 or rtt > .4:
-                reason = 'stake, next-tick settlement or buy latency guard failed'
+            if abs(buy_price - args.stake) > .000001 or lag != 1:
+                reason = 'stake or next-tick settlement guard failed'
                 break
             time.sleep(.25)
     except KeyboardInterrupt:
