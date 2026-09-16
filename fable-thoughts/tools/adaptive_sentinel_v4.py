@@ -169,12 +169,13 @@ def run(args, public, trader, emit):
             exit_time = settled.get('exit_spot_time')
             lag = int(exit_time) - epoch if exit_time is not None else None
             emit({'event': 'settled', 'cid': cid, 'status': settled['status'], 'profit': float(profit),
-                  'pnl': float(pnl), 'lag': lag, 'executed_payout': actual})
+                  'pnl': float(pnl), 'lag': lag, 'executed_payout': actual,
+                  'timing_warning': 'settlement_not_next_tick' if lag != 1 else None})
             if not math.isfinite(actual) or actual + 1e-9 < signal['assumed_payout']:
                 reason = 'executed payout below decision assumption'
                 break
-            if abs(buy_price - args.stake) > .000001 or lag != 1:
-                reason = 'stake or next-tick settlement guard failed'
+            if abs(buy_price - args.stake) > .000001:
+                reason = 'stake guard failed'
                 break
             time.sleep(.25)
     except KeyboardInterrupt:

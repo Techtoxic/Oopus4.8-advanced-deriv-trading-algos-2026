@@ -74,10 +74,11 @@ class Book:
         lag = int(end) - row['epoch'] if end is not None else None
         self.pnl += profit
         del self.pending[cid]
-        if lag != 1 or profit != expected:
-            self.halt = 'next-tick settlement or payment guard failed'
+        if profit != expected:
+            self.halt = 'payment guard failed'
         return {'event': 'settled', 'cid': cid, 'status': c['status'], 'profit': float(profit),
                 'pnl': float(self.pnl), 'lag': lag, 'executed_payout': float(payout / price),
+                'timing_warning': 'settlement_not_next_tick' if lag != 1 else None,
                 'buy_price': float(price), 'payout': float(payout),
                 'pending_count': len(self.pending)}
 

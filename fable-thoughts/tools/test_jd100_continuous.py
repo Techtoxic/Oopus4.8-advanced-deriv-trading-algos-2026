@@ -71,13 +71,18 @@ class BookTests(unittest.TestCase):
         self.assertEqual(self.book.pnl, 0)
         self.assertEqual(self.book.reserved(), 1)
 
-    def test_late_settlement_and_payment_discrepancy_halt(self):
+    def test_timing_discrepancies_warn_and_payment_discrepancies_halt(self):
         for values in ({'exit_spot_time': 1002}, {'profit': '.50'}, {'exit_spot_time': None}):
             with self.subTest(values=values):
                 self.book = bot.Book()
                 self.add()
-                self.book.settle(1, self.settled(**values))
-                self.assertIsNotNone(self.book.halt)
+                event = self.book.settle(1, self.settled(**values))
+                if 'profit' in values:
+                    self.assertEqual(self.book.halt, 'payment guard failed')
+                    self.assertIsNone(event['timing_warning'])
+                else:
+                    self.assertIsNone(self.book.halt)
+                    self.assertEqual(event['timing_warning'], 'settlement_not_next_tick')
                 self.assertEqual(self.book.pending, {})
 
     def test_worse_fill_or_wrong_stake_halts_immediately(self):
@@ -267,14 +272,16 @@ class StreamingTests(unittest.TestCase):
         self.assertTrue(events[-1]['unknown_buy_outcome'])
         self.assertIn('interrupted', events[-1]['reason'])
 
-    def test_late_settlement_halts_and_drains(self):
+    def test_late_settlement_warns_and_continues_until_trade_limit(self):
         scenario = Scenario()
         scenario.lag = 2
-        events = self.run_case(scenario, max_trades=100)
-        self.assertIn('guard failed', events[-1]['reason'])
-        self.assertLessEqual(events[-1]['trades'], 3)
+        events = self.run_case(scenario, max_trades=5)
+        self.assertEqual(events[-1]['reason'], 'session complete')
+        self.assertEqual(events[-1]['trades'], 5)
         self.assertEqual(events[-1]['pending_contracts'], [])
         self.assertEqual(len([e for e in events if e['event'] == 'settled']), events[-1]['trades'])
+        self.assertTrue(all(e['timing_warning'] == 'settlement_not_next_tick'
+                            for e in events if e['event'] == 'settled'))
 
     def test_adverse_fill_stops_before_second_buy(self):
         scenario = Scenario()

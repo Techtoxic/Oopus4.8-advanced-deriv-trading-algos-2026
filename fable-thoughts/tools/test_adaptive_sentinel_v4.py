@@ -150,10 +150,12 @@ class V4Tests(unittest.TestCase):
         self.assertEqual(logs[-1]['reason'], 'executed payout below decision assumption')
         self.assertIsNone(logs[-1]['pending_contract'])
 
-    def test_late_settlement_halts(self):
+    def test_late_settlement_warns_and_continues(self):
         client, logs = self.execute(lag=2)
-        self.assertEqual(sum('buy' in c for c in client.calls), 1)
-        self.assertIn('next-tick', logs[-1]['reason'])
+        self.assertEqual(sum('buy' in c for c in client.calls), 2)
+        self.assertEqual(logs[-1]['reason'], 'session complete')
+        self.assertTrue(all(e['lag'] == 2 and e['timing_warning'] == 'settlement_not_next_tick'
+                            for e in logs if e['event'] == 'settled'))
 
     def test_ambiguous_buy_not_retried(self):
         client, logs = self.execute(buy_error=TimeoutError())
