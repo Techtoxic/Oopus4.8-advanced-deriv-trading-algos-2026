@@ -73,6 +73,9 @@ def prices(client, stake):
 
 
 def run(args, public, trader, emit):
+    if getattr(args, 'continuous', False):
+        from jd100_continuous import run_continuous
+        return run_continuous(args, public, trader, emit)
     pnl = Decimal('0')
     count = 0
     pending = None
@@ -191,6 +194,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--trade', action='store_true')
     parser.add_argument('--check-latency', action='store_true')
+    parser.add_argument('--continuous', action='store_true', help='Stream ticks and reconcile settlements on a separate connection')
+    parser.add_argument('--max-pending', type=int, default=3, help='Continuous-mode pending-contract cap, 1–10')
     parser.add_argument('--stake', type=float, default=1)
     parser.add_argument('--minutes', type=float, default=10)
     parser.add_argument('--max-loss', type=float, default=10)
@@ -201,8 +206,8 @@ def main():
     if not (math.isfinite(args.stake) and 1 <= args.stake <= 10 and round(args.stake, 2) == args.stake
             and math.isfinite(args.minutes) and 0 < args.minutes <= 1440
             and math.isfinite(args.max_loss) and args.max_loss > 0 and args.max_trades > 0
-            and math.isfinite(args.ev_gate) and .01 <= args.ev_gate <= .1):
-        parser.error('Use a $1–$10 cent-rounded stake, positive limits, and an EV gate of .01–.10')
+            and math.isfinite(args.ev_gate) and .01 <= args.ev_gate <= .1 and 1 <= args.max_pending <= 10):
+        parser.error('Use a $1–$10 cent-rounded stake, positive limits, an EV gate of .01–.10, and max-pending of 1–10')
     token, app = os.environ.get('DERIV_TOKEN'), os.environ.get('DERIV_APP_ID')
     if (args.trade or args.check_latency) and (not token or not app):
         parser.error('Configure DERIV_TOKEN and DERIV_APP_ID securely in the environment')
@@ -222,6 +227,7 @@ def main():
                     return
             public = DerivWS(token='', timeout=5)
             emit({'event': 'start', 'demo_trade': bool(trader) and not args.check_latency,
+                  'continuous': args.continuous, 'max_pending': args.max_pending if args.continuous else 1,
                   'stake': args.stake, 'ev_gate': args.ev_gate, 'log': filename,
                   'warning': 'Model extrapolation, not a verified profitable regime; proposals can overstate fills'})
             run(args, public, trader, emit)

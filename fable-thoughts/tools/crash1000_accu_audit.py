@@ -21,7 +21,7 @@ def read_request(client, payload, emit, account_id, deadline):
     fields = {
         'ticks_history': {'ticks_history', 'count', 'end', 'style'},
         'proposal': {'proposal', 'amount', 'basis', 'contract_type', 'currency',
-                     'underlying_symbol', 'growth_rate', 'limit_order'},
+                     'underlying_symbol', 'growth_rate', 'limit_order', 'barrier', 'duration', 'duration_unit'},
         'proposal_open_contract': {'proposal_open_contract', 'contract_id'},
     }
     kinds = [kind for kind, allowed in fields.items() if kind in payload and set(payload) <= allowed]
