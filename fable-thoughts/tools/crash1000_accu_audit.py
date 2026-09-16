@@ -17,7 +17,9 @@ BARRIER = BARRIERS['CRASH1000']
 TRANSPORT_ERRORS = (websocket.WebSocketException, ConnectionError, TimeoutError, OSError)
 
 
-def read_request(client, payload, emit, account_id, deadline):
+def read_request(client, payload, emit, account_id, deadline, account_type='demo'):
+    if account_type not in ('demo', 'real'):
+        raise ValueError('Unsupported account type')
     fields = {
         'ticks_history': {'ticks_history', 'count', 'end', 'style'},
         'proposal': {'proposal', 'amount', 'basis', 'contract_type', 'currency',
@@ -31,7 +33,7 @@ def read_request(client, payload, emit, account_id, deadline):
     for attempt in range(4):
         if time.monotonic() >= deadline:
             raise TimeoutError('Read recovery deadline reached')
-        if client.account.get('account_type') != 'demo' or client.account.get('account_id') != account_id:
+        if client.account.get('account_type') != account_type or client.account.get('account_id') != account_id:
             raise RuntimeError('Account changed; refusing to continue')
         try:
             if reconnect:
@@ -42,7 +44,7 @@ def read_request(client, payload, emit, account_id, deadline):
                     except TRANSPORT_ERRORS:
                         pass
                 client._connect()
-                if client.account.get('account_type') != 'demo' or client.account.get('account_id') != account_id:
+                if client.account.get('account_type') != account_type or client.account.get('account_id') != account_id:
                     raise RuntimeError('Reconnected to a different account; refusing to continue')
                 reconnect = False
             if time.monotonic() >= deadline:
@@ -55,7 +57,8 @@ def read_request(client, payload, emit, account_id, deadline):
             if (response.get('error') or {}).get('code') != 'RateLimit':
                 if attempt:
                     emit({'event': 'read_recovered', 'request': kinds[0], 'attempt': attempt + 1,
-                          'cid': payload.get('contract_id'), 'same_demo_account': True})
+                          'cid': payload.get('contract_id'), 'same_demo_account': account_type == 'demo',
+                          'same_account': True, 'account_type': account_type})
                 return response
             error = 'RateLimit'
         if attempt == 3:

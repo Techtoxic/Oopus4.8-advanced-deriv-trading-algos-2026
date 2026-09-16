@@ -4,7 +4,7 @@ import urllib.request, urllib.error
 import websocket
 
 # ── Credentials — env first, fallback to pasted values ──────────────────────
-TOKEN  = os.environ.get("DERIV_TOKEN",  "pat_23c350f49ef832db6e7b117d69417416d804a610875e8899f6dc4936fa884f34")
+TOKEN = os.environ.get("DERIV_TOKEN", "")
 APP_ID = os.environ.get("DERIV_APP_ID", "33wYNr1doMQUdym9qvsMk")
 
 # ── New API endpoints ────────────────────────────────────────────────────────
@@ -14,9 +14,14 @@ URL = WS_PUBLIC  # exported for sigma_sentinel tick stream
 
 
 class DerivWS:
-    def __init__(self, token=None, app_id=None, timeout=30):
+    def __init__(self, token=None, app_id=None, timeout=30, account_type=None):
+        if account_type not in (None, 'demo', 'real'):
+            raise ValueError('account_type must be demo or real')
+        self.account_type = account_type
         self.timeout = timeout
         self.token   = token  if token  is not None else TOKEN
+        if account_type is not None and not self.token:
+            raise ValueError('An account selection requires an API token')
         self.app_id  = app_id if app_id is not None else APP_ID
         self._req    = itertools.count(1)
         self._lock   = threading.Lock()
@@ -43,7 +48,13 @@ class DerivWS:
             if not acct_list:
                 raise RuntimeError("No accounts found for this token")
             # Prefer demo account; fall back to first available
-            acct = next((a for a in acct_list if a.get("account_type") == "demo"), acct_list[0])
+            requested_type = getattr(self, 'account_type', None)
+            if requested_type is not None:
+                acct = next((a for a in acct_list if a.get('account_type') == requested_type), None)
+                if acct is None:
+                    raise RuntimeError('Requested account type is unavailable for this token')
+            else:
+                acct = next((a for a in acct_list if a.get("account_type") == "demo"), acct_list[0])
             self.account = acct
             account_id = acct["account_id"]   # new API uses account_id, not loginid
             # Step 2: get OTP → the response contains the ready-to-use WS URL

@@ -87,11 +87,12 @@ class Reader:
     def __init__(self, client, events, stop):
         self.client, self.events, self.stop = client, events, stop
         self.account_id = client.account.get('account_id')
+        self.account_type = client.account.get('account_type')
 
     def _call(self, payload):
         if self.account_id:
             return read_request(self.client, payload, self.events.put, self.account_id,
-                                min(self.stop, time.monotonic() + 15))
+                                min(self.stop, time.monotonic() + 15), account_type=self.account_type)
         return self.client._call(payload)
 
 
@@ -132,6 +133,7 @@ def run_continuous(args, public, trader, emit):
     quoted_at = 0
     deadline = time.monotonic() + args.minutes * 60
     reason = 'session complete'
+    stage = 'initialization'
     stake, max_loss = Decimal(str(args.stake)), Decimal(str(args.max_loss))
     max_age = getattr(args, 'max_age', .45)
     skipped = {'not_eligible': 0, 'stale_tick': 0, 'stale_quote': 0, 'pending_cap': 0, 'loss_budget': 0}
@@ -180,15 +182,24 @@ def run_continuous(args, public, trader, emit):
                   'diagnostic_only': True})
             reason = 'latency diagnostic only'
             return
-        control = DerivWS(token=trader.token if trader else '', app_id=trader.app_id if trader else None, timeout=3)
-        if trader and (trader.account.get('account_type') != 'demo' or not trader.account.get('account_id')
-                       or control.account.get('account_type') != 'demo'
+        expected_type = 'real' if getattr(args, 'real', False) else 'demo'
+        stage = 'account_validation'
+        if trader and trader.account.get('account_type') != expected_type:
+            raise RuntimeError('Buyer account type does not match requested mode')
+        stage = 'control_connection'
+        control = DerivWS(token=trader.token if trader else '', app_id=trader.app_id if trader else None,
+                          timeout=3, account_type=expected_type if trader else None)
+        stage = 'account_validation'
+        if trader and (not trader.account.get('account_id')
+                       or control.account.get('account_type') != expected_type
                        or control.account.get('account_id') != trader.account['account_id']):
-            raise RuntimeError('Buyer and settlement connection must use the same demo account')
+            raise RuntimeError('Buyer and settlement connection must use the same requested account')
         reader = Reader(control, events, deadline + 40)
+        stage = 'payout_quotes'
         payouts = model.prices(reader, args.stake)
         quoted_at = time.monotonic()
         pool = ThreadPoolExecutor(max_workers=1)
+        stage = 'tick_subscription'
         initial = public._call({'ticks': 'JD100', 'subscribe': 1})
         public.ws.settimeout(.05)
         last_epoch = 0
@@ -196,6 +207,7 @@ def run_continuous(args, public, trader, emit):
         last_ping = time.monotonic()
         ping_rtt = None
         while time.monotonic() < deadline and book.count < args.max_trades:
+            stage = 'signal_loop'
             harvest()
             if book.halt:
                 reason = book.halt
@@ -265,10 +277,14 @@ def run_continuous(args, public, trader, emit):
             book.unknown_buy = True
             book.unknown_stake = stake
             started = time.monotonic()
+            stage = 'buy_request'
             response = trader._call({'buy': 1, 'price': args.stake, 'parameters': params})
             rtt = time.monotonic() - started
             if 'buy' not in response:
-                reason = 'buy rejected or unconfirmed; inspect demo portfolio'
+                code = (response.get('error') or {}).get('code')
+                safe_code = code if isinstance(code, str) and len(code) <= 80 and code.replace('_', '').isalnum() else None
+                emit({'event': 'buy_error', 'error_code': safe_code, 'outcome_unknown': True})
+                reason = 'buy rejected or unconfirmed; inspect the selected account portfolio'
                 break
             cid = book.add(response['buy'], signal, epoch, stake)
             emit({'event': 'buy', 'cid': cid, 'epoch': epoch, 'spot': spot, 'stake': args.stake,
@@ -299,6 +315,7 @@ def run_continuous(args, public, trader, emit):
             except Exception as exc:
                 emit({'event': 'close_error', 'error_type': type(exc).__name__})
         emit({'event': 'summary', 'continuous': True, 'reason': book.halt or reason,
+              'stage': stage,
               'skipped': dict(skipped),
               'trades': book.count, 'pnl': float(book.pnl), 'pending_contracts': list(book.pending),
               'unknown_buy_outcome': book.unknown_buy, 'reserved_stake': float(book.reserved())})

@@ -1,4 +1,4 @@
-"""Payout-aware JD100 research runner. Watch-only by default; trading is demo-only."""
+"""Payout-aware JD100 research runner. Watch-only by default; real trading requires --real --trade."""
 import argparse
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -140,7 +140,7 @@ def run(args, public, trader, emit):
             response = trader._call({'buy': 1, 'price': args.stake, 'parameters': params})
             rtt = time.monotonic() - started
             if 'buy' not in response:
-                reason = 'buy rejected or response unconfirmed; inspect demo portfolio'
+                reason = 'buy rejected or response unconfirmed; inspect the selected account portfolio'
                 break
             buy = response['buy']
             pending = buy['contract_id']
@@ -157,7 +157,7 @@ def run(args, public, trader, emit):
                     settled = c
                     break
             if settled is None:
-                reason = 'settlement unconfirmed; inspect demo portfolio'
+                reason = 'settlement unconfirmed; inspect the selected account portfolio'
                 break
             profit = Decimal(str(settled['profit']))
             if not profit.is_finite():
@@ -179,9 +179,9 @@ def run(args, public, trader, emit):
                 break
             time.sleep(.25)
     except KeyboardInterrupt:
-        reason = 'interrupted; inspect demo portfolio if a purchase is pending'
+        reason = 'interrupted; inspect the selected account portfolio if a purchase is pending'
     except Exception as exc:
-        reason = 'error: ' + type(exc).__name__ + '; inspect demo portfolio if a purchase is pending'
+        reason = 'error: ' + type(exc).__name__ + '; inspect the selected account portfolio if a purchase is pending'
     finally:
         emit({'event': 'summary', 'reason': reason, 'trades': count, 'pnl': float(pnl),
               'pending_contract': pending})
@@ -190,6 +190,7 @@ def run(args, public, trader, emit):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--trade', action='store_true')
+    parser.add_argument('--real', action='store_true', help='Explicitly select a real account; --trade places real-money orders')
     parser.add_argument('--check-latency', action='store_true')
     parser.add_argument('--continuous', action='store_true', help='Stream ticks and reconcile settlements on a separate connection')
     parser.add_argument('--max-pending', type=int, default=0, help='Continuous-mode pending-contract cap, 0 disables the count cap')
@@ -201,17 +202,21 @@ def main():
     parser.add_argument('--ev-gate', type=float, default=.01)
     parser.add_argument('--log', default=None)
     args = parser.parse_args()
-    if not (math.isfinite(args.stake) and 1 <= args.stake <= 10 and round(args.stake, 2) == args.stake
+    if not (math.isfinite(args.stake) and .35 <= args.stake <= 10 and round(args.stake, 2) == args.stake
             and math.isfinite(args.minutes) and 0 < args.minutes <= 1440
             and math.isfinite(args.max_loss) and args.max_loss > 0 and args.max_trades > 0
             and math.isfinite(args.ev_gate) and .01 <= args.ev_gate <= .1 and 0 <= args.max_pending <= 10
             and math.isfinite(args.max_age) and 0 < args.max_age <= 1):
-        parser.error('Use a $1–$10 cent-rounded stake, positive limits, EV gate .01–.10, max-pending 0–10, and max-age in (0, 1]')
+        parser.error('Use a $0.35–$10 cent-rounded stake, positive limits, EV gate .01–.10, max-pending 0–10, and max-age in (0, 1]')
+    if args.real and not (args.trade or args.check_latency):
+        parser.error('--real requires --trade or --check-latency')
+    account_type = 'real' if args.real else 'demo'
     token, app = os.environ.get('DERIV_TOKEN'), os.environ.get('DERIV_APP_ID')
     if (args.trade or args.check_latency) and (not token or not app):
         parser.error('Configure DERIV_TOKEN and DERIV_APP_ID securely in the environment')
     filename = args.log or 'jd100_v4_' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '.jsonl'
     public = trader = None
+    stage = 'account_connection'
     with Path(filename).open('x', encoding='utf-8', buffering=1) as log:
         def emit(row):
             row = {'utc': datetime.now(timezone.utc).isoformat(), **row}
@@ -220,19 +225,32 @@ def main():
             log.write(line + '\n')
         try:
             if args.trade or args.check_latency:
-                trader = DerivWS(token=token, app_id=app, timeout=5)
-                if trader.account.get('account_type') != 'demo':
-                    emit({'event': 'halt', 'reason': 'real accounts are not supported'})
+                trader = DerivWS(token=token, app_id=app, timeout=5, account_type=account_type)
+                if trader.account.get('account_type') != account_type or trader.account.get('currency') != 'USD':
+                    emit({'event': 'halt', 'reason': 'requested account type and USD currency are required'})
                     return
+                balance = trader.account.get('balance')
+                if args.trade and not args.check_latency and balance is not None:
+                    balance = Decimal(str(balance))
+                    if not balance.is_finite() or balance < Decimal(str(args.stake)):
+                        emit({'event': 'halt', 'reason': 'insufficient or invalid account balance for the requested stake',
+                              'account_type': account_type, 'stake': args.stake})
+                        return
+            stage = 'public_connection'
             public = DerivWS(token='', timeout=5)
-            emit({'event': 'start', 'demo_trade': bool(trader) and not args.check_latency,
+            emit({'event': 'start', 'demo_trade': bool(trader) and not args.check_latency and not args.real,
+                  'real_trade': bool(trader) and not args.check_latency and args.real,
+                  'account_type': trader.account.get('account_type') if trader else None,
                   'continuous': args.continuous, 'max_pending': args.max_pending if args.continuous else 1,
                   'max_age': args.max_age,
                   'stake': args.stake, 'ev_gate': args.ev_gate, 'log': filename,
                   'warning': 'Model extrapolation, not a verified profitable regime; proposals can overstate fills'})
+            stage = 'runner_import_or_run'
             run(args, public, trader, emit)
         except Exception as exc:
-            emit({'event': 'halt', 'reason': 'initialization failed', 'error_type': type(exc).__name__})
+            emit({'event': 'halt', 'reason': 'initialization failed', 'error_type': type(exc).__name__,
+                  'stage': stage, 'error_file': Path(exc.filename).name if isinstance(exc, SyntaxError) and exc.filename else None,
+                  'error_line': exc.lineno if isinstance(exc, SyntaxError) else None})
         finally:
             for client in (public, trader):
                 if client is not None:
