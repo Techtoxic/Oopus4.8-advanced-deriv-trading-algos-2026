@@ -9,13 +9,46 @@ import time
 import websocket
 
 import adaptive_sentinel_v4 as model
-from crash1000_accu_audit import read_request
+from crash1000_accu_audit import read_request, TRANSPORT_ERRORS
 from deriv_api import DerivWS
 
 
 QUOTE_REFRESH_SECONDS = 60
 QUOTE_MAX_AGE_SECONDS = 75
 PING_INTERVAL_SECONDS = 25
+FEED_IDLE_SECONDS = 10
+BUY_ACK_RECOVERY_SECONDS = 20
+
+
+def reconnect_channel(client, emit, deadline, channel, account=None):
+    for attempt in range(3):
+        if time.monotonic() >= deadline:
+            raise TimeoutError('Session deadline reached during connection recovery')
+        delay = min(2 ** attempt, max(0, deadline - time.monotonic()))
+        emit({'event': 'connection_retry', 'channel': channel, 'attempt': attempt + 1, 'delay_seconds': delay})
+        time.sleep(delay)
+        if time.monotonic() >= deadline:
+            raise TimeoutError('Session deadline reached during connection recovery')
+        try:
+            try:
+                client.ws.close()
+            except TRANSPORT_ERRORS:
+                pass
+            client._connect()
+            if account and (client.account.get('account_id'), client.account.get('account_type')) != account:
+                raise RuntimeError('Reconnected account changed; refusing to continue')
+            if time.monotonic() >= deadline:
+                raise TimeoutError('Session deadline reached during connection recovery')
+            response = client._call({'ticks': 'JD100', 'subscribe': 1} if channel == 'feed' else {'ping': 1})
+            if channel == 'feed' and not response.get('tick'):
+                raise RuntimeError('Tick subscription rejected after reconnect')
+            if channel == 'buyer' and 'ping' not in response:
+                raise RuntimeError('Buyer heartbeat rejected after reconnect')
+            emit({'event': 'connection_recovered', 'channel': channel, 'attempt': attempt + 1})
+            return response
+        except TRANSPORT_ERRORS as exc:
+            emit({'event': 'connection_retry_failed', 'channel': channel, 'error_type': type(exc).__name__})
+    raise RuntimeError('Connection recovery attempts exhausted')
 
 
 class Book:
@@ -186,6 +219,7 @@ def run_continuous(args, public, trader, emit):
         stage = 'account_validation'
         if trader and trader.account.get('account_type') != expected_type:
             raise RuntimeError('Buyer account type does not match requested mode')
+        buyer_account = (trader.account.get('account_id'), expected_type) if trader else None
         stage = 'control_connection'
         control = DerivWS(token=trader.token if trader else '', app_id=trader.app_id if trader else None,
                           timeout=3, account_type=expected_type if trader else None)
@@ -200,11 +234,15 @@ def run_continuous(args, public, trader, emit):
         quoted_at = time.monotonic()
         pool = ThreadPoolExecutor(max_workers=1)
         stage = 'tick_subscription'
-        initial = public._call({'ticks': 'JD100', 'subscribe': 1})
+        try:
+            initial = public._call({'ticks': 'JD100', 'subscribe': 1})
+        except TRANSPORT_ERRORS:
+            initial = reconnect_channel(public, emit, deadline, 'feed')
         public.ws.settimeout(.05)
         last_epoch = 0
         reported = -math.inf
         last_ping = time.monotonic()
+        last_feed = time.monotonic()
         ping_rtt = None
         while time.monotonic() < deadline and book.count < args.max_trades:
             stage = 'signal_loop'
@@ -218,15 +256,31 @@ def run_continuous(args, public, trader, emit):
             schedule()
             if trader and time.monotonic() - last_ping >= PING_INTERVAL_SECONDS:
                 started = time.monotonic()
-                response = trader._call({'ping': 1})
+                stage = 'buyer_heartbeat'
+                try:
+                    response = trader._call({'ping': 1})
+                except TRANSPORT_ERRORS:
+                    response = reconnect_channel(trader, emit, deadline, 'buyer',
+                                                 buyer_account)
                 ping_rtt = time.monotonic() - started
                 last_ping = time.monotonic()
                 if 'ping' not in response:
                     reason = 'buyer heartbeat failed'
                     break
-            tick = newest_tick(public, initial)
+            stage = 'tick_stream'
+            try:
+                tick = newest_tick(public, initial)
+            except TRANSPORT_ERRORS:
+                initial = reconnect_channel(public, emit, deadline, 'feed')
+                public.ws.settimeout(.05)
+                last_feed = time.monotonic()
+                continue
             initial = None
             if tick is None:
+                if time.monotonic() - last_feed >= FEED_IDLE_SECONDS:
+                    initial = reconnect_channel(public, emit, deadline, 'feed')
+                    public.ws.settimeout(.05)
+                    last_feed = time.monotonic()
                 continue
             epoch, spot = int(tick['epoch']), float(tick['quote'])
             signal = model.choose(spot, tick.get('pip_size'), payouts, args.ev_gate)
@@ -242,6 +296,7 @@ def run_continuous(args, public, trader, emit):
             if epoch <= last_epoch:
                 continue
             last_epoch = epoch
+            last_feed = time.monotonic()
             age = time.time() - epoch
             if signal is None:
                 skipped['not_eligible'] += 1
@@ -278,7 +333,20 @@ def run_continuous(args, public, trader, emit):
             book.unknown_stake = stake
             started = time.monotonic()
             stage = 'buy_request'
-            response = trader._call({'buy': 1, 'price': args.stake, 'parameters': params})
+            try:
+                response = trader._call({'buy': 1, 'price': args.stake, 'parameters': params})
+            except (websocket.WebSocketTimeoutException, TimeoutError):
+                receive = getattr(trader, 'receive_pending_buy', None)
+                if receive is None:
+                    raise
+                stage = 'buy_ack_recovery'
+                remaining = min(BUY_ACK_RECOVERY_SECONDS, deadline + 20 - time.monotonic())
+                if remaining <= 0:
+                    raise TimeoutError('Buy acknowledgment recovery deadline exceeded')
+                emit({'event': 'buy_ack_wait', 'timeout_seconds': remaining, 'stake_reserved': float(stake),
+                      'request_resent': False})
+                response = receive(timeout=remaining)
+                emit({'event': 'buy_ack_received', 'request_resent': False})
             rtt = time.monotonic() - started
             if 'buy' not in response:
                 code = (response.get('error') or {}).get('code')

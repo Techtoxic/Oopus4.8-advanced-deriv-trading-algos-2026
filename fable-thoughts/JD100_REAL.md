@@ -58,6 +58,11 @@ bot requests an actual-stake quote and checks the purchased contract's terms.
   No buy is retried. Unknown outcomes retain their reservation: check the selected account's
   portfolio before restarting. Do not infer that zero confirmed trades means no purchase
   could have happened when `unknown_buy_outcome` is true.
+- Continuous-mode feed and heartbeat transport failures use bounded reconnects. A buy
+  response timeout waits up to another 20 seconds for the matching acknowledgment on the
+  original connection, without resending the order. A recovered session keeps its existing
+  P&L and risk limits. A lost connection or still-unknown buy cannot be safely retried and
+  remains a stop condition. Update both `deriv_api.py` and `jd100_continuous.py` for this behavior.
 
 Latency and non-next-tick timing remain diagnostic, not shutdown conditions. Payout/stake
 checks, stale-tick rejection, and unresolved-contract handling still apply. This change

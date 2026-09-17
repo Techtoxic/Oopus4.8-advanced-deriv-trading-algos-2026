@@ -25,6 +25,8 @@ class DerivWS:
         self.app_id  = app_id if app_id is not None else APP_ID
         self._req    = itertools.count(1)
         self._lock   = threading.Lock()
+        self._pending_request = None
+        self._pending_socket = None
         self.account = {}
         self._connect()
 
@@ -72,11 +74,34 @@ class DerivWS:
         payload = dict(payload)
         payload["req_id"] = rid
         with self._lock:
+            if self._pending_request is not None and self._pending_request[1] == 'buy':
+                raise RuntimeError('Unresolved buy response; refusing another request')
+            self._pending_request = (rid, 'buy' if 'buy' in payload else 'read')
+            self._pending_socket = self.ws
             self.ws.send(json.dumps(payload))
-            while True:
+            return self._receive_response(rid, time.monotonic() + self.timeout)
+
+    def _receive_response(self, rid, deadline):
+        original_timeout = self.ws.gettimeout()
+        try:
+            while time.monotonic() < deadline:
+                self.ws.settimeout(max(.001, deadline - time.monotonic()))
                 msg = json.loads(self.ws.recv())
-                if msg.get("req_id") == rid or msg.get("msg_type") == "error":
+                if msg.get('req_id') == rid:
+                    self._pending_request = None
+                    self._pending_socket = None
                     return msg
+            raise websocket.WebSocketTimeoutException('Response deadline exceeded')
+        finally:
+            self.ws.settimeout(original_timeout)
+
+    def receive_pending_buy(self, timeout=20):
+        with self._lock:
+            if self._pending_request is None or self._pending_request[1] != 'buy':
+                raise RuntimeError('No pending buy response to receive')
+            if self.ws is not self._pending_socket:
+                raise RuntimeError('Original buy connection is unavailable')
+            return self._receive_response(self._pending_request[0], time.monotonic() + timeout)
 
     def call(self, payload, retries=3):
         for i in range(retries):
