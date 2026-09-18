@@ -193,3 +193,32 @@ class RealSupportTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class SharedSwitchTests(unittest.TestCase):
+    def select(self, default, account_type=None):
+        accounts = [{'account_type': 'real', 'account_id': 'r'}, {'account_type': 'demo', 'account_id': 'd'}]
+        with patch.object(deriv_api, 'DEFAULT_ACCOUNT_TYPE', default), \
+             patch.object(deriv_api.DerivWS, '_rest', side_effect=[{'data': accounts}, {'data': {'url': 'wss://unit.invalid'}}]), \
+             patch.object(deriv_api.websocket, 'create_connection'):
+            return deriv_api.DerivWS(token='unit-token', account_type=account_type).account['account_id']
+
+    def test_switch_selects_demo_or_real_by_default(self):
+        self.assertEqual(self.select('demo'), 'd')
+        self.assertEqual(self.select('real'), 'r')
+
+    def test_explicit_argument_overrides_switch(self):
+        self.assertEqual(self.select('real', 'demo'), 'd')
+        self.assertEqual(self.select('demo', 'real'), 'r')
+
+    def test_jd100_without_real_flag_follows_switch(self):
+        for default, expected in (('demo', 'demo'), ('real', 'real')):
+            trader = Mock(account={'account_type': expected, 'account_id': 'x', 'currency': 'USD', 'balance': '100'})
+            with tempfile.TemporaryDirectory() as folder, patch.object(entry, 'DEFAULT_ACCOUNT_TYPE', default), \
+                 patch.dict(os.environ, {'DERIV_TOKEN': 'unit-token', 'DERIV_APP_ID': 'unit-app'}), \
+                 patch.object(sys, 'argv', ['v4', '--trade', '--log', folder + '/log.jsonl']), \
+                 patch.object(entry, 'DerivWS', side_effect=[trader, Mock()]) as construct, \
+                 patch.object(entry, 'run') as run, patch('builtins.print'):
+                entry.main()
+                self.assertEqual(construct.call_args_list[0].kwargs['account_type'], expected)
+                self.assertEqual(run.call_args.args[0].real, expected == 'real')

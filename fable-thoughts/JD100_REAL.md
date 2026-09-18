@@ -1,7 +1,10 @@
 # Explicit real-account support
 
-This mode places real-money orders only when **both `--real` and `--trade`** are supplied.
-Without `--real`, trading explicitly selects a demo account and does not fall back to real.
+Account mode is chosen by `TRADE_DEMO` at the top of `tools/deriv_api.py` (default `True` =
+demo). Every bot that does not pass `account_type` explicitly reads it, so flipping it to `False`
+makes those bots use the REAL account. `--real` on the JD100 runner forces real regardless of the
+switch; there is no `--demo` override, so set `TRADE_DEMO = True` (or `DERIV_TRADE_DEMO=1`) when you
+want demo. The accumulator audits remain demo-only and refuse to start when the switch selects real.
 Without `--trade`, no orders are placed. The model and its profitability are not guaranteed.
 
 ## Replace damaged local files

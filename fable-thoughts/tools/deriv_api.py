@@ -3,6 +3,16 @@ import json, os, time, threading, itertools
 import urllib.request, urllib.error
 import websocket
 
+# ── Account mode switch ──────────────────────────────────────────────────────
+# TRADE_DEMO = True  -> every bot that does not pass account_type explicitly uses the DEMO account.
+# TRADE_DEMO = False -> those bots use the REAL account and place REAL-MONEY orders.
+# Environment override: DERIV_TRADE_DEMO=0/false/real selects real, 1/true/demo selects demo.
+TRADE_DEMO = True
+_env_mode = os.environ.get("DERIV_TRADE_DEMO")
+if _env_mode is not None:
+    TRADE_DEMO = _env_mode.strip().lower() not in ("0", "false", "no", "real")
+DEFAULT_ACCOUNT_TYPE = "demo" if TRADE_DEMO else "real"
+
 # ── Credentials — env first, fallback to pasted values ──────────────────────
 TOKEN = os.environ.get("DERIV_TOKEN", "")
 APP_ID = os.environ.get("DERIV_APP_ID", "33wYNr1doMQUdym9qvsMk")
@@ -17,9 +27,11 @@ class DerivWS:
     def __init__(self, token=None, app_id=None, timeout=30, account_type=None):
         if account_type not in (None, 'demo', 'real'):
             raise ValueError('account_type must be demo or real')
-        self.account_type = account_type
         self.timeout = timeout
         self.token   = token  if token  is not None else TOKEN
+        if account_type is None and self.token:
+            account_type = DEFAULT_ACCOUNT_TYPE
+        self.account_type = account_type
         if account_type is not None and not self.token:
             raise ValueError('An account selection requires an API token')
         self.app_id  = app_id if app_id is not None else APP_ID
@@ -49,14 +61,10 @@ class DerivWS:
             acct_list = accounts_resp.get("data", [])
             if not acct_list:
                 raise RuntimeError("No accounts found for this token")
-            # Prefer demo account; fall back to first available
-            requested_type = getattr(self, 'account_type', None)
-            if requested_type is not None:
-                acct = next((a for a in acct_list if a.get('account_type') == requested_type), None)
-                if acct is None:
-                    raise RuntimeError('Requested account type is unavailable for this token')
-            else:
-                acct = next((a for a in acct_list if a.get("account_type") == "demo"), acct_list[0])
+            requested_type = getattr(self, 'account_type', None) or DEFAULT_ACCOUNT_TYPE
+            acct = next((a for a in acct_list if a.get('account_type') == requested_type), None)
+            if acct is None:
+                raise RuntimeError(f'No {requested_type} account is available for this token')
             self.account = acct
             account_id = acct["account_id"]   # new API uses account_id, not loginid
             # Step 2: get OTP → the response contains the ready-to-use WS URL

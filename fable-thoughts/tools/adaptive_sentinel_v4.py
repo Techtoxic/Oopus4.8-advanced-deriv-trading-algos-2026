@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import time
 
-from deriv_api import DerivWS
+from deriv_api import DerivWS, DEFAULT_ACCOUNT_TYPE
 from jd100_demo import measure_latency
 from sigma_model import wrapped_normal_pmf
 
@@ -190,7 +190,7 @@ def run(args, public, trader, emit):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--trade', action='store_true')
-    parser.add_argument('--real', action='store_true', help='Explicitly select a real account; --trade places real-money orders')
+    parser.add_argument('--real', action='store_true', help='Force the real account; otherwise TRADE_DEMO in deriv_api.py decides')
     parser.add_argument('--check-latency', action='store_true')
     parser.add_argument('--continuous', action='store_true', help='Stream ticks and reconcile settlements on a separate connection')
     parser.add_argument('--max-pending', type=int, default=0, help='Continuous-mode pending-contract cap, 0 disables the count cap')
@@ -210,7 +210,8 @@ def main():
         parser.error('Use a $0.35–$10 cent-rounded stake, positive limits, EV gate .01–.10, max-pending 0–10, and max-age in (0, 1]')
     if args.real and not (args.trade or args.check_latency):
         parser.error('--real requires --trade or --check-latency')
-    account_type = 'real' if args.real else 'demo'
+    account_type = 'real' if args.real else DEFAULT_ACCOUNT_TYPE
+    args.real = account_type == 'real'
     token, app = os.environ.get('DERIV_TOKEN'), os.environ.get('DERIV_APP_ID')
     if (args.trade or args.check_latency) and (not token or not app):
         parser.error('Configure DERIV_TOKEN and DERIV_APP_ID securely in the environment')
