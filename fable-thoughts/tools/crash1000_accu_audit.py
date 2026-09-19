@@ -1,4 +1,4 @@
-"""Bounded CRASH1000 candidate-state demo audit. No real-account override."""
+"""Bounded CRASH1000 candidate-state accumulator audit. Demo by default; --real selects the real account."""
 import argparse
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_DOWN, ROUND_HALF_UP
@@ -149,9 +149,10 @@ def eligible(q, pip, stake=Decimal('1'), take_profit=Decimal('1.19'), symbol='CR
     return 14 <= phase < 14.25
 
 
-def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), max_loss=Decimal('10'), symbol='CRASH1000'):
-    if client.account.get('account_type') != 'demo' or not client.account.get('account_id'):
-        raise RuntimeError('Refusing non-demo account')
+def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), max_loss=Decimal('10'), symbol='CRASH1000',
+        account_type='demo'):
+    if client.account.get('account_type') != account_type or not client.account.get('account_id'):
+        raise RuntimeError('Connected account does not match the requested account type')
     account_id = client.account['account_id']
     barrier = BARRIERS[symbol]
     deadline = time.monotonic() + seconds
@@ -169,10 +170,10 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
                 reason = 'remaining session loss budget smaller than stake'
                 break
             h = read_request(client, {'ticks_history': symbol, 'count': 1, 'end': 'latest', 'style': 'ticks'},
-                             emit, account_id, deadline)
+                             emit, account_id, deadline, account_type)
             if time.monotonic() >= deadline:
                 break
-            r = read_request(client, {'proposal': 1, **params}, emit, account_id, deadline)
+            r = read_request(client, {'proposal': 1, **params}, emit, account_id, deadline, account_type)
             q = r.get('proposal', {})
             if not q:
                 raise RuntimeError('Quote unavailable')
@@ -210,7 +211,7 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
                 if time.monotonic() >= until:
                     break
                 response = read_request(client, {'proposal_open_contract': 1, 'contract_id': pending},
-                                        emit, account_id, until)
+                                        emit, account_id, until, account_type)
                 c = response.get('proposal_open_contract', {})
                 if not c:
                     raise RuntimeError('Pending contract cannot be read')
@@ -277,11 +278,12 @@ def run(client, seconds, execute, emit, check_only=False, stake=Decimal('1'), ma
 def main(symbol='CRASH1000'):
     if symbol not in BARRIERS:
         raise ValueError('Unsupported candidate configuration')
-    parser = argparse.ArgumentParser(description=f'{symbol} candidate-state accumulator demo audit; no real-account override')
+    parser = argparse.ArgumentParser(description=f'{symbol} candidate-state accumulator audit; demo unless --real is given')
     parser.add_argument('--minutes', type=float, default=60)
     parser.add_argument('--stake', type=money, default=Decimal('1'), help='Fixed stake in USD, at least $1; broker limits still apply')
     parser.add_argument('--max-loss', type=money, default=Decimal('10'), help='Maximum net realized loss for this session in USD')
-    parser.add_argument('--execute', action='store_true', help='Permit bounded demo purchases inside the tested state')
+    parser.add_argument('--execute', action='store_true', help='Permit bounded purchases inside the tested state')
+    parser.add_argument('--real', action='store_true', help='Use the REAL account: --execute then places real-money orders')
     parser.add_argument('--check', action='store_true', help='Check the current state once, without purchasing')
     parser.add_argument('--out', default=None, help='New JSONL file; existing files are never overwritten')
     args = parser.parse_args()
@@ -292,9 +294,10 @@ def main(symbol='CRASH1000'):
     token, app = os.environ.get('DERIV_TOKEN'), os.environ.get('DERIV_APP_ID')
     if not token or not app:
         parser.error('Set DERIV_TOKEN and DERIV_APP_ID securely in your environment')
+    account_type = 'real' if args.real else 'demo'
     filename = args.out or symbol.lower() + '_accu_' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '.jsonl'
     try:
-        client = DerivWS(token=token, app_id=app, timeout=10)
+        client = DerivWS(token=token, app_id=app, timeout=10, account_type=account_type)
     except Exception as exc:
         print(json.dumps({'event': 'initialization_failed', 'error_type': type(exc).__name__}), flush=True)
         raise SystemExit(1) from None
@@ -306,16 +309,21 @@ def main(symbol='CRASH1000'):
             if row['event'] != 'contract':
                 print(json.dumps({k: v for k, v in row.items() if k != 'contract'}, allow_nan=False), flush=True)
         try:
-            if client.account.get('account_type') != 'demo':
-                emit({'event': 'halt', 'reason': 'Refusing non-demo account; no purchases'})
+            if client.account.get('account_type') != account_type or client.account.get('currency') != 'USD':
+                emit({'event': 'halt', 'reason': 'Connected account is not the requested USD account; no purchases'})
                 return
-            emit({'event': 'start', 'demo_execute': args.execute and not args.check,
-                  'symbol': symbol,
+            balance = client.account.get('balance')
+            if args.execute and not args.check and balance is not None and Decimal(str(balance)) < args.stake:
+                emit({'event': 'halt', 'reason': 'account balance below stake; no purchases', 'account_type': account_type})
+                return
+            emit({'event': 'start', 'demo_execute': args.execute and not args.check and account_type == 'demo',
+                  'real_execute': args.execute and not args.check and account_type == 'real',
+                  'account_type': account_type, 'symbol': symbol,
                   'minutes': args.minutes, 'stake': str(args.stake), 'growth': .04,
                   'take_profit': str(payout_terms(args.stake)[0]), 'maximum_contracts': None,
                   'maximum_realized_loss': str(args.max_loss), 'log': filename,
                   'warning': 'Historical candidate, not proven live profitability. This uses the Options API, not MT5.'})
-            run(client, args.minutes * 60, args.execute, emit, args.check, args.stake, args.max_loss, symbol)
+            run(client, args.minutes * 60, args.execute, emit, args.check, args.stake, args.max_loss, symbol, account_type)
         finally:
             client.ws.close()
 

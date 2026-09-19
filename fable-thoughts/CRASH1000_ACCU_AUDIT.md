@@ -142,3 +142,14 @@ stake-scaled take profit and payment, no buy retry, pending interruption, entry 
 and fallback close. These use fake executions. Live smoke checks only checked quotes;
 no orders were placed for the session-limit update. Keep and, if large, zip the JSONL
 file for review. A longer run does not guarantee a positive result.
+
+## Real-account mode
+
+Demo is the default. Passing `--real` selects the real USD account for the whole session
+(quotes, purchases, settlement reads and reconnects), and `--execute --real` places
+real-money orders. The `TRADE_DEMO` switch in `deriv_api.py` does not affect this bot: it
+always requests the account type implied by the flag and halts if the connected account
+differs, is not USD, or has a balance below the stake. Every other guard (candidate band,
+one open contract, full-stake reservation against `--max-loss`, no buy retries, path
+reconciliation halts) is unchanged. Real mode is for measuring live fills; the strategy's
+positive expectation is not established.

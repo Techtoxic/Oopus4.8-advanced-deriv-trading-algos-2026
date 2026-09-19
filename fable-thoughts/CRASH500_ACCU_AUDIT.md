@@ -64,3 +64,14 @@ contracts before restarting after a halt.
 
 Logs use the prefix `crash500_accu_` and identify the symbol in state/settlement records.
 Send a completed small-stake demo log for review before considering larger experiments.
+
+## Real-account mode
+
+Demo is the default. Passing `--real` selects the real USD account for the whole session
+(quotes, purchases, settlement reads and reconnects), and `--execute --real` places
+real-money orders. The `TRADE_DEMO` switch in `deriv_api.py` does not affect this bot: it
+always requests the account type implied by the flag and halts if the connected account
+differs, is not USD, or has a balance below the stake. Every other guard (candidate band,
+one open contract, full-stake reservation against `--max-loss`, no buy retries, path
+reconciliation halts) is unchanged. Real mode is for measuring live fills; the strategy's
+positive expectation is not established.
