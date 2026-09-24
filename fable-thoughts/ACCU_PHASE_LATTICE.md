@@ -147,6 +147,52 @@ Run `accu_phase_decide.py all` (read-only, no token, about 60–75 min). It:
 
 Tick history only reaches back about 4.6 days, so `accu_phase_watch.py` must keep archiving ticks and oracle snapshots for the 2–3 weeks PASS-B needs.
 
+### How to run it (read-only: no token, no orders)
+
+```sh
+pip install "websocket-client>=1.6" numpy scipy
+cd fable-thoughts/tools
+python3 -m unittest test_accu_phase test_accu_phase_watch   # 45 offline tests, ~40 s
+
+# 1. one-shot: barrier ladder + oracle + ~4M ticks + analysis (~60-75 min)
+python3 accu_phase_decide.py all
+
+# 2. leave running for >= 14 days (tick history only reaches back ~4.6 days)
+python3 accu_phase_watch.py --hours 0 --cells ../results/accu_phase_<UTC>/analysis.json
+```
+
+**Send back after step 1:**
+- the stdout;
+- `results/accu_phase_<UTC>/` (`ladder.json`, `oracle_*.json`, `analysis.json`, `summary.txt`);
+- the `ticks/` folder, zipped.
+
+**Send back weekly from the watcher:**
+- `summary.log` and `alerts.jsonl`;
+- `quotes.jsonl`;
+- `oracle/` and `ticks/`, zipped.
+
+**Offline smoke test on the repo's own data:** from `fable-thoughts/tools`, run
+```sh
+python3 accu_phase_decide.py analyze \
+  --local-json ../../data/CRASH1000.json.gz ../../data/CRASH500.json.gz \
+               ../../data/BOOM1000.json.gz ../../data/BOOM500.json.gz \
+  --barrier CRASH1000=0.04:2.3454e-6 CRASH1000=0.03:2.447e-6 \
+            CRASH500=0.04:4.7141e-6 CRASH500=0.03:4.9222e-6 \
+            BOOM1000=0.03:2.4506e-6 BOOM500=0.03:4.9295e-6
+```
+Those are the six barriers the repo has recorded. It returns `INCONCLUSIVE` with these numbers:
+- CRASH500 band G = 1.00246;
+- pooled D = 1.00094 [0.99746, 1.00412] on 23k in-band ticks;
+- no oracle data (A6 fails).
+
+That is the honest state of the evidence today.
+
+**Known conservative biases, left as pre-registered:**
+- **The model underestimates survival near phase 0** by 0.0004–0.0010. The V2 kernel adds rounding noise twice. So A3, K2 and eligibility lean toward "no".
+- **C1 (ungated G < 0.998) depends on which phases the archive happens to cover.** It can fail on a short, phase-lucky archive and converges as spot wanders.
+
+Both biases push toward INCONCLUSIVE, never toward a false PASS.
+
 ## 5. Why this is the right posture
 
 This is the same shape as the only edge that ever existed here: a parameter calibrated on an average (the barrier) meeting a state the trader can observe and select on (lattice phase).
