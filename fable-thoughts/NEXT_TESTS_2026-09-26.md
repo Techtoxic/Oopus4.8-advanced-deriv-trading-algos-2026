@@ -286,3 +286,30 @@ The watcher:
 `evaluate` replays the quote log through the window rules, so window state is a pure function of
 `quotes.jsonl`. It then applies the unchanged PASS-B rule to pooled fresh ticks inside qualifying
 windows. Before day 14 the verdict reads INTERIM.
+
+### T2 build, 2026-09-26 11:57 UTC (`accu_phase_map_20260926T115657Z`)
+
+- **Hash.** The Windows checkout hashes `prereg_t2.json` as `9927fd03…`, the repo as `c6cedbfe…`. Only
+  the line endings differ: the repo file with LF converted to CRLF hashes to exactly `9927fd03…`. The
+  rules are identical. The watcher compares hashes on the same machine, so this is consistent.
+- **65 armed cells**:
+  - all standard Boom/Crash (500/600/900/1000);
+  - CRASH300N and BOOM300N;
+  - 1HZ10V, 1HZ100V and R_100.
+- **Excluded**:
+  - N=50/150N: σ above 40 pips and OR-1 fails, which agrees with the earlier refutation. Their
+    authenticated barrier at 2–5% is 15–25× tighter than the public one.
+  - Every other volatility index: σ from 72 to 81,000 pips.
+  - JD10–JD100: ACCU isn't offered.
+- **No armed cell is near a window.** The closest are:
+  - BOOM300N 4%: 2.8 levels away, −36% spot (window at 256; spot 402);
+  - CRASH1000/CRASH500 5%: about 4.7 levels away, −34% to −38%;
+  - R_100 4%: −44%.
+  - 1HZ100V 4–5%, the cells Deriv tightened, have no window anywhere in the 3× spot range.
+- **Reachability in 14 days (information, not a rule change).** Standard Boom/Crash move about 1% a day
+  (1 SD), so a −35% move is out of reach. The volatility indices need moves of 3 SD or more. BOOM300N
+  has drifted from about 1004 in June to 402, and at that pace the 4% window is roughly seven weeks
+  away. So the 14-day T2 verdict will almost certainly be KILL (no qualifying window), unless Deriv
+  loosens a barrier. The watcher remaps immediately if that happens.
+- **Misfit z on BOOM300N is about +2.0 at all five rates** (the same ticks, so not five independent
+  results): the data survive slightly more than the model predicts. It is within the pre-registered |z| ≤ 3.
