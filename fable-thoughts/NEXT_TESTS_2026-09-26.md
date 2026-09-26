@@ -236,3 +236,53 @@ For each test, report:
 - any rule you believe was wrong, and why. Report it; don't apply the fix silently.
 
 Paste the raw table outputs, not summaries.
+
+---
+
+## Results so far (reported 2026-09-26, read-only, authenticated demo quotes)
+
+- **T3: market-wide.** A second account matches this one on every cell. Barriers don't depend on stake at
+  $1, $10 or $100 (CRASH1000 4% 2.28724e-6, BOOM300N 4% 1.9525167e-5; $1000 isn't offered). A second
+  `app_id` was not tested. Validating on this account is enough.
+- **T4: closed.** Step indices reject every barrier offset ("Invalid barrier"). Plain Rise already prices
+  the exact parity binomial: payout × P is 0.977 at odd tick counts and 0.954–0.966 at even ones.
+- **T1: CRASH500 killed, the rest parked.**
+  - Maximum multipliers: 500 on CRASH1000 and BOOM1000, 400 on CRASH500 and BOOM500, 100 on the
+    300N symbols.
+  - CRASH500 ×400: EV per cycle −5.2%, 99% [−9.6%, −1.5%].
+  - CRASH1000 ×500: EV per cycle −0.5%, 99% [−7.1%, +6.0%]. The gap put covers 41% of commission, so
+    break-even needs an upward drift of about 5e-8 per tick. Measured: +3.4e-8, 99% [−8.8e-8, +1.5e-7].
+  - The drift question rides along in T2 (pre-registered in `prereg_t2.json`); 14 days won't settle it.
+- **T2: built.** Status below.
+
+## T2: how to run it
+
+Rules: `tools/accu_phase_data/prereg_t2.json`, committed before any map or watcher data.
+
+```
+cd fable-thoughts/tools
+DERIV_TOKEN=<demo token> python3 accu_phase_map.py build            # about 20-40 min
+DERIV_TOKEN=<demo token> python3 accu_phase_watch.py --map ../results/accu_phase_map_<UTC>/phase_map.json \
+        --outdir ../results/t2_watch --hours 0                     # 14 days; restart-safe
+python3 accu_phase_map.py evaluate --watch-dir ../results/t2_watch --map <same phase_map.json>
+```
+
+`build` gates each symbol in this order:
+1. The ACCU contract is offered.
+2. A step law exists for it.
+3. The small-step σ is at most 40 pips.
+4. OR-1 passes on the house's `ticks_stayed_in` lists.
+5. Per cell, model misfit |z| ≤ 3.
+
+For each armed cell, it prints the spot intervals where model G ≥ 1.001 at the authenticated b, and
+the distance from the current spot.
+
+The watcher:
+- logs the prereg hash first, and refuses a map built on a different hash;
+- quotes every 600 s, or every 60 s when a cell is within one level of a window;
+- writes `WINDOW` open and close events;
+- runs `evaluate` daily.
+
+`evaluate` replays the quote log through the window rules, so window state is a pure function of
+`quotes.jsonl`. It then applies the unchanged PASS-B rule to pooled fresh ticks inside qualifying
+windows. Before day 14 the verdict reads INTERIM.

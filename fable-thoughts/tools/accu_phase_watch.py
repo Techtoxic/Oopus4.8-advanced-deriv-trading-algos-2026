@@ -34,6 +34,11 @@ RUN (from fable-thoughts/tools; needs websocket-client>=1.6, numpy, scipy; DERIV
 account, used for proposals only: no orders)
   DERIV_TOKEN=<demo token> python3 accu_phase_watch.py --hours 0            # forever; Ctrl+C stops cleanly
   DERIV_TOKEN=<demo token> python3 accu_phase_watch.py --cells ../results/accu_phase_<UTC>/analysis.json
+  DERIV_TOKEN=<demo token> python3 accu_phase_watch.py --map <phase_map.json> --outdir ../results/t2_watch
+      T2 (accu_phase_map.py): logs the prereg_t2.json sha256 first and refuses a map built on another hash;
+      adds the map's armed symbols and CRASH1000; quotes each symbol every 600 s, every 60 s when a cell is
+      within one level of a window; WINDOW open/close events -> windows.jsonl and alerts; the daily run is
+      accu_phase_map.py evaluate instead of accu_phase_decide analyze
 Default --outdir is ../results/accu_phase_watch/ (fixed, so a restart continues the same archive).
 Send back weekly: summary.log, alerts.jsonl, quotes.jsonl (barriers and spots: analyze needs it), and
 zips of oracle/ and ticks/. The repo .gitignore skips *.log: if you send them through git, add
@@ -46,6 +51,7 @@ sys.path.insert(0, HERE)
 import numpy as np
 import accu_phase_lib as lib
 import accu_phase_decide as apd
+import accu_phase_map as apm
 from derivfetch import IntegrityError, fetch_ticks, native_interval
 
 DerivWS = None                  # imported on first connect (tests substitute a fake)
@@ -62,6 +68,9 @@ ANALYZE_MAX_S = 4 * 3600        # a background analyze running longer is stopped
 VOL_SYMBOLS = ('R_100', '1HZ100V', '1HZ10V')
 VOL_SIGMA_PIPS_MIN = 9.6
 DECIDE = os.path.join(HERE, 'accu_phase_decide.py')
+MAPTOOL = os.path.join(HERE, 'accu_phase_map.py')
+MAP_LOOP_S = 30                 # with --map, the quote task checks per-symbol due times this often
+DRIFT_SYMBOL = 'CRASH1000'      # always archived with --map (the carried T1 drift question)
 TASKS = ('hourly', 'oracle', 'quotes', 'ticks', 'analyze')   # run in this order when due together
 UTC = dt.timezone.utc
 
@@ -138,6 +147,16 @@ class Watcher:
         self.models, self.band, extra = {}, tuple(lib.THRESH['band_core']), []
         if args.cells:
             extra, self.models, self.band = load_cells(args.cells)
+        self.tracker, self.map_sha, self.sym_due = None, None, {}
+        if getattr(args, 'map', None):
+            pr, sha = apm.prereg_t2()
+            pmap = apd.read_json(args.map)
+            if pmap.get('prereg_sha256') != sha:
+                raise SystemExit(f"--map was built on prereg_t2 sha256 {pmap.get('prereg_sha256')}; the file now "
+                                 f"hashes to {sha}: rebuild the map (the rules must not change after data)")
+            self.tracker, self.map_sha, self.prereg_t2 = apm.WindowTracker(pmap, pr), sha, pr
+            extra = extra + self.tracker.symbols() + [DRIFT_SYMBOL]
+            self.map_path = os.path.abspath(args.map)
         self.symbols = list(dict.fromkeys(list(args.symbols) + extra))
         self.rates = [float(g) for g in args.rates]
         self.vol_symbols = list(args.vol_symbols)
@@ -149,9 +168,13 @@ class Watcher:
         self.n = dict(quotes=0, alerts=0, ticks=0, oracle=0, errors=0, connects=0, analyses=0)
         self.intervals = {'hourly': HOURLY_S, 'oracle': args.oracle_interval, 'quotes': args.quote_interval,
                           'ticks': args.tick_interval, 'analyze': args.analyze_interval}
+        if self.tracker is not None:
+            self.intervals['quotes'] = MAP_LOOP_S
         now = self.clock()
         self.due = {k: now for k in TASKS}
         self.due['analyze'] = now + args.analyze_interval
+        if self.tracker is not None:
+            self.log(f'prereg_t2 sha256 {self.map_sha}  map {self.map_path}  armed cells {len(self.tracker.cells)}')
         self.restore()
 
     # ---------------------------------------------------------------- output
@@ -212,6 +235,13 @@ class Watcher:
                         self.in_band[key] = bool(q['in_band'])
                     if q.get('pip') is not None:
                         self.pip[q['sym']] = int(q['pip'])
+        if self.tracker is not None and os.path.exists(path):
+            n_open = 0
+            for q in apm.read_quotes(path):     # window state is a pure function of the quote log
+                self.tracker.on_quote(q['sym'], q['g'], q['b'], q['spot'], q['t'], q.get('epoch'))
+            n_open = len(self.tracker.open)
+            if n_open:
+                self.log(f'resumed {n_open} open window(s): ' + ', '.join(f'{s} {g}' for s, g in self.tracker.open))
         for sym in self.symbols:
             self.last_epoch[sym] = archive_last_epoch(os.path.join(self.tdir, sym))
         slog = os.path.join(self.outdir, 'summary.log')
@@ -289,8 +319,13 @@ class Watcher:
     # ---------------------------------------------------------------- 1-2. quotes and oracle snapshots
     def quote_round(self, save_oracle=False):
         marks = []
-        for sym in self.symbols:
-            parts = []
+        now = self.clock()
+        syms = self.symbols if (self.tracker is None or save_oracle) else \
+            [s for s in self.symbols if self.sym_due.get(s, 0) <= now]
+        if not syms:
+            return
+        for sym in syms:
+            parts, seen = [], {}
             for g in self.rates:
                 q = self.echo(apd.quote, self.ws_auth, sym, g)     # the terms a logged-in account is sold
                 self.sleep(PAUSE_PROPOSAL)
@@ -301,8 +336,15 @@ class Watcher:
                 if not q or q.get('b') is None:
                     continue
                 st = self.on_quote(sym, g, q, qp.get('b') if qp else None)
+                seen[g] = (q['b'], q.get('spot'))
                 if 'K' in st:
                     parts.append(f"{g * 100:.0f}%:K{st['K']}/{st['phase']:.3f}{'*' if st.get('in_band') else ''}")
+            if self.tracker is not None:
+                wm = self.prereg_t2['watch']
+                near = self.tracker.near(sym, seen)
+                self.sym_due[sym] = self.clock() + (wm['near_quote_interval_s'] if near else wm['base_quote_interval_s'])
+                if near:
+                    parts.append('NEAR')
             marks.append(f"{sym} {' '.join(parts) or 'no quote'}")
         self.log(('oracle+quotes ' if save_oracle else 'quotes ') + ' | '.join(marks))
 
@@ -324,6 +366,10 @@ class Watcher:
         self.check_barrier(sym, g, b, q, b_pub)
         self.check_maxticks(sym, g, q)
         self.check_band(sym, g, b, q, pip, st)
+        if self.tracker is not None:
+            for ev in self.tracker.on_quote(sym, g, b, spot, t, q.get('spot_time')):
+                self.append_jsonl('windows.jsonl', {'utc': utc_str(t), 't': round(t, 3), **ev})
+                self.alert('WINDOW', **{k: v for k, v in ev.items() if k not in ('sym', 'g')}, sym=sym, g=g)
         return st
 
     def cell_state(self, sym, g, b, spot, pip):
@@ -479,10 +525,16 @@ class Watcher:
         t = self.clock()
         adir = os.path.join(self.outdir, 'analyze', dt.datetime.fromtimestamp(int(t), UTC).strftime('%Y%m%dT%H%M%SZ'))
         os.makedirs(adir)
-        cmd = [sys.executable, DECIDE, 'analyze', '--from-dir', self.outdir, '--outdir', adir]
-        for flag, v in (('--reps-ticks', self.a.reps_ticks), ('--reps-model', self.a.reps_model)):
-            if v:
-                cmd += [flag, str(v)]
+        if self.tracker is not None:
+            cmd = [sys.executable, MAPTOOL, 'evaluate', '--watch-dir', self.outdir, '--map', self.map_path,
+                   '--outdir', adir]
+            if self.a.reps_ticks:
+                cmd += ['--reps', str(self.a.reps_ticks)]
+        else:
+            cmd = [sys.executable, DECIDE, 'analyze', '--from-dir', self.outdir, '--outdir', adir]
+            for flag, v in (('--reps-ticks', self.a.reps_ticks), ('--reps-model', self.a.reps_model)):
+                if v:
+                    cmd += [flag, str(v)]
         out = open(os.path.join(adir, 'stdout.txt'), 'x')
         self.proc = {'p': subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT, cwd=HERE), 'dir': adir,
                      'out': out, 't0': t}
@@ -610,6 +662,10 @@ def build_parser():
                     help='watched symbols (quotes, oracle snapshots, tick archive)')
     ap.add_argument('--cells', help='analysis.json from accu_phase_decide: adds the symbols with an eligible cell '
                                     'and uses its fitted step law and D band for G_min / IN_BAND')
+    ap.add_argument('--map', help='T2: phase_map.json from accu_phase_map.py build. Adds its armed symbols (and '
+                                  'CRASH1000), tracks pre-registered windows (windows.jsonl, WINDOW alerts), quotes '
+                                  'each symbol every 600 s or every 60 s near a window, and runs '
+                                  'accu_phase_map.py evaluate daily instead of accu_phase_decide analyze')
     ap.add_argument('--rates', nargs='+', type=float, default=list(lib.RATES))
     ap.add_argument('--quote-interval', type=float, default=120, help='seconds between quote rounds')
     ap.add_argument('--oracle-interval', type=float, default=1800, help='seconds between oracle snapshots')
