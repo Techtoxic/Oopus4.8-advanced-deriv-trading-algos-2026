@@ -203,3 +203,26 @@ The weaknesses need stating plainly:
 - **The counterparty can close it in one release**, by quantising barriers to the pip or recalibrating per phase. Their demonstrated reaction time on JD100 was days.
 
 Size accordingly: $1 stakes until PASS-B. Treat any `BARRIER_CHANGE` alert from the watcher as a stop.
+
+---
+
+## 6. First live decision run (2026-09-26)
+
+`accu_phase_decide.py all` on 19–26 Sep ticks (600k CRASH1000/500, 300k other Boom/Crash), rescored after
+two oracle-scoring fixes made **after** seeing KILL verdicts (commits 2947237, 13422b0):
+
+- **Barrier ladder (law A):** 32 new growth-rate ratios on N = 500/600/900/1000 predicted to <= 0.07%.
+- **Oracle:** 80/80 cells match all 99 completed house runs under raw_incl (shuffled null <= 5). The
+  in-progress entry is 1 tick short in 10 cells (delta -1), which is what the original scoring tripped on.
+- **Decision:** D = 1.00327, 99% [1.00202, 1.00454], 191,566 in-band ticks, 72 blocks; C4 z = 37.7 at
+  0.97x model; placebo 0.990; 20-tick replay CRASH1000 4% +6.3%/trade [+3.3%, +9.3%], placebo -19%.
+  **VERDICT: PASS-B** under the rescored oracle.
+- **Caveats:** the pass definition changed twice after results were seen; the data window overlaps the
+  previous run almost entirely (not an independent replication); everything is feed replay, no executions.
+- **BOOM50/CRASH50/BOOM150N/CRASH150N: dead.** They quote the 1HZ10V Gaussian ladder, so the model predicted
+  spike-only knockouts and G up to 1.04/tick. Deriv's own lists refute it: 0/99 completed runs match
+  (longest 1-10, same as shuffled), and on BOOM150N the house runs are ~330 ticks shorter than the replay.
+  The knockout rule on these symbols is not the one modelled; the apparent edge was a model error.
+- **BOOM300N (exploratory, not pre-registered):** spot fell from ~1004 (June) to ~400, coarsening the
+  lattice to K = 7-9. D = 1.00386 [1.00256, 1.00508], replay +8.4%/trade, oracle 99/99 in 10/10 cells.
+  Needs its own fresh-data test.
