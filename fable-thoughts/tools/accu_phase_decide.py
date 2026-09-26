@@ -7,21 +7,29 @@ w = b*P_prev, so per-tick survival is a sawtooth in the phase of w. At any growt
 K = floor(w) is low enough, G = (1+g)*P(stay) is above 1 while the phase is in [0.05, 0.125).
 Pick whichever g is in band at the current spot. The criteria below were fixed before any fresh data.
 
-SUBCOMMANDS (public data only: no token, no buy or sell anywhere)
-  ladder   barrier ladder, 14 Boom/Crash + R_100/1HZ100V/1HZ10V x g = 1-5%, stake check; L1-L4
-  collect  tick history -> ticks/<SYM>.npz (600k CRASH1000/500, 300k the rest, 150k on N=50)
-  oracle   ticks_stayed_in snapshots (8 symbols x 5 rates), the last 20k ticks, rule alignment; OR-1..3
-  analyze  S1-S7, D, M, C1-C5 and the verdict -> analysis.json, summary.txt (last line VERDICT: ...)
+SUBCOMMANDS (read-only: proposals and tick history, no buy or sell anywhere)
+  ladder   barrier ladder, 14 Boom/Crash + R_100/1HZ100V/1HZ10V x g = 1-5%, stake check; L1-L4. Every cell
+           is quoted twice: on an authenticated DEMO connection (DERIV_TOKEN) -- the barrier a logged-in
+           account is sold, which is tighter than the public one on some symbols and is what is analysed --
+           and on the public connection (b_public, diagnostic only)
+  collect  tick history -> ticks/<SYM>.npz (600k CRASH1000/500, 300k the rest, 150k on N=50); public
+  oracle   ticks_stayed_in snapshots (8 symbols x 5 rates), the last 20k ticks, rule alignment; OR-1..3; public
+  analyze  S1-S7, D, M, C1-C5 and the verdict on the authenticated barriers -> analysis.json, summary.txt
+           (last line VERDICT: ...); when public barriers are known too, the same analysis on them is shown
+           side by side (analysis_public.json; information only, the verdict uses the authenticated ones)
   all      ladder, oracle snapshot 1, collect, oracle snapshot 2, 20k-tick fetch, alignment, analyze
            (about 60-75 minutes)
+ladder and all need DERIV_TOKEN set to a token with a DEMO account (the proposals are read-only; the
+token is used for nothing else); history and oracle stay on the public connection.
 
 RUN (from fable-thoughts/tools; needs websocket-client>=1.6, numpy, scipy)
-  python3 accu_phase_decide.py all
-  python3 accu_phase_decide.py ladder --repeat 6 --interval 600          # barrier-vs-spot series
+  DERIV_TOKEN=<demo token> python3 accu_phase_decide.py all
+  DERIV_TOKEN=<demo token> python3 accu_phase_decide.py ladder --repeat 6 --interval 600   # barrier-vs-spot series
   python3 accu_phase_decide.py analyze --from-dir ../results/accu_phase_<UTC>
   python3 accu_phase_decide.py analyze --from-dir <watcher outdir>       # ticks/<SYM>/<date>.csv archive
   python3 accu_phase_decide.py analyze --local-json ../../data/CRASH500.json.gz ../../data/CRASH1000.json.gz \\
-          --barrier CRASH500=0.04:4.7141e-6 CRASH1000=0.04:2.3454e-6     # offline, repo json.gz format
+          --barrier CRASH500=0.04:4.598554e-6 CRASH1000=0.04:2.28724e-6  # offline, repo json.gz format
+          (--barrier overrides are not verified against authenticated quotes, so A7 fails without a ladder)
 Outputs go to --outdir (default ../results/accu_phase_<UTC>/); every file is opened with mode 'x'.
 Send back: ladder.json, oracle_*.json, analysis.json, summary.txt, ticks/*.npz (zipped) and the stdout.
 """
@@ -46,6 +54,10 @@ TICK_TARGETS = {'CRASH1000': 600_000, 'CRASH500': 600_000,
 STAKES = (1, 1.13, 100)
 CD_FIELDS = ('tick_size_barrier', 'barrier_spot_distance', 'high_barrier', 'low_barrier', 'maximum_ticks',
              'maximum_payout', 'ticks_stayed_in', 'last_tick_epoch')
+
+
+def g7(x):
+    return 'n/a' if x is None else f'{x:.7g}'
 
 
 def utc_tag():
@@ -73,12 +85,38 @@ def save_npz(path, ep, px, pip):
 
 
 # ------------------------------------------------------------------ network (read-only)
-def new_ws():
+TOKEN_MSG = ('ladder needs DERIV_TOKEN (demo) to read the barrier a logged-in account is sold; '
+             'tick history stays public')
+
+
+def ws_class():
     global DerivWS
     if DerivWS is None:
         from deriv_api import DerivWS as _W
         DerivWS = _W
-    return DerivWS(token="", timeout=15)
+    return DerivWS
+
+
+def new_ws():
+    """Public connection: tick history, pip size, oracle snapshots."""
+    return ws_class()(token="", timeout=15)
+
+
+def need_token():
+    token = os.environ.get('DERIV_TOKEN')
+    if not token:
+        raise SystemExit(TOKEN_MSG)
+    return token
+
+
+def auth_ws():
+    """Authenticated DEMO connection: ACCU proposals on the terms a logged-in account is sold (a tighter
+    tick_size_barrier than the public quote on some symbols). Proposals only; nothing is ever bought."""
+    client = ws_class()(token=need_token(), account_type='demo', timeout=15)
+    if client.account.get('account_type') != 'demo':
+        client.close()
+        raise SystemExit(f"DERIV_TOKEN did not open a demo account (got {client.account.get('account_type')!r})")
+    return client
 
 
 def request(ws, payload, what):
@@ -113,44 +151,57 @@ def quote(ws, sym, g, amount=10):
 # ------------------------------------------------------------------ ladder
 def run_ladder(args, outdir):
     syms = args.symbols or list(LADDER_SYMBOLS)
-    print(f'\n== ladder: {len(syms)} symbols x {len(lib.RATES)} rates, {args.repeat} round(s)')
+    need_token()
+    print(f'\n== ladder: {len(syms)} symbols x {len(lib.RATES)} rates, {args.repeat} round(s); '
+          'authenticated (demo) quotes, public in brackets')
     rounds, pips = [], {}
+    n_cells = n_diff = 0
     for rep in range(args.repeat):
         if rep:
             print(f'  sleeping {args.interval}s before round {rep + 1}')
             time.sleep(args.interval)
         rnd = {'utc': utc_tag(), 'quotes': {}}
         for sym in syms:
-            ws = None
+            ws = wa = None
             try:
-                ws = new_ws()
+                ws, wa = new_ws(), auth_ws()
                 if sym not in pips:
                     pips[sym] = get_pip(ws, sym)
                 qs = {}
                 for g in lib.RATES:
-                    q = quote(ws, sym, g)
+                    q = quote(wa, sym, g)
+                    time.sleep(PAUSE_PROPOSAL)
+                    qp = quote(ws, sym, g)
                     time.sleep(PAUSE_PROPOSAL)
                     if q and 'b' in q:
+                        q['terms'] = 'authenticated'
+                        q['b_public'] = qp.get('b') if qp else None
                         qs[str(g)] = q
                 rnd['quotes'][sym] = qs
-                print(f"  {sym:10s} pip {pips[sym]}  " + '  '.join(f"{g}:{q['b']:.6g}" for g, q in qs.items()))
+                diff = sum(q['b_public'] is not None and q['b_public'] != q['b'] for q in qs.values())
+                n_cells, n_diff = n_cells + len(qs), n_diff + diff
+                print(f"  {sym:10s} pip {pips[sym]}  " + '  '.join(
+                    f"{g}:{q['b']:.7g} (pub {g7(q['b_public'])})"
+                    for g, q in qs.items()) + f'  [{diff}/{len(qs)} differ]')
             except Exception as e:
                 print(f'  {sym}: {type(e).__name__}: {str(e)[:160]}')
             finally:
-                if ws is not None:
-                    ws.close()
+                for c in (ws, wa):
+                    if c is not None:
+                        c.close()
             time.sleep(PAUSE_SYMBOL)
         rounds.append(rnd)
+    print(f'  authenticated barrier differs from the public one on {n_diff}/{n_cells} quoted cells')
     stake = {}
     for sym in ('CRASH1000', 'CRASH500'):
         if sym not in syms:
             continue
-        ws = None
+        wa = None
         try:
-            ws = new_ws()
+            wa = auth_ws()
             stake[sym] = {}
             for amt in STAKES:
-                q = quote(ws, sym, 0.04, amt)
+                q = quote(wa, sym, 0.04, amt)
                 time.sleep(PAUSE_PROPOSAL)
                 stake[sym][str(amt)] = q.get('b') if q else None
             last = rounds[-1]['quotes'].get(sym, {}).get('0.04')
@@ -158,9 +209,9 @@ def run_ladder(args, outdir):
         except Exception as e:
             print(f'  stake check {sym}: {type(e).__name__}: {str(e)[:160]}')
         finally:
-            if ws is not None:
-                ws.close()
-    lad = {'utc': utc_tag(), 'rounds': rounds, 'pip': pips, 'stake_check': stake}
+            if wa is not None:
+                wa.close()
+    lad = {'utc': utc_tag(), 'terms': 'authenticated', 'rounds': rounds, 'pip': pips, 'stake_check': stake}
     lad['derived'] = ladder_derived(lad)
     lad['checks'] = ladder_checks(lad)
     write_json(os.path.join(outdir, 'ladder.json'), lad)
@@ -183,7 +234,7 @@ def ladder_derived(lad):
                     continue
                 w = b * float(spot) * 10 ** pip
                 K = math.floor(w)
-                row = {'round': i, 'b': b, 'spot': spot, 'spot_time': q.get('spot_time'), 'w': w, 'K': K,
+                row = {'round': i, 'b': b, 'b_public': q.get('b_public'), 'terms': q.get('terms', 'public'), 'spot': spot, 'spot_time': q.get('spot_time'), 'w': w, 'K': K,
                        'phase': w - K, 'maximum_ticks': q.get('maximum_ticks')}
                 if b4:
                     row['ratio_to_4pct'] = b / b4
@@ -222,8 +273,10 @@ def ladder_checks(lad):
     print('  state at the last round (g: K / phase):')
     for sym, per in der.items():
         print(f'      {sym:10s} ' + '  '.join(f"{gs}: {rows[-1]['K']}/{rows[-1]['phase']:.3f}" for gs, rows in per.items()))
-    print('  L2  recorded barriers unchanged')
+    print('  L2  recorded barriers unchanged (authenticated quote vs the recorded value; the recorded values '
+          'are public-era quotes, so the public quote is shown too)')
     l2 = []
+    same = lambda b, v: b is not None and abs(b / v - 1) <= lib.recorded_tol(v) + 1e-12
     for sym, per in prereg['recorded'].items():
         for gs, v in per.items():
             if not isinstance(v, (int, float)):
@@ -233,11 +286,12 @@ def ladder_checks(lad):
                 l2.append({'sym': sym, 'g': gs, 'recorded': v, 'quoted': None, 'ok': None})
                 print(f'      {sym:10s} g={gs}  recorded {v:.5g}  quoted n/a')
                 continue
-            rel = q['b'] / v - 1
-            ok = abs(rel) <= lib.recorded_tol(v) + 1e-12
-            l2.append({'sym': sym, 'g': gs, 'recorded': v, 'quoted': q['b'], 'rel': rel, 'ok': ok})
-            print(f"      {sym:10s} g={gs}  recorded {v:.5g}  quoted {q['b']!r}  {'ok' if ok else 'CHANGED'}")
-    print('  L3  barrier independent of stake (4%)')
+            ok, bp = same(q['b'], v), q.get('b_public')
+            l2.append({'sym': sym, 'g': gs, 'recorded': v, 'quoted': q['b'], 'terms': q['terms'], 'rel': q['b'] / v - 1,
+                       'ok': ok, 'public': bp, 'public_ok': same(bp, v) if bp is not None else None})
+            print(f"      {sym:10s} g={gs}  recorded {v:.5g}  {q['terms']} {q['b']!r}  {'ok' if ok else 'CHANGED'}"
+                  f"  (public {bp!r}{'' if bp is None else ', = recorded' if same(bp, v) else ', differs from recorded'})")
+    print('  L3  barrier independent of stake (4%, authenticated)')
     l3 = {}
     for sym, d in lad['stake_check'].items():
         vals = [v for v in d.values() if v is not None]
@@ -487,8 +541,16 @@ def parse_barriers(items):
     return out
 
 
+def terms_of(q):
+    """'authenticated' for a quote taken on the logged-in (demo) connection; a quote without the field is
+    from the public-only era (legacy ladder / watcher log)."""
+    return 'authenticated' if q.get('terms') == 'authenticated' else 'public'
+
+
 def ladder_inputs(lad):
-    """Barriers, spots and pips from the last ladder round, plus the (time, b) history of every round."""
+    """Analysed barriers (authenticated quotes only), spots and pips from the ladder, plus the (time, b, terms)
+    history of every round. A legacy ladder (public quotes, no 'terms') gives history only: its barriers
+    are public ones (ladder_public_bars)."""
     bars, spots, hist = {}, {}, []
     pips = {k: v for k, v in lad.get('pip', {}).items() if v is not None}
     for rnd in lad.get('rounds', []):
@@ -496,17 +558,33 @@ def ladder_inputs(lad):
             for gs, q in qs.items():
                 if q.get('b') is None:
                     continue
-                bars.setdefault(sym, {})[float(gs)] = q['b']
+                terms, g, t = terms_of(q), float(gs), q.get('spot_time')
+                if terms == 'authenticated':
+                    bars.setdefault(sym, {})[g] = q['b']
+                    if q.get('b_public') is not None:
+                        hist.append({'sym': sym, 'g': g, 'b': q['b_public'], 't': t, 'terms': 'public'})
                 if q.get('spot') is not None and sym in pips:
-                    spots.setdefault(sym, {})[float(gs)] = (float(q['spot']), pips[sym])
-                hist.append({'sym': sym, 'g': float(gs), 'b': q['b'], 't': q.get('spot_time')})
+                    spots.setdefault(sym, {})[g] = (float(q['spot']), pips[sym])
+                hist.append({'sym': sym, 'g': g, 'b': q['b'], 't': t, 'terms': terms})
     return bars, spots, pips, hist
 
 
-def quotes_log_inputs(path):
-    """Watcher quotes.jsonl: latest b and spot per (sym, g) plus the full (time, b) history. Accepts the
-    raw proposal shape (contract_details.tick_size_barrier) or flat keys."""
-    bars, spots, hist = {}, {}, []
+def ladder_public_bars(lad):
+    """{sym: {g: public b}} from the last round quoting it: b_public, or b of a legacy (public) quote."""
+    out = {}
+    for rnd in lad.get('rounds', []):
+        for sym, qs in rnd['quotes'].items():
+            for gs, q in qs.items():
+                b = q.get('b_public') if terms_of(q) == 'authenticated' else q.get('b')
+                if b is not None:
+                    out.setdefault(sym, {})[float(gs)] = float(b)
+    return out
+
+
+def quote_records(path):
+    """Watcher quotes.jsonl rows as dicts (sym, g, b, b_public, terms, t, spot, pip). Accepts the raw
+    proposal shape (contract_details.tick_size_barrier, a verbatim ws.call() response) or flat keys."""
+    out = []
     with open(path) as fh:
         for line in fh:
             try:
@@ -521,14 +599,38 @@ def quotes_log_inputs(path):
             b = q.get('b', q.get('tick_size_barrier', cd.get('tick_size_barrier')))
             if sym is None or g is None or b is None:
                 continue
-            t = q.get('epoch', q.get('t', q.get('spot_time', p.get('spot_time'))))
-            bars.setdefault(sym, {})[float(g)] = float(b)
-            spot = q.get('spot', p.get('spot'))
-            pip = q.get('pip', q.get('pip_size'))
-            if spot is not None and pip is not None:
-                spots.setdefault(sym, {})[float(g)] = (float(spot), int(pip))
-            hist.append({'sym': sym, 'g': float(g), 'b': float(b), 't': t})
+            bp = q.get('b_public')
+            out.append({'sym': sym, 'g': float(g), 'b': float(b), 'terms': terms_of(q),
+                        'b_public': None if bp is None else float(bp),
+                        't': q.get('epoch', q.get('t', q.get('spot_time', p.get('spot_time')))),
+                        'spot': q.get('spot', p.get('spot')), 'pip': q.get('pip', q.get('pip_size'))})
+    return out
+
+
+def quotes_log_inputs(path):
+    """Watcher quotes.jsonl: latest authenticated b and spot per (sym, g) plus the full (time, b, terms)
+    history. Records without 'terms' are legacy public quotes: history only (quotes_public_bars)."""
+    bars, spots, hist = {}, {}, []
+    for r in quote_records(path):
+        sym, g = r['sym'], r['g']
+        if r['terms'] == 'authenticated':
+            bars.setdefault(sym, {})[g] = r['b']
+            if r['b_public'] is not None:
+                hist.append({'sym': sym, 'g': g, 'b': r['b_public'], 't': r['t'], 'terms': 'public'})
+        if r['spot'] is not None and r['pip'] is not None:
+            spots.setdefault(sym, {})[g] = (float(r['spot']), int(r['pip']))
+        hist.append({'sym': sym, 'g': g, 'b': r['b'], 't': r['t'], 'terms': r['terms']})
     return bars, spots, hist
+
+
+def quotes_public_bars(path):
+    """{sym: {g: latest public b}} from quotes.jsonl: b_public, or b of a legacy (public) record."""
+    out = {}
+    for r in quote_records(path):
+        b = r['b_public'] if r['terms'] == 'authenticated' else r['b']
+        if b is not None:
+            out.setdefault(r['sym'], {})[r['g']] = b
+    return out
 
 
 def watcher_snapshots(d, series):
@@ -560,7 +662,10 @@ def watcher_snapshots(d, series):
 
 
 def a7_status(bars, hist, series, src):
-    """A7: 4% barriers unchanged (vs the pre-registered record), or the analysed window is homogeneous."""
+    """A7: the analysed 4% barrier is the one a logged-in account is sold (equal to the latest authenticated
+    quote) and did not change over the tick window: the barrier in force at the window start (the latest
+    authenticated quote at or before t0) and every authenticated quote inside it show one value. The
+    pre-registered (public-era) recorded value and the public quote are reported, information only."""
     rec = lib.load_prereg()['recorded']
     detail, status = [], 'PASS'
     for sym in lib.THRESH['decision_symbols']:
@@ -569,69 +674,140 @@ def a7_status(bars, hist, series, src):
             return {'status': 'NOT_EVALUATED', 'detail': f'no 4% barrier or no ticks for {sym}'}
         ep = series[sym][0]
         t0, t1 = int(np.min(ep)), int(np.max(ep))
-        inwin = [h['b'] for h in hist if h['sym'] == sym and abs(h['g'] - 0.04) < 1e-9
-                 and h.get('t') is not None and t0 <= int(h['t']) <= t1]
-        r = rec.get(sym, {}).get('0.04')
-        same = r is not None and abs(b / r - 1) <= lib.recorded_tol(r) + 1e-12
-        if len(set(inwin + [b])) > 1:
+        h4 = [h for h in hist if h['sym'] == sym and abs(h['g'] - 0.04) < 1e-9]
+        timed = lambda hs: sorted((h for h in hs if h.get('t') is not None), key=lambda h: int(h['t']))
+        auth = [h for h in h4 if h.get('terms') == 'authenticated']
+        pub = timed(h for h in h4 if h.get('terms') != 'authenticated')
+        info = f"recorded {rec.get(sym, {}).get('0.04')!r}, public {pub[-1]['b'] if pub else None!r}"
+        if not auth:
             status = 'FAIL'
-            detail.append(f'{sym}: 4% barrier changed inside the window {sorted(set(inwin + [b]))}; split with --start/--end')
-        elif same:
-            detail.append(f'{sym}: {b!r} = recorded ({src})')
-        else:
-            # the latest quote up to 1 h into the window must already show b (an older quote may show the old b)
-            early = sorted((h for h in hist if h['sym'] == sym and abs(h['g'] - 0.04) < 1e-9 and h.get('t') is not None
-                            and int(h['t']) <= t0 + 3600), key=lambda h: int(h['t']))
-            if early and early[-1]['b'] == b:
-                detail.append(f'{sym}: {b!r} differs from recorded {r} but is constant over the window')
-            else:
-                status = 'FAIL'
-                detail.append(f'{sym}: {b!r} differs from recorded {r}; change time unknown, split the analysis')
+            detail.append(f'{sym}: {b!r} ({src}): analysed barrier not verified against authenticated terms '
+                          f'(no authenticated 4% quote; {info})')
+            continue
+        at = timed(auth)
+        latest = (at or auth)[-1]['b']
+        if abs(latest / b - 1) > 1e-9:
+            status = 'FAIL'
+            detail.append(f'{sym}: analysed {b!r} ({src}) != latest authenticated quote {latest!r} ({info})')
+            continue
+        before = [h for h in at if int(h['t']) <= t0]
+        inwin = {h['b'] for h in at if t0 < int(h['t']) <= t1} | ({before[-1]['b']} if before else set())
+        if len(inwin | {latest}) > 1:           # a change inside the window, or after it (b not yet in force)
+            inwin |= {latest}
+            status = 'FAIL'
+            detail.append(f'{sym}: authenticated 4% barrier changed inside the window {sorted(inwin)}; '
+                          f'split with --start/--end ({info})')
+            continue
+        cov = any(int(h['t']) <= t1 for h in at)
+        detail.append(f"{sym}: {b!r} = latest authenticated quote ({src}); authenticated history covers the window: "
+                      + ('yes' if cov else 'no -- the barrier during the window is assumed, not observed') + f' ({info})')
     return {'status': status, 'detail': '; '.join(detail)}
+
+
+def merge_bars(dst, src):
+    for sym, v in src.items():
+        dst.setdefault(sym, {}).update(v)
+
+
+def fill_law_a(bars, say=print):
+    prereg = lib.load_prereg()
+    for sym, v in bars.items():
+        N = lib.sym_N(sym)
+        if N and 0.04 in v:
+            for g in lib.RATES:
+                r = lib.law_a_ratio(N, g, prereg)
+                if g not in v and r:
+                    v[g] = v[0.04] * r
+                    say(f'  {sym} g={g}: barrier filled from law A: {v[g]:.6g}')
+
+
+def eligible_range(R, gs):
+    ks = sorted(int(k) for k, c in ((R.get('eligibility') or {}).get(gs) or {}).items() if c.get('eligible'))
+    return 'none' if not ks else f'K{ks[0]}' if len(ks) == 1 else f'K{ks[0]}..K{ks[-1]}'
+
+
+def side_by_side(A, P, bars, pub_bars, diff):
+    """Compact comparison of the analysis on the public barriers (P) and on the authenticated ones (A)."""
+    L = ['', '=== public vs authenticated barriers (verdict uses authenticated)']
+    for sym in sorted(diff):
+        Ra, Rp = A['symbols'].get(sym, {}), P['symbols'].get(sym, {})
+        for g in sorted(diff[sym]):
+            gs, g2 = str(g), f'{g:.2f}'
+            L.append(f'{sym} g={g2}  b_pub {pub_bars[sym][g]!r}  b_auth {bars[sym][g]!r}')
+            for band in ('[0,.125)', '[.05,.125)', '[.75,1)'):
+                cell = lambda R: ((R.get('S3') or {}).get(gs) or {}).get('bands', {}).get(band)
+                f = lambda c: f"n={c['n']} G={c['G']:.5f}" if c else 'n/a'
+                L.append(f'   S3 {band:11s} pub {f(cell(Rp)):22s} auth {f(cell(Ra))}')
+            L.append(f'   eligible K     pub {eligible_range(Rp, gs):22s} auth {eligible_range(Ra, gs)}')
+            s7 = lambda R: ((R.get('S7') or {}).get(g2))
+            f7 = lambda c: (f"K{c['K']} phase {c['phase']:.4f} in-band {'yes' if c['in_band'] else 'no'}"
+                            f"{' ELIGIBLE' if c['eligible_now'] else ''}") if c else 'n/a'
+            L.append(f'   S7             pub {f7(s7(Rp)):40s} auth {f7(s7(Ra))}')
+        f6 = lambda c: (f"n={c['n']} {c['mean_ret_halfup']:+.4f} [{lib._f(c['ci99_halfup'][0], 4)}, "
+                        f"{lib._f(c['ci99_halfup'][1], 4)}]") if c and c.get('n') else 'n/a'
+        L.append(f"   S6 choice mean/trade 99%  pub {f6((Rp.get('S6') or {}).get('choice'))}  "
+                 f"auth {f6((Ra.get('S6') or {}).get('choice'))}")
+    da, dp = A.get('decision', {}), P.get('decision', {})
+    fci = lambda d: f"{lib._f(d.get('point'), 5)} [{lib._f(d.get('lo'), 5)}, {lib._f(d.get('hi'), 5)}]" if d else 'n/a'
+    L.append(f"pooled D        pub {fci(dp.get('D'))}  auth {fci(da.get('D'))}")
+    for k in ('V1', 'V2'):
+        L.append(f"pooled M {k}     pub {fci((dp.get('M') or {}).get(k))}  auth {fci((da.get('M') or {}).get(k))}")
+    f4 = lambda c: f"{c['contrast']:+.5f} z {c['z']:.2f}" if c else 'n/a'
+    L.append(f"C4 at 4%        pub {f4(dp.get('C4'))}  auth {f4(da.get('C4'))}")
+    L.append(f"verdict         pub {P['verdict']['label']} (information only)  auth {A['verdict']['label']}")
+    return L
 
 
 def run_analyze(args, outdir):
     print('\n== analyze')
-    bars, spots, pips, hist, recs = {}, {}, {}, [], []
+    bars, pub, spots, pips, hist, recs = {}, {}, {}, {}, [], []
     src = []
     d = args.from_dir
     lad_path = args.ladder or (os.path.join(d, 'ladder.json') if d and os.path.exists(os.path.join(d, 'ladder.json')) else None)
     if lad_path:
-        b_, s_, p_, h_ = ladder_inputs(read_json(lad_path))
-        bars.update(b_)
+        lad = read_json(lad_path)
+        b_, s_, p_, h_ = ladder_inputs(lad)
+        merge_bars(bars, b_)
+        merge_bars(pub, ladder_public_bars(lad))
         spots.update(s_)
         pips.update(p_)
         hist += h_
-        src.append('ladder')
+        src.append('authenticated ladder' if b_ else 'public ladder (legacy)')
     if d and os.path.exists(os.path.join(d, 'quotes.jsonl')):
-        b_, s_, h_ = quotes_log_inputs(os.path.join(d, 'quotes.jsonl'))
-        for sym, v in b_.items():
-            bars.setdefault(sym, {}).update(v)
+        qpath = os.path.join(d, 'quotes.jsonl')
+        b_, s_, h_ = quotes_log_inputs(qpath)
+        merge_bars(bars, b_)
+        merge_bars(pub, quotes_public_bars(qpath))
         for sym, v in s_.items():
             spots.setdefault(sym, {}).update(v)
             pips.setdefault(sym, next(iter(v.values()))[1])
         hist += h_
-        src.append('watcher quotes')
+        src.append('authenticated watcher quotes' if b_ else 'public watcher quotes (legacy)')
+    # a symbol with public quotes only (legacy inputs) falls back to them; A7 then fails on it
+    legacy = sorted(s for s in pub if s not in bars)
+    for sym in legacy:
+        bars[sym] = dict(pub[sym])
+    if legacy:
+        print(f"  no authenticated quote for {', '.join(legacy)}: analysing the PUBLIC (legacy) barrier; "
+              'A7 fails on a decision symbol')
     series = {}
     if d:
         series.update(load_tick_dir(d, pips))
     if args.local_json:
         series.update(load_local_json(args.local_json, outdir))
+    pub_run = {s: dict(v) for s, v in bars.items()}        # public barriers where known, else the analysed ones
+    merge_bars(pub_run, pub)
     over = parse_barriers(args.barrier)
+    merge_bars(bars, over)
     for sym, v in over.items():
-        bars.setdefault(sym, {}).update(v)
+        pub_run.setdefault(sym, {})
+        for g, b in v.items():
+            pub_run[sym].setdefault(g, b)
     if over:
-        src.append('--barrier')
+        src.append('override')
     if args.fill_lawA:
-        prereg = lib.load_prereg()
-        for sym, v in bars.items():
-            N = lib.sym_N(sym)
-            if N and 0.04 in v:
-                for g in lib.RATES:
-                    r = lib.law_a_ratio(N, g, prereg)
-                    if g not in v and r:
-                        v[g] = v[0.04] * r
-                        print(f'  {sym} g={g}: barrier filled from law A: {v[g]:.6g}')
+        fill_law_a(bars)
+        fill_law_a(pub_run, lambda s: None)
     if d:                                   # oracle on the whole archive, before any --symbols/--start/--end cut
         recs += watcher_snapshots(d, series)
     if args.symbols:
@@ -657,13 +833,29 @@ def run_analyze(args, outdir):
     a7 = a7_status(bars, hist, series, '+'.join(src) or 'none')
     print(f"  series: {', '.join(f'{k} ({len(v[0])})' for k, v in sorted(series.items()))}")
     print(f"  barriers from {' + '.join(src) or 'nowhere'}; oracle records {len(recs)}")
-    A, lines = lib.run_analysis(series, bars, spots=spots, oracle_records=recs, a7_info=a7,
-                                reps_ticks=args.reps_ticks, reps_model=args.reps_model)
-    A['inputs'] = {'from_dir': d, 'local_json': args.local_json, 'barrier_sources': src, 'barriers': bars,
+    kw = dict(spots=spots, oracle_records=recs, a7_info=a7, reps_ticks=args.reps_ticks, reps_model=args.reps_model)
+    A, lines = lib.run_analysis(series, bars, **kw)
+    A['inputs'] = {'from_dir': d, 'local_json': args.local_json, 'barrier_sources': src, 'terms': 'authenticated',
+                   'barriers': bars, 'public_barriers': pub, 'legacy_public_fallback': legacy,
                    'oracle_files': oracle_files, 'start': args.start, 'end': args.end}
+    diff = {s: [g for g, b in bars.get(s, {}).items() if pub_run.get(s, {}).get(g, b) != b] for s in series}
+    diff = {s: v for s, v in diff.items() if v}
+    block = []
+    if diff:
+        P, _ = lib.run_analysis(series, pub_run, log=lambda s: None, **kw)
+        P['inputs'] = dict(A['inputs'], terms='public', barriers=pub_run)
+        block = side_by_side(A, P, bars, pub_run, diff)
+        A['public_vs_authenticated'] = {'cells': diff, 'public_verdict': P['verdict']['label'],
+                                        'lines': block[2:]}
+        write_json(os.path.join(outdir, 'analysis_public.json'), P)
+        for line in block:
+            print(line)
+        print(lines[-1])
+    elif pub:
+        print('  public barriers equal the analysed ones on every analysed cell: no side-by-side')
     write_json(os.path.join(outdir, 'analysis.json'), A)
     with open(os.path.join(outdir, 'summary.txt'), 'x') as fh:
-        fh.write('\n'.join(lines) + '\n')
+        fh.write('\n'.join(lines[:-1] + block + lines[-1:]) + '\n')
     print(f"  wrote {os.path.join(outdir, 'summary.txt')}")
     return A
 
@@ -691,6 +883,8 @@ def main(argv=None):
     ap.add_argument('--reps-ticks', type=int, help=f"bootstrap reps for tick statistics (default {lib.THRESH['boot_ticks']})")
     ap.add_argument('--reps-model', type=int, help=f"bootstrap reps for model refits (default {lib.THRESH['boot_model']})")
     args = ap.parse_args(argv)
+    if args.cmd in ('ladder', 'all'):
+        need_token()                        # before any file or connection
     outdir = args.outdir or os.path.normpath(os.path.join(HERE, '..', 'results', f'accu_phase_{utc_tag()}'))
     os.makedirs(outdir, exist_ok=True)
     print(f'accu_phase_decide {args.cmd}  outdir {outdir}  (read-only: proposals and tick history only)')

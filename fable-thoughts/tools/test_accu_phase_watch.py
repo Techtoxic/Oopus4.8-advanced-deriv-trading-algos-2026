@@ -1,9 +1,10 @@
 """test_accu_phase_watch.py -- offline tests for accu_phase_watch.py (spec 4.3), no network.
 
 A fake DerivWS serves a synthetic market that moves with a fake clock: Crash feeds that follow the
-universal step law, vol-index feeds, recorded / law-A barriers, and ticks_stayed_in computed from the feed
-with the repo rule. Covered: IN_BAND enter/exit, BARRIER_CHANGE / MAXTICKS_CHANGE (and resume after a
-restart), gap refill and GAP_UNFILLED, archive append without duplicates (day rollover, restart, partial
+universal step law, vol-index feeds, recorded / law-A barriers (public), a 2.5% tighter barrier on the
+authenticated demo connection for CRASH1000 / CRASH500 / BOOM300N, and ticks_stayed_in computed from the
+feed with the repo rule. Covered: IN_BAND enter/exit, band state on the authenticated b, TERMS_GAP,
+BARRIER_CHANGE / MAXTICKS_CHANGE (and resume after a restart), DERIV_TOKEN required, gap refill and GAP_UNFILLED, archive append without duplicates (day rollover, restart, partial
 line), reconnect after exceptions, PIP_CHANGE / VOL_REGIME, --hours, Ctrl+C, the daily background analyze,
 and that the watcher's files are what accu_phase_decide analyze reads. Review regressions: a snapshot newer
 than the archive, a refill cut short, a failed write across midnight, '[' in --outdir, a dead stdout.
@@ -72,8 +73,13 @@ class FakeFeed:
             for g in lib.RATES:
                 self.maxt[(sym, g)] = MAXT[g]
         self.spot, self.latest, self.pip = {}, {}, {}      # overrides: proposal spot, 1-tick price, pip_size
+        self.tight = {'CRASH1000', 'CRASH500', 'BOOM300N'}  # authenticated accounts are sold 0.975 * b here
         self.fail_calls = self.fail_connect = 0
-        self.calls = []
+        self.calls, self.auth_calls = [], []
+
+    def auth_bar(self, sym, g):
+        b = self.bar[(sym, g)]
+        return float(f'{b * 0.975:.7g}') if sym in self.tight else b
 
     def px(self, sym, i):
         ep, P, dec = self.feed[sym]
@@ -94,11 +100,11 @@ class FakeFeed:
         return {'echo_req': p, 'msg_type': 'history', 'pip_size': self.pip.get(sym, dec),
                 'history': {'prices': prices, 'times': ep[idx].tolist()}}
 
-    def proposal(self, p):
+    def proposal(self, p, auth=False):
         sym, g = p['underlying_symbol'], p['growth_rate']
         ep, P, dec = self.feed[sym]
         i = int(np.searchsorted(ep, int(self.clock()), 'right')) - 1
-        b = self.bar[(sym, g)]
+        b = self.auth_bar(sym, g) if auth else self.bar[(sym, g)]
         stay = lib.knockout(P[i - 5000:i], P[i - 4999:i + 1], b)['stay']
         runs, inprog, _ = lib.run_lengths(~stay)
         spot = self.spot.get(sym, self.px(sym, i))
@@ -110,28 +116,33 @@ class FakeFeed:
 
 
 class FakeWS:
-    """Stands in for deriv_api.DerivWS(token="", timeout=15): call() / close(); can fail on demand."""
+    """Stands in for deriv_api.DerivWS: token '' is the public connection, a non-empty token with
+    account_type 'demo' the authenticated one; call() / close(); can fail on demand."""
     feed = None
     made = closed = 0
 
     def __init__(self, token=None, app_id=None, timeout=30, account_type=None):
-        assert token == '', 'the watcher must use the public connection'
+        assert token == '' or (token and account_type == 'demo'), 'public, or authenticated on the demo account'
         if FakeWS.feed.fail_connect > 0:
             FakeWS.feed.fail_connect -= 1
             raise OSError('mock: network is unreachable')
+        self.auth = bool(token)
+        self.account = {'account_type': 'demo', 'account_id': 'VRTC0'} if self.auth else {}
         FakeWS.made += 1
 
     def call(self, payload, retries=3):
         f = FakeWS.feed
         assert 'buy' not in payload and 'sell' not in payload, 'read-only tool sent an order'
         f.calls.append(payload)
+        if self.auth:
+            f.auth_calls.append(payload)
         if f.fail_calls > 0:
             f.fail_calls -= 1
             raise ConnectionError('mock: connection reset by peer')
         if 'ticks_history' in payload:
             return f.history(payload)
         if 'proposal' in payload:
-            return f.proposal(payload)
+            return f.proposal(payload, self.auth)
         return {'error': {'code': 'UnrecognisedRequest', 'message': 'mock'}}
 
     _call = call
@@ -158,6 +169,8 @@ class WatchBase(unittest.TestCase):
         FakeWS.feed, FakeWS.made, FakeWS.closed = self.feed, 0, 0
         self.saved = (apw.DerivWS, apw.PAUSE_PROPOSAL, apw.PAUSE_SYMBOL, derivfetch.SLEEP)
         apw.DerivWS, apw.PAUSE_PROPOSAL, apw.PAUSE_SYMBOL, derivfetch.SLEEP = FakeWS, 0, 0, 0
+        self.token = os.environ.get('DERIV_TOKEN')
+        os.environ['DERIV_TOKEN'] = 'fake'
         self.stdout = io.StringIO()
         self.redir = contextlib.redirect_stdout(self.stdout)
         self.redir.__enter__()
@@ -165,6 +178,10 @@ class WatchBase(unittest.TestCase):
     def tearDown(self):
         self.redir.__exit__(None, None, None)
         apw.DerivWS, apw.PAUSE_PROPOSAL, apw.PAUSE_SYMBOL, derivfetch.SLEEP = self.saved
+        if self.token is None:
+            os.environ.pop('DERIV_TOKEN', None)
+        else:
+            os.environ['DERIV_TOKEN'] = self.token
         self.tmp.cleanup()
 
     def make(self, *argv):
@@ -185,6 +202,7 @@ class TestQuotesAndAlerts(WatchBase):
         return round(w / b) / 1000                     # CRASH1000 spot whose 4% level is w = b*P
 
     def test_in_band_enter_exit(self):
+        self.feed.tight = set()             # same barrier on both connections: the band logic alone
         w = self.make('--symbols', 'CRASH1000', '--rates', '0.03', '0.04')
         w.connect()
         for level in (14.6, 14.08, 14.09, 14.2, 20.08):      # out, in, in, out, K=20 in phase but not eligible
@@ -214,41 +232,106 @@ class TestQuotesAndAlerts(WatchBase):
         w3.quote_round()
         self.assertEqual([a['state'] for a in self.alerts('IN_BAND')], ['enter', 'exit', 'enter'])
 
+    def test_band_state_uses_the_authenticated_barrier(self):
+        # public b puts CRASH1000 4% at K14 phase 0.08 (eligible, in band); the authenticated b (0.975x)
+        # puts the same spot at K13 phase ~0.73, and at that b no level is eligible: no IN_BAND
+        w = self.make('--symbols', 'CRASH1000', '--rates', '0.04')
+        w.connect()
+        self.feed.spot['CRASH1000'] = self.spot_at(14.08)
+        w.quote_round()
+        q = read_jsonl(os.path.join(self.out, 'quotes.jsonl'))[-1]
+        b_auth = self.feed.auth_bar('CRASH1000', 0.04)
+        self.assertEqual((q['terms'], q['b'], q['b_public']), ('authenticated', b_auth, 2.3454e-6))
+        P = round(q['spot'] * 1000)
+        self.assertEqual(q['K'], int(b_auth * P))
+        self.assertAlmostEqual(q['phase'], b_auth * P - q['K'], places=9)
+        self.assertEqual((q['K'], q['in_band'], q['eligible']), (13, False, False))
+        self.assertEqual(self.alerts('IN_BAND'), [])
+        # the oracle snapshot keeps the public proposal
+        w.quote_round(save_oracle=True)
+        snap = apd.read_json(glob.glob(os.path.join(self.out, 'oracle', 'CRASH1000_0.04_*.json'))[0])
+        self.assertEqual(snap['proposal']['contract_details']['tick_size_barrier'], 2.3454e-6)
+        # the authenticated connection only quotes; tick history stays public
+        self.assertTrue(self.feed.auth_calls)
+        self.assertTrue(all('proposal' in c for c in self.feed.auth_calls))
+
     def test_barrier_and_maxticks_change(self):
         w = self.make('--symbols', 'CRASH1000', 'CRASH500', '--rates', '0.04')
         w.connect()
-        self.feed.bar[('CRASH500', 0.04)] = 4.8e-6            # differs from the pre-registered 4.7141e-6
+        self.feed.bar[('CRASH500', 0.04)] = 4.8e-6            # public differs from the pre-registered 4.7141e-6
         w.quote_round()
-        bc = self.alerts('BARRIER_CHANGE')
-        self.assertEqual([(a['sym'], a['b'], a['frozen'], a['previous']) for a in bc],
-                         [('CRASH500', 4.8e-6, 4.7141e-6, None)])
-        self.feed.bar[('CRASH1000', 0.04)] = 2.36e-6
+        # first sight: no BARRIER_CHANGE (recorded values are public-era), one TERMS_GAP per cell
+        self.assertEqual(self.alerts('BARRIER_CHANGE'), [])
+        tg = self.alerts('TERMS_GAP')
+        self.assertEqual([(a['sym'], a['b'], a['b_public'], a['recorded']) for a in tg],
+                         [('CRASH1000', 2.286765e-6, 2.3454e-6, 2.3454e-6), ('CRASH500', 4.68e-6, 4.8e-6, 4.7141e-6)])
+        self.feed.bar[('CRASH1000', 0.04)] = 2.36e-6          # authenticated b moves to 2.301e-6
         self.feed.maxt[('CRASH1000', 0.04)] = 60
         self.clock.t += 120
         w.quote_round()
         self.clock.t += 120
         w.quote_round()                                        # unchanged: no new alerts
         bc = self.alerts('BARRIER_CHANGE')
-        self.assertEqual(len(bc), 2)
-        self.assertEqual((bc[1]['sym'], bc[1]['previous'], bc[1]['b'], bc[1]['first_seen']),
-                         ('CRASH1000', 2.3454e-6, 2.36e-6, 2.3454e-6))
-        self.assertEqual((bc[1]['equals_first_seen'], bc[1]['equals_frozen']), (False, False))
-        self.assertIsNotNone(bc[1]['epoch'])
+        self.assertEqual(len(bc), 1)
+        self.assertEqual((bc[0]['sym'], bc[0]['previous'], bc[0]['b'], bc[0]['first_seen'], bc[0]['b_public']),
+                         ('CRASH1000', 2.286765e-6, 2.301e-6, 2.286765e-6, 2.36e-6))
+        self.assertFalse(bc[0]['equals_first_seen'])
+        self.assertIsNotNone(bc[0]['epoch'])
+        self.assertEqual(len(self.alerts('TERMS_GAP')), 2)     # once per (sym, g), even as the gap moves
         mt = self.alerts('MAXTICKS_CHANGE')
         self.assertEqual([(a['sym'], a['previous'], a['maximum_ticks']) for a in mt], [('CRASH1000', 65, 60)])
-        # restart on the same outdir: the last b is read back, so a revert is still reported
+        # restart on the same outdir: the last authenticated b is read back, so a revert is still reported
         self.feed.bar[('CRASH1000', 0.04)] = 2.3454e-6
         w2 = self.make('--symbols', 'CRASH1000', 'CRASH500', '--rates', '0.04')
         w2.connect()
         w2.quote_round()
         bc = self.alerts('BARRIER_CHANGE')
-        self.assertEqual(len(bc), 3)
-        self.assertEqual((bc[2]['previous'], bc[2]['equals_first_seen'], bc[2]['equals_frozen']), (2.36e-6, True, True))
-        # the quote log is what accu_phase_decide analyze reads (latest b, spot, pip, change history)
-        bars, spots, hist = apd.quotes_log_inputs(os.path.join(self.out, 'quotes.jsonl'))
-        self.assertEqual(bars['CRASH1000'][0.04], 2.3454e-6)
+        self.assertEqual(len(bc), 2)
+        self.assertEqual((bc[1]['previous'], bc[1]['equals_first_seen']), (2.301e-6, True))
+        self.assertEqual(len(self.alerts('TERMS_GAP')), 2)     # the gap state was read back too
+        # the quote log is what accu_phase_decide analyze reads (latest authenticated b, spot, pip, history)
+        path = os.path.join(self.out, 'quotes.jsonl')
+        self.assertTrue(all(q['terms'] == 'authenticated' and 'b_public' in q for q in read_jsonl(path)))
+        bars, spots, hist = apd.quotes_log_inputs(path)
+        self.assertEqual(bars['CRASH1000'][0.04], 2.286765e-6)
+        self.assertEqual(apd.quotes_public_bars(path)['CRASH1000'][0.04], 2.3454e-6)
         self.assertEqual(spots['CRASH500'][0.04][1], 3)
-        self.assertEqual(sorted({h['b'] for h in hist if h['sym'] == 'CRASH1000'}), [2.3454e-6, 2.36e-6])
+        self.assertEqual(sorted({h['b'] for h in hist if h['sym'] == 'CRASH1000' and h['terms'] == 'authenticated'}),
+                         [2.286765e-6, 2.301e-6])
+
+    def test_legacy_quotes_do_not_seed_the_authenticated_state(self):
+        # a quotes.jsonl from the public-only watcher: resuming on it must not report the first
+        # authenticated quote as a BARRIER_CHANGE
+        os.makedirs(self.out)
+        with open(os.path.join(self.out, 'quotes.jsonl'), 'w') as fh:
+            fh.write(json.dumps({'sym': 'CRASH1000', 'g': 0.04, 'b': 2.3454e-6, 'in_band': False}) + '\n')
+        w = self.make('--symbols', 'CRASH1000', '--rates', '0.04')
+        w.connect()
+        w.quote_round()
+        self.assertEqual(self.alerts('BARRIER_CHANGE'), [])
+        self.assertEqual(len(self.alerts('TERMS_GAP')), 1)
+
+    def test_needs_token(self):
+        os.environ.pop('DERIV_TOKEN')
+        with self.assertRaises(SystemExit) as cm:
+            apw.main(['--outdir', self.out, '--symbols', 'CRASH1000', '--hours', '0.1'], self.clock, self.clock.sleep)
+        self.assertIn('needs DERIV_TOKEN (demo)', str(cm.exception))
+        self.assertEqual((FakeWS.made, self.feed.calls), (0, []))
+        self.assertFalse(os.path.exists(self.out))
+
+    def test_refuses_a_real_account(self):
+        class RealWS(FakeWS):
+            def __init__(self, *a, **k):
+                super().__init__(*a, **k)
+                if self.auth:
+                    self.account = {'account_type': 'real', 'account_id': 'CR0'}
+        apw.DerivWS = RealWS
+        with self.assertRaises(SystemExit) as cm:
+            apw.main(['--outdir', self.out, '--symbols', 'CRASH1000', '--rates', '0.04', '--hours', '0.1',
+                      '--analyze-interval', '0'], self.clock, self.clock.sleep)
+        self.assertIn('did not open a demo account', str(cm.exception))
+        self.assertEqual(self.feed.calls, [])
+        self.assertEqual(FakeWS.closed, 2)
 
     def test_pip_change_and_vol_regime(self):
         self.assertAlmostEqual(lib.vol_sigma_pips('R_100', 381, 2), 9.595, places=3)
@@ -413,7 +496,7 @@ class TestLoop(WatchBase):
         w = self.make('--symbols', 'CRASH1000', '--rates', '0.04', '--vol-symbols', '--analyze-interval', '0')
         self.feed.fail_connect = 1                             # the first connect fails
         w.step()
-        self.assertEqual((w.n['errors'], FakeWS.made), (1, 1))
+        self.assertEqual((w.n['errors'], FakeWS.made), (1, 2))            # one public + authenticated pair
         self.assertIn(apw.RECONNECT_S, self.clock.sleeps)
         self.assertEqual(len(read_jsonl(os.path.join(self.out, 'quotes.jsonl'))), 1)   # the oracle round ran
         self.assertIsNotNone(w.last_epoch['CRASH1000'])
@@ -422,9 +505,10 @@ class TestLoop(WatchBase):
         self.clock.t += 125
         w.step()
         self.assertEqual(w.n['errors'], 2)
-        self.assertEqual(FakeWS.closed, closed + 1)
+        self.assertEqual(FakeWS.closed, closed + 2)            # both connections are dropped
         self.assertIsNotNone(w.ws)                             # reconnected for the next task in the same step
-        self.assertEqual(FakeWS.made, 2)
+        self.assertIsNotNone(w.ws_auth)
+        self.assertEqual(FakeWS.made, 4)
         self.clock.t += apw.RETRY_S + 1
         w.step()                                               # the failed task is retried and succeeds
         self.assertEqual(w.n['errors'], 2)
@@ -433,7 +517,7 @@ class TestLoop(WatchBase):
         self.assertIn('OSError: mock: network is unreachable -- closing, reconnect in 5s', log)
         self.assertIn('ConnectionError: mock: connection reset by peer -- closing, reconnect in 5s', log)
         with open(os.path.join(self.out, 'watch.log')) as fh:
-            self.assertIn('connected (public, read-only) #2', fh.read())
+            self.assertIn('connected (public + authenticated demo, read-only) #2', fh.read())
 
     def test_run_hours_limit_and_oracle_files(self):
         w = apw.main(['--outdir', self.out, '--symbols', 'CRASH1000', '--rates', '0.04', '--hours', '0.1',
@@ -442,7 +526,8 @@ class TestLoop(WatchBase):
         self.assertEqual(w.n['errors'], 0)
         self.assertEqual(w.n['quotes'], 3)                     # t = 0 (oracle round), 120, 240 s
         self.assertIsNone(w.ws)
-        self.assertGreaterEqual(FakeWS.closed, 1)
+        self.assertIsNone(w.ws_auth)
+        self.assertGreaterEqual(FakeWS.closed, 2)
         files = glob.glob(os.path.join(self.out, 'oracle', 'CRASH1000_0.04_*.json'))
         self.assertEqual(len(files), 1)
         # the snapshot and the archive are what analyze's oracle reader expects: primary mode, rule confirmed
@@ -457,6 +542,8 @@ class TestLoop(WatchBase):
         self.assertIn('stopped: quotes 3', text)
         kinds = {next(k for k in ('proposal', 'ticks_history') if k in c) for c in self.feed.calls}
         self.assertEqual(kinds, {'proposal', 'ticks_history'})   # read-only requests only
+        self.assertFalse(any('buy' in c or 'sell' in c for c in self.feed.calls))
+        self.assertTrue(all('proposal' in c for c in self.feed.auth_calls))
 
     def test_ctrl_c_stops_cleanly(self):
         self.clock.stop_at = self.T0 + 200
@@ -541,7 +628,9 @@ class TestDailyAnalyze(WatchBase):
         A = apd.read_json(os.path.join(adir, 'analysis.json'))
         self.assertEqual(A['oracle']['n_records'], 4)          # the watcher's oracle/ snapshots were aligned
         self.assertEqual(A['decision']['OR1'], 'PASS')
-        self.assertEqual(A['decision']['A7'], 'PASS')          # barriers from quotes.jsonl, unchanged
+        self.assertEqual(A['decision']['A7'], 'PASS')          # authenticated barriers from quotes.jsonl, unchanged
+        self.assertEqual(A['inputs']['barriers']['CRASH1000']['0.04'], 2.286765e-6)
+        self.assertTrue(os.path.exists(os.path.join(adir, 'analysis_public.json')))
         self.assertEqual(set(A['symbols']), {'CRASH1000', 'CRASH500'})
         # a restart schedules the next analyze 24 h after the last summary.log entry
         w2 = self.make('--symbols', 'CRASH1000')

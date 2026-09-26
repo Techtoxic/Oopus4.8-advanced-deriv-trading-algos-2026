@@ -7,11 +7,17 @@ Band occupancy depends on spot, and the history endpoint only reaches back about
 The watcher also logs every quote, so a barrier change (criterion A7) is caught with its time, and it
 saves ticks_stayed_in snapshots for the knockout-rule oracle (OR-1..3).
 
-LOOP (one persistent public DerivWS(token=""); on any exception: close, sleep 5 s, reconnect)
-  quotes   every --quote-interval s: an ACCU proposal per (sym, g) -> quotes.jsonl. Alerts:
-           IN_BAND enter/exit (cell G_min >= 1.0005 and phase in the band), BARRIER_CHANGE (b differs
-           from the previous quote, or from the pre-registered value at first sight), MAXTICKS_CHANGE
-  oracle   every --oracle-interval s: the same round, also saving each full proposal to
+LOOP (two persistent connections: a public DerivWS(token="") for ticks, pip sizes and oracle snapshots,
+and an authenticated DEMO one (DERIV_TOKEN) for the ACCU proposals a logged-in account is sold, whose
+tick_size_barrier is tighter than the public quote on some symbols; on any exception both are closed,
+5 s sleep, both reconnect)
+  quotes   every --quote-interval s: an ACCU proposal per (sym, g) on both connections -> quotes.jsonl
+           (b = authenticated barrier, b_public, terms='authenticated'). Band state and alerts use the
+           authenticated b: IN_BAND enter/exit (cell G_min >= 1.0005 and phase in the band),
+           BARRIER_CHANGE (the authenticated b differs from the previous authenticated quote; the
+           pre-registered values are public-era quotes, so first sight never alerts), TERMS_GAP (once per
+           (sym, g): the public b differs from the authenticated one; info), MAXTICKS_CHANGE
+  oracle   every --oracle-interval s: the same round, also saving each full PUBLIC proposal to
            oracle/<SYM>_<g>_<last_tick_epoch>.json
   ticks    every --tick-interval s: the last 1500 ticks -> ticks/<SYM>/<YYYY-MM-DD>.csv (epoch,quote),
            epochs newer than the archive only. A gap is refetched with target gap + 1500 (at most
@@ -24,9 +30,10 @@ LOOP (one persistent public DerivWS(token=""); on any exception: close, sleep 5 
 Alerts go to alerts.jsonl and stdout; every printed line also goes to watch.log. Restarting on the same
 --outdir resumes: archive ends, first-seen barriers, max ticks, pips and band states are read back.
 
-RUN (from fable-thoughts/tools; needs websocket-client>=1.6, numpy, scipy; no token, no orders)
-  python3 accu_phase_watch.py --hours 0                         # forever; Ctrl+C stops cleanly
-  python3 accu_phase_watch.py --cells ../results/accu_phase_<UTC>/analysis.json
+RUN (from fable-thoughts/tools; needs websocket-client>=1.6, numpy, scipy; DERIV_TOKEN with a DEMO
+account, used for proposals only: no orders)
+  DERIV_TOKEN=<demo token> python3 accu_phase_watch.py --hours 0            # forever; Ctrl+C stops cleanly
+  DERIV_TOKEN=<demo token> python3 accu_phase_watch.py --cells ../results/accu_phase_<UTC>/analysis.json
 Default --outdir is ../results/accu_phase_watch/ (fixed, so a restart continues the same archive).
 Send back weekly: summary.log, alerts.jsonl, quotes.jsonl (barriers and spots: analyze needs it), and
 zips of oracle/ and ticks/. The repo .gitignore skips *.log: if you send them through git, add
@@ -115,6 +122,10 @@ def load_cells(path):
 # ------------------------------------------------------------------ watcher
 class Watcher:
     def __init__(self, args, clock=time.time, sleep=time.sleep):
+        self.token = os.environ.get('DERIV_TOKEN')
+        if not self.token:
+            raise SystemExit('accu_phase_watch needs DERIV_TOKEN (demo) to read the barrier a logged-in account '
+                             'is sold; tick history stays public')
         self.a = args
         self.clock, self.sleep = clock, sleep
         self.outdir = os.path.abspath(args.outdir)
@@ -130,11 +141,11 @@ class Watcher:
         self.symbols = list(dict.fromkeys(list(args.symbols) + extra))
         self.rates = [float(g) for g in args.rates]
         self.vol_symbols = list(args.vol_symbols)
-        self.ws = None
+        self.ws = self.ws_auth = None           # public (ticks, pip, oracle) and authenticated demo (quotes)
         self.proc = None                        # the running background analyze: Popen, dir, stdout file, start
         self.first_b, self.last_b, self.last_maxt, self.in_band = {}, {}, {}, {}
         self.pip, self.vol_below, self.last_epoch, self.cell_cache = {}, {}, {}, {}
-        self.refill_tries = {}
+        self.refill_tries, self.gap_seen = {}, set()
         self.n = dict(quotes=0, alerts=0, ticks=0, oracle=0, errors=0, connects=0, analyses=0)
         self.intervals = {'hourly': HOURLY_S, 'oracle': args.oracle_interval, 'quotes': args.quote_interval,
                           'ticks': args.tick_interval, 'analyze': args.analyze_interval}
@@ -190,9 +201,11 @@ class Watcher:
                     except (ValueError, KeyError, TypeError):
                         continue
                     nq += 1
-                    if q.get('b') is not None:
+                    if q.get('b') is not None and q.get('terms') == 'authenticated':   # legacy rows are public
                         self.first_b.setdefault(key, q['b'])
                         self.last_b[key] = q['b']
+                        if q.get('b_public') is not None and q['b_public'] != q['b']:
+                            self.gap_seen.add(key)
                     if q.get('maximum_ticks') is not None:
                         self.last_maxt[key] = q['maximum_ticks']
                     if 'in_band' in q:
@@ -236,17 +249,28 @@ class Watcher:
         if DerivWS is None:
             from deriv_api import DerivWS as _W
             DerivWS = _W
-        self.ws = DerivWS(token="", timeout=15)
+        self.drop()
+        try:
+            self.ws = DerivWS(token="", timeout=15)
+            self.ws_auth = DerivWS(token=self.token, account_type='demo', timeout=15)
+        except Exception:
+            self.drop()
+            raise
+        kind = self.ws_auth.account.get('account_type')
+        if kind != 'demo':
+            self.drop()
+            raise SystemExit(f'DERIV_TOKEN did not open a demo account (got {kind!r})')
         self.n['connects'] += 1
-        self.log(f"connected (public, read-only) #{self.n['connects']}")
+        self.log(f"connected (public + authenticated demo, read-only) #{self.n['connects']}")
 
     def drop(self):
-        if self.ws is not None:
-            try:
-                self.ws.close()
-            except Exception:
-                pass
-        self.ws = None
+        for c in (self.ws, self.ws_auth):
+            if c is not None:
+                try:
+                    c.close()
+                except Exception:
+                    pass
+        self.ws = self.ws_auth = None
 
     def check_pip(self, sym):
         """One-tick history request: pip_size (PIP_CHANGE on a change) and the last price."""
@@ -268,19 +292,22 @@ class Watcher:
         for sym in self.symbols:
             parts = []
             for g in self.rates:
-                q = self.echo(apd.quote, self.ws, sym, g)
+                q = self.echo(apd.quote, self.ws_auth, sym, g)     # the terms a logged-in account is sold
                 self.sleep(PAUSE_PROPOSAL)
+                qp = self.echo(apd.quote, self.ws, sym, g)         # public: diagnostic b_public, oracle
+                self.sleep(PAUSE_PROPOSAL)
+                if save_oracle and qp:
+                    self.save_oracle(sym, g, qp)
                 if not q or q.get('b') is None:
                     continue
-                st = self.on_quote(sym, g, q)
-                if save_oracle:
-                    self.save_oracle(sym, g, q)
+                st = self.on_quote(sym, g, q, qp.get('b') if qp else None)
                 if 'K' in st:
                     parts.append(f"{g * 100:.0f}%:K{st['K']}/{st['phase']:.3f}{'*' if st.get('in_band') else ''}")
             marks.append(f"{sym} {' '.join(parts) or 'no quote'}")
         self.log(('oracle+quotes ' if save_oracle else 'quotes ') + ' | '.join(marks))
 
-    def on_quote(self, sym, g, q):
+    def on_quote(self, sym, g, q, b_pub=None):
+        """q is the authenticated quote: band state and alerts use its b; b_pub is logged alongside."""
         b, spot = q['b'], q.get('spot')
         pip = self.pip.get(sym)
         if pip is None:
@@ -290,10 +317,11 @@ class Watcher:
         t = self.clock()
         self.append_jsonl('quotes.jsonl', {
             'utc': utc_str(t), 't': round(t, 3), 'epoch': q.get('spot_time'), 'sym': sym, 'g': g, 'b': b,
-            'b_repr': q.get('b_repr'), 'spot': spot, 'pip': pip, 'maximum_ticks': q.get('maximum_ticks'),
+            'b_repr': q.get('b_repr'), 'b_public': b_pub, 'terms': 'authenticated', 'spot': spot, 'pip': pip, 'maximum_ticks': q.get('maximum_ticks'),
             'barrier_spot_distance': q.get('barrier_spot_distance'), 'last_tick_epoch': q.get('last_tick_epoch'), **st})
         self.n['quotes'] += 1
-        self.check_barrier(sym, g, b, q)
+        self.check_terms(sym, g, b, b_pub, q)
+        self.check_barrier(sym, g, b, q, b_pub)
         self.check_maxticks(sym, g, q)
         self.check_band(sym, g, b, q, pip, st)
         return st
@@ -322,20 +350,27 @@ class Watcher:
                        in_band=bool(c.get('eligible') and lo <= ph < hi))
         return out
 
-    def check_barrier(self, sym, g, b, q):
+    def check_terms(self, sym, g, b, b_pub, q):
+        """TERMS_GAP (info, once per (sym, g)): the public quote differs from the authenticated one."""
         key = (sym, g)
-        rec = self.recorded.get(key)
-        off_rec = rec is not None and abs(b / rec - 1) > lib.recorded_tol(rec) + 1e-12
-        common = dict(sym=sym, g=g, b=b, b_repr=repr(b), epoch=q.get('spot_time'), frozen=rec)
+        if b_pub is None or b_pub == b or key in self.gap_seen:
+            return
+        self.gap_seen.add(key)
+        self.alert('TERMS_GAP', sym=sym, g=g, b=b, b_public=b_pub, rel=round(b / b_pub - 1, 6),
+                   recorded=self.recorded.get(key), epoch=q.get('spot_time'),
+                   reason='the authenticated barrier (used) differs from the public quote (info)')
+
+    def check_barrier(self, sym, g, b, q, b_pub=None):
+        """BARRIER_CHANGE: the authenticated b differs from the previous authenticated quote. The recorded
+        (pre-registered) values are public-era quotes, so a first sight that differs from them is no alert."""
+        key = (sym, g)
         if key not in self.first_b:
             self.first_b[key] = b
-            if off_rec:
-                self.alert('BARRIER_CHANGE', **common, previous=None, first_seen=b,
-                           reason='first quote differs from the pre-registered value (A7: split the analysis)')
         elif b != self.last_b.get(key):
-            self.alert('BARRIER_CHANGE', **common, previous=self.last_b.get(key), first_seen=self.first_b[key],
-                       equals_first_seen=b == self.first_b[key], equals_frozen=None if rec is None else not off_rec,
-                       reason='b changed (A7: split the analysis at this epoch with --start/--end)')
+            self.alert('BARRIER_CHANGE', sym=sym, g=g, b=b, b_repr=repr(b), epoch=q.get('spot_time'),
+                       previous=self.last_b.get(key), first_seen=self.first_b[key],
+                       equals_first_seen=b == self.first_b[key], b_public=b_pub, recorded=self.recorded.get(key),
+                       reason='authenticated b changed (A7: split the analysis at this epoch with --start/--end)')
         self.last_b[key] = b
 
     def check_maxticks(self, sym, g, q):
@@ -519,7 +554,7 @@ class Watcher:
                 if name == 'analyze':
                     self.start_analyze()
                     continue
-                if self.ws is None:
+                if self.ws is None or self.ws_auth is None:
                     self.connect()
                 if name == 'hourly':
                     self.hourly()

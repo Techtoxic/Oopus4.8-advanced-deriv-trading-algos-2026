@@ -4,7 +4,8 @@
   2. analyze --local-json on the repo's CRASH/BOOM json.gz files (CRASH500 band G = 1.00239, C4)
   3. knockout rule at exact-integer w (Decimal tie handling), rule variants, verdict logic
   4. mock-ws end to end: `all` (ladder + oracle + collect + analyze) against a fake DerivWS whose
-     proposal / ticks_history responses are shaped like remaining_specs.json
+     proposal / ticks_history responses are shaped like remaining_specs.json; authenticated (demo)
+     proposals are sold a tighter barrier than public ones on CRASH1000 / CRASH500 / BOOM300N
 
 Run: python3 -m unittest test_accu_phase -v      (no network; about a minute)
 """
@@ -31,6 +32,20 @@ def quiet():
 def read_text(path):
     with open(path) as fh:
         return fh.read()
+
+
+def set_token(value):
+    """Set (or with None unset) DERIV_TOKEN; returns the previous value for restore_token."""
+    prev = os.environ.get('DERIV_TOKEN')
+    if value is None:
+        os.environ.pop('DERIV_TOKEN', None)
+    else:
+        os.environ['DERIV_TOKEN'] = value
+    return prev
+
+
+def restore_token(prev):
+    set_token(prev)
 
 
 # ------------------------------------------------------------------ 3. knockout rule
@@ -288,7 +303,11 @@ class TestAnalyzeLocal(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(self.out, 'ticks', 'CRASH500.npz')))
         self.assertTrue(self.summary[-1].startswith('VERDICT: INCONCLUSIVE'))   # no oracle offline -> A6 open
         self.assertEqual(self.A['decision']['OR1'], 'NOT_EVALUATED')
-        self.assertEqual(self.A['decision']['A7'], 'PASS')
+        # --barrier overrides only: never verified against an authenticated quote
+        self.assertEqual(self.A['decision']['A7'], 'FAIL')
+        self.assertIn('not verified against authenticated terms', self.A['a7']['detail'])
+        self.assertEqual(self.A['inputs']['barrier_sources'], ['override'])
+        self.assertFalse(os.path.exists(os.path.join(self.out, 'analysis_public.json')))
 
     def test_watcher_csv_layout_gives_same_map(self):
         # ticks/<SYM>/<YYYY-MM-DD>.csv (header epoch,quote) + quotes.jsonl, as the watcher writes them
@@ -369,13 +388,13 @@ class FakeMarket:
         return {'echo_req': p, 'msg_type': 'history', 'pip_size': dec,
                 'history': {'prices': [round(int(v) * 10.0 ** -dec, dec) for v in P[idx]], 'times': ep[idx].tolist()}}
 
-    def proposal(self, p):
+    def proposal(self, p, auth=False):
         sym, g = p['underlying_symbol'], p['growth_rate']
         if (sym, g) not in self.bar:
             return {'echo_req': p, 'msg_type': 'proposal',
                     'error': {'code': 'ContractBuyValidationError', 'message': 'Trading is not offered for this asset.'}}
         ep, P, dec = self.feed[sym]
-        b = self.bar[(sym, g)]
+        b = auth_barrier(sym, self.bar[(sym, g)]) if auth else self.bar[(sym, g)]   # stayed_in: public b
         spot = round(int(P[-1]) * 10.0 ** -dec, dec)
         dist = (Decimal(repr(b)) * Decimal(repr(spot))).quantize(Decimal(1).scaleb(-(dec + 1)), ROUND_CEILING)
         return {'echo_req': p, 'msg_type': 'proposal', 'proposal': {
@@ -393,24 +412,34 @@ class FakeMarket:
 
 
 MARKET = None
+TIGHT = ('CRASH1000', 'CRASH500', 'BOOM300N')     # logged-in accounts are sold a tighter barrier here
+
+
+def auth_barrier(sym, b):
+    return float(f'{b * 0.975:.7g}') if sym in TIGHT else b
 
 
 class FakeDerivWS:
-    """Stands in for deriv_api.DerivWS(token="", timeout=15): same call()/close() surface."""
+    """Stands in for deriv_api.DerivWS: token '' is the public connection, a non-empty token with
+    account_type 'demo' the authenticated one (same call()/close() surface, account filled in)."""
     calls = []
+    auth_calls = []
 
     def __init__(self, token=None, app_id=None, timeout=30, account_type=None):
-        assert token == '', 'the decision tool must use the public connection'
-        self.account = {}
+        assert token == '' or (token and account_type == 'demo'), 'public, or authenticated on the demo account'
+        self.auth = bool(token)
+        self.account = {'account_type': 'demo', 'account_id': 'VRTC0'} if self.auth else {}
         self._rid = itertools.count(1)
 
     def call(self, payload, retries=3):
         FakeDerivWS.calls.append(payload)
+        if self.auth:
+            FakeDerivWS.auth_calls.append(payload)
         assert 'buy' not in payload and 'sell' not in payload, 'read-only tool sent an order'
         if 'ticks_history' in payload:
             r = MARKET.history(payload)
         elif 'proposal' in payload:
-            r = MARKET.proposal(payload)
+            r = MARKET.proposal(payload, self.auth)
         else:
             r = {'error': {'code': 'UnrecognisedRequest', 'message': 'mock'}}
         r['req_id'] = next(self._rid)
@@ -428,6 +457,7 @@ class TestMockEndToEnd(unittest.TestCase):
         global MARKET
         MARKET = FakeMarket()
         cls.saved = (apd.DerivWS, apd.PAUSE_PROPOSAL, apd.PAUSE_SYMBOL, derivfetch.SLEEP)
+        cls.token = set_token('fake')
         apd.DerivWS, apd.PAUSE_PROPOSAL, apd.PAUSE_SYMBOL, derivfetch.SLEEP = FakeDerivWS, 0, 0, 0
         cls.tmp = tempfile.TemporaryDirectory()
         cls.out = os.path.join(cls.tmp.name, 'all')
@@ -441,6 +471,7 @@ class TestMockEndToEnd(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         apd.DerivWS, apd.PAUSE_PROPOSAL, apd.PAUSE_SYMBOL, derivfetch.SLEEP = cls.saved
+        restore_token(cls.token)
         cls.tmp.cleanup()
 
     def load(self, name):
@@ -457,14 +488,70 @@ class TestMockEndToEnd(unittest.TestCase):
         lad = self.load('ladder.json')
         ch = lad['checks']
         self.assertTrue(ch['L1']['ok'])
-        self.assertTrue(ch['L2']['ok'])
+        # L2 compares the authenticated quote with the (public-era) recorded value: the Crash barriers
+        # sold to a logged-in account are tighter, so they read CHANGED while the public quote matches
+        l2 = {(r['sym'], r['g']): r for r in ch['L2']['rows']}
+        self.assertFalse(ch['L2']['ok'])
+        for key in (('CRASH1000', '0.04'), ('CRASH500', '0.04'), ('CRASH1000', '0.03')):
+            self.assertEqual((l2[key]['ok'], l2[key]['public_ok'], l2[key]['terms']), (False, True, 'authenticated'))
+        self.assertEqual((l2[('BOOM500', '0.03')]['ok'], l2[('BOOM500', '0.03')]['public_ok']), (True, True))
+        self.assertIn('(public 2.3454e-06, = recorded)', self.stdout)
         self.assertTrue(ch['L3']['ok'])
         self.assertIn('ceil', ch['L4']['consistent_with_all'])
         self.assertNotIn('BOOM50', {k for k, v in lad['rounds'][0]['quotes'].items() if v})
         self.assertIn('error ContractBuyValidationError', self.stdout)       # server errors are echoed
         self.assertIn('error InvalidSymbol', self.stdout)
         d = lad['derived']['CRASH500']['0.04'][0]
-        self.assertAlmostEqual(d['w'], 4.7141e-6 * d['spot'] * 1000, places=9)
+        self.assertAlmostEqual(d['w'], auth_barrier('CRASH500', 4.7141e-6) * d['spot'] * 1000, places=9)
+
+    def test_ladder_stores_authenticated_barrier(self):
+        lad = self.load('ladder.json')
+        self.assertEqual(lad['terms'], 'authenticated')
+        qs = lad['rounds'][0]['quotes']
+        for sym in ('CRASH1000', 'CRASH500', 'BOOM500', 'R_100'):
+            for gs, q in qs[sym].items():
+                pub = MARKET.bar[(sym, float(gs))]
+                self.assertEqual((q['terms'], q['b'], q['b_public']), ('authenticated', auth_barrier(sym, pub), pub))
+        self.assertEqual(qs['CRASH1000']['0.04']['b'], 2.286765e-06)
+        self.assertEqual(lad['stake_check']['CRASH1000']['1'], 2.286765e-06)      # stake check: authenticated
+        self.assertIn('0.04:2.286765e-06 (pub 2.3454e-06)', self.stdout)
+        self.assertIn('[5/5 differ]', self.stdout)
+        self.assertIn('differs from the public one on 10/20 quoted cells', self.stdout)
+        # analysed set = authenticated; public set = b_public
+        bars, _, _, hist = apd.ladder_inputs(lad)
+        self.assertEqual(bars['CRASH1000'][0.04], 2.286765e-06)
+        self.assertEqual(apd.ladder_public_bars(lad)['CRASH1000'][0.04], 2.3454e-06)
+        self.assertEqual({h['terms'] for h in hist}, {'authenticated', 'public'})
+        A = self.load('analysis.json')
+        self.assertEqual(A['inputs']['barriers']['CRASH1000']['0.04'], 2.286765e-06)
+        self.assertEqual(A['inputs']['public_barriers']['CRASH1000']['0.04'], 2.3454e-06)
+        self.assertEqual(A['inputs']['barrier_sources'], ['authenticated ladder'])
+        w = A['symbols']['CRASH1000']['S7']['0.04']
+        self.assertAlmostEqual(w['w'], 2.286765e-06 * w['spot'] * 1000, places=9)
+        self.assertIn('= latest authenticated quote', A['a7']['detail'])
+        self.assertIn('authenticated history covers the window: yes', A['a7']['detail'])
+
+    def test_side_by_side_block(self):
+        A, P = self.load('analysis.json'), self.load('analysis_public.json')
+        self.assertEqual(P['inputs']['barriers']['CRASH1000']['0.04'], 2.3454e-06)
+        lines = read_text(os.path.join(self.out, 'summary.txt')).strip().split('\n')
+        i = lines.index('=== public vs authenticated barriers (verdict uses authenticated)')
+        block = lines[i:-1]
+        self.assertTrue(lines[-1].startswith('VERDICT: '))
+        self.assertEqual(lines[-1], f"VERDICT: {A['verdict']['label']} {'; '.join(A['verdict']['reasons'])}")
+        self.assertEqual(sum(l.startswith('VERDICT:') for l in lines), 1)
+        text = '\n'.join(block)
+        self.assertIn('CRASH1000 g=0.04  b_pub 2.3454e-06  b_auth 2.286765e-06', text)
+        self.assertIn('CRASH500 g=0.01', text)
+        self.assertNotIn('BOOM500 g=', text)                         # same barrier on both: not listed
+        for key in ('S3 [0,.125)', 'S3 [.05,.125)', 'S3 [.75,1)', 'eligible K', 'S6 choice', 'S7 ',
+                    'pooled D', 'pooled M V1', 'pooled M V2', 'C4 at 4%'):
+            self.assertIn(key, text)
+        self.assertIn(f"verdict         pub {P['verdict']['label']} (information only)  auth {A['verdict']['label']}", text)
+        self.assertEqual(A['public_vs_authenticated']['public_verdict'], P['verdict']['label'])
+        # the two analyses really used different barriers
+        s3 = lambda X: {k: (v['n'], v['G']) for k, v in X['symbols']['CRASH1000']['S3']['0.04']['bands'].items()}
+        self.assertNotEqual(s3(A), s3(P))
 
     def test_oracle_alignment(self):
         o = self.load('oracle_align.json')
@@ -510,6 +597,13 @@ class TestMockEndToEnd(unittest.TestCase):
     def test_read_only(self):
         kinds = {next(k for k in ('proposal', 'ticks_history') if k in c) for c in FakeDerivWS.calls}
         self.assertEqual(kinds, {'proposal', 'ticks_history'})
+        self.assertFalse(any('buy' in c or 'sell' in c for c in FakeDerivWS.calls))
+        # the authenticated connection only quotes; tick history and pip sizes stay public
+        self.assertTrue(FakeDerivWS.auth_calls)
+        self.assertTrue(all('proposal' in c and c['contract_type'] == 'ACCU' for c in FakeDerivWS.auth_calls))
+        # the oracle snapshots are public proposals (the list matches the public barrier)
+        snap = self.load('oracle_snap1.json')['snaps']['CRASH1000']['0.04']
+        self.assertEqual(snap['b'], 2.3454e-06)
         amounts = {c['amount'] for c in FakeDerivWS.calls if 'proposal' in c}
         self.assertEqual(amounts, {10, 1, 1.13, 100})
 
@@ -552,14 +646,68 @@ class TestReviewRegressions(unittest.TestCase):
     def test_a7_new_barrier_must_be_quoted_from_the_window_start(self):
         t0 = 1790000000
         series = {s: (np.arange(t0, t0 + 400000), None, 3) for s in lib.THRESH['decision_symbols']}
-        old = {'CRASH1000': 2.3454e-6, 'CRASH500': 4.7141e-6}
+        old = {'CRASH1000': 2.28724e-6, 'CRASH500': 4.598554e-6}
         bars = {'CRASH1000': {0.04: 2.4e-6}, 'CRASH500': {0.04: 4.8e-6}}
 
         def hist(t_new):                    # old barrier quoted 100 s before the window, the new one at t_new
-            return [{'sym': s, 'g': 0.04, 'b': b, 't': t} for s in old
+            return [{'sym': s, 'g': 0.04, 'b': b, 't': t, 'terms': 'authenticated'} for s in old
                     for t, b in ((t0 - 100, old[s]), (t_new, bars[s][0.04]))]
-        self.assertEqual(apd.a7_status(bars, hist(t0 + 5000), series, 'test')['status'], 'FAIL')
+        a = apd.a7_status(bars, hist(t0 + 5000), series, 'test')
+        self.assertEqual(a['status'], 'FAIL')           # the old barrier was in force when the window opened
+        self.assertIn('changed inside the window', a['detail'])
         self.assertEqual(apd.a7_status(bars, hist(t0), series, 'test')['status'], 'PASS')   # split at the change
+        a = apd.a7_status(bars, hist(t0 + 400001), series, 'test')     # new b quoted only after the window
+        self.assertEqual(a['status'], 'FAIL')
+
+    def test_a7_uses_authenticated_terms(self):
+        t0 = 1790000000
+        series = {s: (np.arange(t0, t0 + 400000), None, 3) for s in lib.THRESH['decision_symbols']}
+        pub = {'CRASH1000': 2.3454e-6, 'CRASH500': 4.7141e-6}
+        auth = {'CRASH1000': 2.28724e-6, 'CRASH500': 4.598554e-6}
+        hist = [{'sym': s, 'g': 0.04, 'b': b, 't': t0 + 10, 'terms': terms} for s in pub
+                for terms, b in (('public', pub[s]), ('authenticated', auth[s]))]
+        a = apd.a7_status({s: {0.04: pub[s]} for s in pub}, hist, series, 'ladder')     # analysed = public
+        self.assertEqual(a['status'], 'FAIL')
+        self.assertIn('!= latest authenticated quote 2.28724e-06', a['detail'])
+        a = apd.a7_status({s: {0.04: auth[s]} for s in auth}, hist, series, 'ladder')   # analysed = authenticated
+        self.assertEqual(a['status'], 'PASS')
+        self.assertIn('authenticated history covers the window: yes', a['detail'])
+        self.assertIn('recorded 2.3454e-06, public 2.3454e-06', a['detail'])
+        late = [dict(h, t=t0 + 500000) for h in hist]                  # quoted only after the window
+        a = apd.a7_status({s: {0.04: auth[s]} for s in auth}, late, series, 'ladder')
+        self.assertEqual(a['status'], 'PASS')
+        self.assertIn('covers the window: no -- the barrier during the window is assumed, not observed', a['detail'])
+        # a legacy (public-only) ladder: its barrier is analysed as a fallback, A7 fails
+        lad = {'pip': {'CRASH1000': 3, 'CRASH500': 3}, 'rounds': [{'quotes': {
+            s: {'0.04': {'b': pub[s], 'spot': 3000.0, 'spot_time': t0 + 10}} for s in pub}}]}
+        bars, _, _, h = apd.ladder_inputs(lad)
+        self.assertEqual(bars, {})
+        self.assertEqual(apd.ladder_public_bars(lad), {s: {0.04: pub[s]} for s in pub})
+        self.assertEqual({x['terms'] for x in h}, {'public'})
+        a = apd.a7_status(apd.ladder_public_bars(lad), h, series, 'public ladder (legacy)')
+        self.assertEqual(a['status'], 'FAIL')
+        self.assertIn('analysed barrier not verified against authenticated terms', a['detail'])
+
+    def test_legacy_ladder_falls_back_to_public_and_fails_a7(self):
+        ep, P = crash_feed(500, 3000.0, 20000, 13)
+        lad = {'pip': {'CRASH500': 3}, 'rounds': [{'quotes': {'CRASH500': {'0.04': {
+            'b': 4.7141e-6, 'spot': P[-1] / 1000, 'spot_time': int(ep[-1])}}}}]}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'CRASH500.json.gz')
+            with gzip.open(path, 'wt') as fh:
+                json.dump([[int(t), p / 1000] for t, p in zip(ep, P)], fh)
+            with open(os.path.join(tmp, 'ladder.json'), 'w') as fh:
+                json.dump(lad, fh)
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                apd.main(['analyze', '--local-json', path, '--ladder', os.path.join(tmp, 'ladder.json'),
+                          '--outdir', os.path.join(tmp, 'out'), '--reps-ticks', '50', '--reps-model', '20'])
+            A = apd.read_json(os.path.join(tmp, 'out', 'analysis.json'))
+            self.assertFalse(os.path.exists(os.path.join(tmp, 'out', 'analysis_public.json')))
+        self.assertEqual(A['inputs']['barriers']['CRASH500']['0.04'], 4.7141e-6)
+        self.assertEqual(A['inputs']['legacy_public_fallback'], ['CRASH500'])
+        self.assertIn('analysing the PUBLIC (legacy) barrier', buf.getvalue())
+        self.assertIn('S3', A['symbols']['CRASH500'])
 
     def test_quotes_log_accepts_verbatim_proposal_response(self):
         resp = {'echo_req': {'proposal': 1, 'underlying_symbol': 'CRASH500', 'growth_rate': 0.04}, 'msg_type': 'proposal',
@@ -570,8 +718,57 @@ class TestReviewRegressions(unittest.TestCase):
             with open(path, 'w') as fh:
                 fh.write(json.dumps(resp) + '\n')
             bars, spots, hist = apd.quotes_log_inputs(path)
-        self.assertEqual(bars, {'CRASH500': {0.04: 4.7141e-06}})
-        self.assertEqual(hist, [{'sym': 'CRASH500', 'g': 0.04, 'b': 4.7141e-06, 't': 1790000000}])
+            pub = apd.quotes_public_bars(path)
+        # a verbatim response has no 'terms': a legacy public quote, not an analysed barrier
+        self.assertEqual(bars, {})
+        self.assertEqual(pub, {'CRASH500': {0.04: 4.7141e-06}})
+        self.assertEqual(hist, [{'sym': 'CRASH500', 'g': 0.04, 'b': 4.7141e-06, 't': 1790000000, 'terms': 'public'}])
+        rec = {'sym': 'CRASH500', 'g': 0.04, 'b': 4.598554e-06, 'b_public': 4.7141e-06, 'terms': 'authenticated',
+               'epoch': 1790000100, 'spot': 3000.1, 'pip': 3}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'quotes.jsonl')
+            with open(path, 'w') as fh:
+                fh.write(json.dumps(resp) + '\n' + json.dumps(rec) + '\n')
+            bars, spots, hist = apd.quotes_log_inputs(path)
+            pub = apd.quotes_public_bars(path)
+        self.assertEqual(bars, {'CRASH500': {0.04: 4.598554e-06}})
+        self.assertEqual(pub, {'CRASH500': {0.04: 4.7141e-06}})
+        self.assertEqual(spots, {'CRASH500': {0.04: (3000.1, 3)}})
+        self.assertEqual([(h['b'], h['terms']) for h in hist],
+                         [(4.7141e-06, 'public'), (4.7141e-06, 'public'), (4.598554e-06, 'authenticated')])
+
+    def test_ladder_needs_token(self):
+        saved, prev = apd.DerivWS, set_token(None)
+        apd.DerivWS = FakeDerivWS
+        n = len(FakeDerivWS.calls)
+        try:
+            with tempfile.TemporaryDirectory() as tmp, quiet():
+                for cmd in ('ladder', 'all'):
+                    with self.assertRaises(SystemExit) as cm:
+                        apd.main([cmd, '--outdir', os.path.join(tmp, cmd)])
+                    self.assertIn('ladder needs DERIV_TOKEN (demo)', str(cm.exception))
+                    self.assertFalse(os.path.exists(os.path.join(tmp, cmd)))
+                with self.assertRaises(SystemExit):
+                    apd.auth_ws()
+        finally:
+            apd.DerivWS = saved
+            restore_token(prev)
+        self.assertEqual(len(FakeDerivWS.calls), n)
+
+    def test_auth_ws_refuses_a_real_account(self):
+        class RealWS(FakeDerivWS):
+            def __init__(self, *a, **k):
+                super().__init__(*a, **k)
+                self.account = {'account_type': 'real', 'account_id': 'CR0'}
+        saved, prev = apd.DerivWS, set_token('fake')
+        apd.DerivWS = RealWS
+        try:
+            with self.assertRaises(SystemExit) as cm:
+                apd.auth_ws()
+            self.assertIn('did not open a demo account', str(cm.exception))
+        finally:
+            apd.DerivWS = saved
+            restore_token(prev)
 
     def test_analyze_with_ticks_from_one_hour_only(self):
         # every tick in hours of one parity: the cross-fit (C5) is n/a instead of an IndexError
