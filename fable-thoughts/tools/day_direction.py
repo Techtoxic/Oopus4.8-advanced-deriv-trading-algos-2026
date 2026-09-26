@@ -70,15 +70,17 @@ def fetch_hourly(ws, sym, hours):
 
 
 def day_matrix(candles):
-    """Complete UTC days only -> (days, R[d, 24]) of close-to-close log returns (the first hour of a day
-    from the previous day's last close), plus the flat hourly returns used for the drift test."""
+    """Complete UTC days only -> (days, R[d, 24]) of within-day log returns, plus the flat hourly returns
+    used for the drift test. Hour 0 runs from its own open: the midnight gap is left out, because
+    RDBULL/RDBEAR reset to 1000 there and that jump would cancel the day's move (on continuous indices
+    the gap is one tick)."""
     a = np.asarray(candles, float)
     ep, op, cl = a[:, 0].astype(np.int64), a[:, 1], a[:, 2]
+    day, hod = ep // 86400, (ep % 86400) // 3600
     prev = np.concatenate([[op[0]], cl[:-1]])
     contiguous = np.concatenate([[False], np.diff(ep) == 3600])
-    prev = np.where(contiguous, prev, op)
+    prev = np.where(contiguous & (hod != 0), prev, op)
     r = np.log(cl) - np.log(prev)
-    day, hod = ep // 86400, (ep % 86400) // 3600
     rows, days = [], []
     for d in np.unique(day):
         m = day == d
@@ -126,7 +128,8 @@ def analyse(sym, candles, n_perm=2000, seed=11):
     for k in ('H2_VR', 'H3_half', 'H3_early', 'H4_hour_mean', 'H4_hour_vol'):
         nv = np.asarray(null[k])
         p = (1 + np.sum(nv >= obs[k])) / (n_perm + 1)      # one-sided: the claim predicts "larger"
-        out[k] = {'obs': obs[k], 'null_mean': float(nv.mean()), 'null_q99': float(np.quantile(nv, 0.99)), 'p': float(p)}
+        out[k] = {'obs': obs[k], 'null_mean': float(nv.mean()), 'null_q99': float(np.quantile(nv, 0.99)), 'p': float(p),
+                  'p_floor': 1 / (n_perm + 1), 'z': float((obs[k] - nv.mean()) / nv.std(ddof=1))}
     out['P_same_sign_halves'] = obs['P_same_sign_halves']
     out['P_day_up'] = float(np.mean(R.sum(1) > 0))
     out['day_return_sd'] = float(R.sum(1).std(ddof=1))
@@ -162,7 +165,8 @@ def main(argv=None):
                                  formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
     ap.add_argument('--symbols', nargs='+', default=list(SYMBOLS))
     ap.add_argument('--hours', type=int, default=8760)
-    ap.add_argument('--perm', type=int, default=2000)
+    ap.add_argument('--perm', type=int, help='permutations per symbol (default: enough that the smallest '
+                                              'possible p is a third of the Bonferroni threshold)')
     ap.add_argument('--from-dir')
     ap.add_argument('--outdir')
     a = ap.parse_args(argv)
@@ -175,6 +179,11 @@ def main(argv=None):
         print(s)
         lines.append(s)
 
+    thr = ALPHA / (len(a.symbols) * len(TESTS))
+    n_perm = a.perm or math.ceil(3 / thr)
+    if 1 / (n_perm + 1) >= thr:
+        say(f'WARNING: {n_perm} permutations cannot reach p < {thr:.2e}; H2-H4 can never flag')
+    say(f'{n_perm} permutations per symbol (smallest possible p {1 / (n_perm + 1):.1e}, threshold {thr:.2e})')
     results = []
     ws = None
     for sym in a.symbols:
@@ -201,8 +210,8 @@ def main(argv=None):
         if not candles:
             say(f'{sym}: no candles')
             continue
-        print(f'  {sym}: {len(candles)} hours, testing ...', flush=True)
-        results.append(analyse(sym, candles, a.perm))
+        print(f'  {sym}: {len(candles)} hours, {n_perm} permutations ...', flush=True)
+        results.append(analyse(sym, candles, n_perm))
     if ws is not None:
         ws.close()
     report(results, say)

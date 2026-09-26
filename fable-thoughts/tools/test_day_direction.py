@@ -59,5 +59,20 @@ class TestDayDirection(unittest.TestCase):
         self.assertGreater(res['H4_hour_mean']['p'], 0.001)
 
 
+    def test_reset_index_keeps_its_daily_drift(self):
+        """RDBULL-like: every day restarts at 1000 and drifts up; the midnight reset must not cancel it."""
+        rng = np.random.default_rng(4)
+        c = []
+        for d in range(120):
+            r = rng.normal(0.004, 0.02, 24)
+            px = 1000 * np.exp(np.cumsum(r))
+            op = np.concatenate([[1000.0], px[:-1]])
+            c += [[T0 + 86400 * d + 3600 * h, float(o), float(x)] for h, (o, x) in enumerate(zip(op, px))]
+        res = dd.analyse('RD', c, n_perm=200)
+        self.assertGreater(res['P_day_up'], 0.75)
+        self.assertLess(res['H1_drift']['p'], 1e-6)
+        self.assertGreater(res['H4_hour_mean']['p'], 0.001)          # no fake hour-0 effect from the reset
+
+
 if __name__ == '__main__':
     unittest.main()
