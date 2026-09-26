@@ -182,6 +182,26 @@ class TestOracleRegression(unittest.TestCase):
         self.assertLessEqual(r['shuffle_null']['max_longest'], 4)
         self.assertAlmostEqual(r['eps_sweep']['eps_min'], -0.009, places=6)
 
+    def test_list_trailing_feed_is_realigned(self):
+        # The same snapshot with the feed running 1-2 ticks past the list's in-progress entry used to
+        # score 0/100 on every rule; the bounded lag search recovers the full match, and no further.
+        spec = apd.read_json(os.path.join(FIX, 'oracle_snapshots_2026-06-07.json'))['accumulators']['R_100']
+        s = spec['barrier_info']
+        t, P = load_opus(R100_CSV)
+        keep = t <= s['last_tick_epoch']
+        t, P = t[keep], P[keep]
+        step = int(t[-1] - t[-2])
+        for extra, lag in ((1, 1), (2, 2), (3, None)):
+            te = np.concatenate([t, t[-1] + step * np.arange(1, extra + 1)])
+            Pe = np.concatenate([P, np.repeat(P[-1], extra)])     # zero moves: no knockouts added
+            r = lib.oracle_align(te, Pe, s['tick_size_barrier'], s['ticks_stayed_in'], int(te[-1]),
+                                 eps_sweep=False, n_shuffle=2)
+            ri = r['rules']['raw_incl']
+            if lag is None:
+                self.assertEqual(ri['matched'], 0)
+            else:
+                self.assertEqual((r['lag'], ri['matched'], ri['covered'], ri['full']), (lag, 100, 100, True))
+
     def test_1hz100v_75_of_75(self):
         r = self.res['1HZ100V']
         self.assertEqual(r['mode'], 'sub')
@@ -463,7 +483,7 @@ class TestMockEndToEnd(unittest.TestCase):
                          [r['rules']['raw_incl']['matched'] for r in o2['records']])
         self.assertEqual(rep['CRASH500']['n'], 30000)
         A = apd.read_json(os.path.join(out2, 'analysis.json'))
-        self.assertEqual(A['oracle']['n_records'], 60)           # outdir's alignment + the re-run's
+        self.assertEqual(A['oracle']['n_records'], 30)           # --oracle replaces the outdir's alignment
         self.assertEqual(A['decision']['OR1'], 'PASS')
 
     def test_read_only(self):

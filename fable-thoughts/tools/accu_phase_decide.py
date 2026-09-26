@@ -366,10 +366,10 @@ def align_snapshots(snaps, ticks):
                     print(f"  {sym:10s} g={gs} {snap.get('label')}: {r.get('error')}")
                     continue
                 es = r.get('eps_sweep') or {}
-                print(f"  {sym:10s} g={gs} {snap.get('label')} {r['mode']:7s} raw_incl {ru['raw_incl']['matched']}/"
+                print(f"  {sym:10s} g={gs} {snap.get('label')} {r['mode']:7s} lag {r.get('lag', 0)}  raw_incl {ru['raw_incl']['matched']}/"
                       f"{ru['raw_incl']['covered']}  ceil_strict {ru['ceil_strict']['matched']}  near_incl "
                       f"{ru['near_incl']['matched']}  K-1 {ru['K-1']['matched']}  K+1 {ru['K+1']['matched']}  "
-                      f"shuffled max {r['shuffle_null']['max_longest']}  eps [{lib._f(es.get('eps_min'), 4)}, "
+                      f"longest {ru['raw_incl']['longest']}  shuffled max {r['shuffle_null']['max_longest']}  eps [{lib._f(es.get('eps_min'), 4)}, "
                       f"{lib._f(es.get('eps_max'), 4)}]  touches {sum(d['exact_touch'] for d in r['disagreements'])}")
     return records
 
@@ -648,7 +648,7 @@ def run_analyze(args, outdir):
         raise SystemExit('analyze: no tick series found (use --from-dir or --local-json)')
     # oracle records
     oracle_files = list(args.oracle or [])
-    if d:
+    if d and not oracle_files:              # explicit --oracle files replace the ones saved in --from-dir
         oracle_files += sorted(glob.glob(os.path.join(glob.escape(d), 'oracle_align*.json')))
     for f in oracle_files:
         recs += read_json(f).get('records', [])
@@ -683,7 +683,7 @@ def main(argv=None):
     ap.add_argument('--barrier', nargs='+', action='extend', help='analyze: SYM=g:b overrides, e.g. CRASH500=0.04:4.7141e-6')
     ap.add_argument('--fill-lawA', action='store_true', help='analyze: fill missing rates from b_4%% x law-A ratio')
     ap.add_argument('--ladder', help='analyze: ladder.json to take barriers/spots from')
-    ap.add_argument('--oracle', nargs='+', help='analyze: extra oracle_align*.json files')
+    ap.add_argument('--oracle', nargs='+', help='analyze: oracle_align*.json files to use instead of those in --from-dir')
     ap.add_argument('--start', type=int, help='analyze: first epoch (split at a barrier change)')
     ap.add_argument('--end', type=int, help='analyze: last epoch')
     ap.add_argument('--reps-ticks', type=int, help=f"bootstrap reps for tick statistics (default {lib.THRESH['boot_ticks']})")

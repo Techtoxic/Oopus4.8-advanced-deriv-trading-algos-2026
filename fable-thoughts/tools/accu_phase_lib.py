@@ -357,6 +357,7 @@ def boot_mean(vals, blk, reps, seed=1):
 ORACLE_RULES = ('raw_incl', 'raw_strict', 'ceil_incl', 'ceil_strict', 'near_incl', 'near_strict',
                 'floor_incl', 'floor_strict', 'K-1', 'K+1')
 QUANT_RULES = ORACLE_RULES[:8]
+ORACLE_MAX_LAG = 2                      # feed ticks the house list's in-progress entry may trail by
 
 
 def rule_breaches(P, b, rules=ORACLE_RULES):
@@ -478,8 +479,25 @@ def oracle_align(ep, P, b, L, last_epoch, interval=None, window=30000, eps_sweep
     ep, P = ep[s0:], P[s0:]
     n = len(P) - 1
     mode = 'primary' if int(ep[-1]) == int(last_epoch) else 'sub'
+    lag = 0
+    if mode == 'primary' and len(P) > ORACLE_MAX_LAG + 3:
+        # The list's in-progress entry can trail last_tick_epoch by a tick or two (the snapshot is read
+        # between feed and contract updates). A one-tick offset zeroes every rule at once, so pick the lag
+        # (0..ORACLE_MAX_LAG) that the best rule aligns at; all rules and controls are scored at that lag.
+        best = (-1, 0)
+        for lg in range(ORACLE_MAX_LAG + 1):
+            Pl = P[:len(P) - lg]
+            hl, cov = house_from_end(len(Pl) - 1, L)
+            brl, _ = rule_breaches(Pl, b, rules)
+            m = max(backward_match(*run_lengths(brl[r])[:2], L, cov) for r in rules)
+            if m > best[0]:
+                best = (m, lg)
+        lag = best[1]
+        if lag:
+            ep, P = ep[:len(ep) - lag], P[:len(P) - lag]
+            n = len(P) - 1
     res.update(mode=mode, interval=int(iv), n_ticks=int(len(P)), feed_start=int(ep[0]), feed_end=int(ep[-1]),
-               feed_short_of_snapshot_s=int(last_epoch - ep[-1]))
+               feed_short_of_snapshot_s=int(last_epoch - ep[-1]), lag=lag)
     if n < 2:
         res['error'] = 'too few contiguous ticks'
         return res
@@ -590,7 +608,9 @@ def oracle_outcomes(records):
                 out['HALT'].append(f"{r['sym']} g={r['g']} {r.get('snapshot')}: best rule matches {best:.0%}")
     e0, o3 = {}, {}
     for r in records:
-        if family(r.get('sym', '')) == 'vol' or r.get('mode') != 'primary':
+        # house verdicts are only trustworthy where some rule reproduced every covered run
+        if family(r.get('sym', '')) == 'vol' or r.get('mode') != 'primary' or not r.get('rules') \
+                or not any(v['full'] for v in r['rules'].values()):
             continue
         for ev in r.get('E0_events', []):
             e0[(r['sym'], r['g'], ev['epoch'])] = ev['house']
@@ -1318,8 +1338,13 @@ def run_analysis(series, barriers, spots=None, oracle_records=None, a7_info=None
             elig = eligibility({g: lv['b'] for g, lv in lvs.items()}, kr, mp, law)
             R['eligibility'] = {str(g): {str(K): c for K, c in cells.items()} for g, cells in elig.items()}
             ecells = [(g, K, c['gmin']) for g, cells in elig.items() for K, c in cells.items() if c['eligible']]
+            by_g = {}
+            for g, K, v in sorted(ecells):
+                by_g.setdefault(g, []).append((K, v))
             say('eligible cells (G_min >= %.4f on [.05,.125)): ' % T['eligible_gmin'] +
-                (', '.join(f'{g:.2f}/K{K} {v:.5f}' for g, K, v in sorted(ecells)) or 'none in range'))
+                ('; '.join(f'{g:.2f} K{c[0][0]}' + (f'..K{c[-1][0]} ({len(c)} levels)' if len(c) > 1 else '') +
+                           f' G_min {max(v for _, v in c):.5f}..{min(v for _, v in c):.5f}'
+                           for g, c in by_g.items()) or 'none in range'))
         # S3 survival map
         R['S3'] = {}
         for g, lv in lvs.items():
