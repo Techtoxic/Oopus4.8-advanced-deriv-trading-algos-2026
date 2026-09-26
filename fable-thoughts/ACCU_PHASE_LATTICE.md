@@ -235,3 +235,29 @@ public-era record and could not catch it. Re-evaluated on authenticated barriers
 the CRASH1000 4% best band is about -6.3% per trade and BOOM300N 3% about -11.5% on the same ticks.
 Commit 3bfac08 moves all proposals to authenticated demo terms and makes A7 check the barrier you can
 buy. Status: read-only until an authenticated cell passes on fresh data not seen during design.
+
+### 6b. Re-analysis on authenticated barriers (2026-09-26)
+
+Same ticks and oracle, barriers from `ladder_auth` (demo token; 45/85 cells tighter than public). Rules,
+phase band and thresholds unchanged from the pre-registration; nothing re-fitted.
+
+| | public barriers (information only) | authenticated barriers |
+|---|---|---|
+| pooled D | 1.00327 [1.00202, 1.00454] | n/a: no tradable cell |
+| tradable cells (A3) | CRASH1000/500 2-5% | 0 |
+| C1 (model calibration) | pass | 0.98949, fails A5 |
+| oracle OR-1 | PASS | PASS (unchanged) |
+| A7 | n/a | PASS, but the barrier inside the window is assumed, not observed |
+| CRASH500 frozen-band replay | positive | **-8.78%/trade, 99% [-11.0%, -6.6%]** |
+| verdict | PASS-B | **INCONCLUSIVE** (A3, A4, A5 not met) |
+
+- **CRASH lattice: closed on buyable terms.** The tightening lands exactly on the cells where the band
+  had positive G; CRASH1000 4% has no in-band ticks and its best band is G 0.98151. The one eligible level
+  (CRASH1000 5%, K7) is not reached at current spot. The untouched cells (CRASH300N/600/900, 1% rates)
+  never had an edge.
+- **N=50/150N: closed.** All cells below 1 on both barrier sets; the oracle already refuted the model.
+- **BOOM300N: not tested.** Eligible only at K2-K4, which needs spot ~170-211 (currently ~400). If spot
+  gets there, it needs a fresh-data test at authenticated barriers, pre-registered before the data is seen.
+- **Reading of the evidence:** Deriv's authenticated terms appear to be set per cell to remove the lattice
+  surplus. The public proposal is not the price a customer pays, so any edge measured on public quotes is
+  not evidence of anything.
