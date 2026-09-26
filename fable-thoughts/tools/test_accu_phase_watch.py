@@ -623,7 +623,7 @@ class TestDailyAnalyze(WatchBase):
         with open(os.path.join(self.out, 'summary.log')) as fh:
             lines = fh.read().strip().split('\n')
         self.assertEqual(len(lines), 1)
-        self.assertRegex(lines[0], r'analyze/\d{8}T\d{6}Z D \S+ \[.*\| VERDICT: (PASS-A|PASS-B|KILL|INCONCLUSIVE) ')
+        self.assertRegex(lines[0], r'analyze[\\/]\d{8}T\d{6}Z D \S+ \[.*\| VERDICT: (PASS-A|PASS-B|KILL|INCONCLUSIVE) ')
         adir = glob.glob(os.path.join(self.out, 'analyze', '*'))[0]
         A = apd.read_json(os.path.join(adir, 'analysis.json'))
         self.assertEqual(A['oracle']['n_records'], 4)          # the watcher's oracle/ snapshots were aligned
