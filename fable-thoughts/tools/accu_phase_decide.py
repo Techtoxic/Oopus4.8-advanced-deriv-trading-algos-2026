@@ -369,6 +369,8 @@ def align_snapshots(snaps, ticks):
                 print(f"  {sym:10s} g={gs} {snap.get('label')} {r['mode']:7s} lag {r.get('lag', 0)}  raw_incl {ru['raw_incl']['matched']}/"
                       f"{ru['raw_incl']['covered']}  ceil_strict {ru['ceil_strict']['matched']}  near_incl "
                       f"{ru['near_incl']['matched']}  K-1 {ru['K-1']['matched']}  K+1 {ru['K+1']['matched']}  "
+                      f"completed {ru['raw_incl'].get('completed_matched', '-')}/{ru['raw_incl']['covered'] - 1}  "
+                      f"in-progress delta {ru['raw_incl'].get('in_progress_delta', '-')}  "
                       f"longest {ru['raw_incl']['longest']}  shuffled max {r['shuffle_null']['max_longest']}  eps [{lib._f(es.get('eps_min'), 4)}, "
                       f"{lib._f(es.get('eps_max'), 4)}]  touches {sum(d['exact_touch'] for d in r['disagreements'])}")
     return records

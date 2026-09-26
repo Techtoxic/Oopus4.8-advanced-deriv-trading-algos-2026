@@ -509,7 +509,15 @@ def oracle_align(ep, P, b, L, last_epoch, interval=None, window=30000, eps_sweep
         for r in rules:
             runs, inprog, _ = run_lengths(br[r])
             m = backward_match(runs, inprog, L, covered)
+            # completed runs only: runs[-k] vs L[-k-1], ignoring the in-progress entry, whose count can
+            # differ from the replay when the list is refreshed off the last_tick_epoch tick
+            mc = 0
+            while mc < covered - 1 and mc < len(runs) and int(runs[-mc - 1]) == int(L[-mc - 2]):
+                mc += 1
             per[r] = {'matched': m, 'covered': covered, 'full': bool(covered > 0 and m == covered),
+                      'completed_matched': mc, 'completed_full': bool(covered > 1 and mc == covered - 1),
+                      'completed_frac': mc / (covered - 1) if covered > 1 else 0.0,
+                      'in_progress_delta': (inprog - L[-1]) if inprog is not None else None,
                       'frac': m / covered if covered else 0.0, 'n_breaches': int(br[r].sum()),
                       'in_progress': inprog, 'longest': longest_match(runs, L[:-1])[0],
                       'transition_disagreements_vs_house': int((br[r][known] != (house[known] == 1)).sum())}
@@ -594,7 +602,8 @@ def oracle_outcomes(records):
     for sym in T['decision_symbols']:
         recs = [r for r in records if r.get('sym') == sym and r.get('rules') and r.get('mode') == 'primary'
                 and (r.get('covered') or 0) >= T['OR1_min_runs']]
-        fails = [f"{r.get('snapshot')} g={r.get('g')}" for r in recs if not r['rules']['raw_incl']['full']]
+        fails = [f"{r.get('snapshot')} g={r.get('g')}" for r in recs
+                 if not r['rules']['raw_incl'].get('completed_full', r['rules']['raw_incl']['full'])]
         status = 'NOT_EVALUATED' if not recs else ('FAIL' if fails else 'PASS')
         out['OR1'][sym] = {'status': status, 'qualifying_snapshots': len(recs), 'failures': fails}
     st = [v['status'] for v in out['OR1'].values()]
@@ -603,7 +612,7 @@ def oracle_outcomes(records):
         if family(r.get('sym', '')) == 'vol' or not r.get('rules') or r.get('mode') != 'primary':
             continue
         if (r.get('covered') or 0) >= T['HALT_min_runs']:
-            best = max(v['frac'] for v in r['rules'].values())
+            best = max(v.get('completed_frac', v['frac']) for v in r['rules'].values())
             if best < T['HALT_match']:
                 out['HALT'].append(f"{r['sym']} g={r['g']} {r.get('snapshot')}: best rule matches {best:.0%}")
     e0, o3 = {}, {}

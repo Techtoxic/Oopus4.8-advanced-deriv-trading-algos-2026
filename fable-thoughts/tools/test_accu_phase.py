@@ -202,6 +202,27 @@ class TestOracleRegression(unittest.TestCase):
             else:
                 self.assertEqual((r['lag'], ri['matched'], ri['covered'], ri['full']), (lag, 100, 100, True))
 
+    def test_completed_runs_scored_without_in_progress_entry(self):
+        # An in-progress entry off by a few ticks no longer zeroes the rule; a wrong completed run still fails.
+        spec = apd.read_json(os.path.join(FIX, 'oracle_snapshots_2026-06-07.json'))['accumulators']['R_100']
+        s = spec['barrier_info']
+        t, P = load_opus(R100_CSV)
+        L = list(s['ticks_stayed_in'])
+        bad_ip = L[:-1] + [L[-1] + 3]
+        r = lib.oracle_align(t, P, s['tick_size_barrier'], bad_ip, s['last_tick_epoch'], eps_sweep=False, n_shuffle=2)
+        ri = r['rules']['raw_incl']
+        self.assertEqual((ri['matched'], ri['completed_matched'], ri['completed_full'], ri['in_progress_delta']),
+                         (0, 99, True, -3))
+        rec = dict(r, sym='CRASH1000', g=0.04, snapshot='t')
+        self.assertEqual(lib.oracle_outcomes([rec])['OR1']['CRASH1000']['status'], 'PASS')
+        bad_run = list(L)
+        bad_run[-5] += 1
+        r2 = lib.oracle_align(t, P, s['tick_size_barrier'], bad_run, s['last_tick_epoch'], eps_sweep=False, n_shuffle=2)
+        self.assertFalse(r2['rules']['raw_incl']['completed_full'])
+        self.assertEqual(r2['rules']['raw_incl']['completed_matched'], 3)
+        rec2 = dict(r2, sym='CRASH1000', g=0.04, snapshot='t')
+        self.assertEqual(lib.oracle_outcomes([rec2])['OR1']['CRASH1000']['status'], 'FAIL')
+
     def test_1hz100v_75_of_75(self):
         r = self.res['1HZ100V']
         self.assertEqual(r['mode'], 'sub')
