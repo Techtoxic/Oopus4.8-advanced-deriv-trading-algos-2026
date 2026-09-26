@@ -1,0 +1,2272 @@
+{
+ "symbols": [
+  {
+   "symbol": "WLDAUD",
+   "name": "AUD Basket",
+   "market": "synthetic_index",
+   "submarket": "forex_basket",
+   "pip": 0.001,
+   "spot": 938.403,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxAUDCAD",
+   "name": "AUD/CAD",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 0.97887,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxAUDCHF",
+   "name": "AUD/CHF",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 0.55957,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxAUDJPY",
+   "name": "AUD/JPY",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 0.001,
+   "spot": 112.23,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxAUDNZD",
+   "name": "AUD/NZD",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 1.20982,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxAUDUSD",
+   "name": "AUD/USD",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 0.69925,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_AS51",
+   "name": "Australia 200",
+   "market": "indices",
+   "submarket": "asia_oceania_OTC",
+   "pip": 0.01,
+   "spot": 8697.15,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "cryBTCUSD",
+   "name": "BTC/USD",
+   "market": "cryptocurrency",
+   "submarket": "non_stable_coin",
+   "pip": 0.001,
+   "spot": 62676.742,
+   "categories": [
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "RDBEAR",
+   "name": "Bear Market Index",
+   "market": "synthetic_index",
+   "submarket": "random_daily",
+   "pip": 0.0001,
+   "spot": 1132.4811,
+   "categories": [
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": true,
+   "accumulator": false
+  },
+  {
+   "symbol": "BOOM50",
+   "name": "Boom 50 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 105379.726,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "BOOM150N",
+   "name": "Boom 150 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 1e-05,
+   "spot": 9347.32605,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "BOOM300N",
+   "name": "Boom 300 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 1003.852,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "BOOM500",
+   "name": "Boom 500 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 5369.703,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "BOOM600",
+   "name": "Boom 600 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 5380.536,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "BOOM900",
+   "name": "Boom 900 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 8839.066,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "BOOM1000",
+   "name": "Boom 1000 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 13768.625,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "RDBULL",
+   "name": "Bull Market Index",
+   "market": "synthetic_index",
+   "submarket": "random_daily",
+   "pip": 0.0001,
+   "spot": 1060.4811,
+   "categories": [
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": true,
+   "accumulator": false
+  },
+  {
+   "symbol": "CRASH50",
+   "name": "Crash 50 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 99150.828,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "CRASH150N",
+   "name": "Crash 150 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 1e-05,
+   "spot": 9901.38037,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "CRASH300N",
+   "name": "Crash 300 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 1832.896,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "CRASH500",
+   "name": "Crash 500 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 3023.836,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "CRASH600",
+   "name": "Crash 600 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 23917.011,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "CRASH900",
+   "name": "Crash 900 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 17574.495,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "CRASH1000",
+   "name": "Crash 1000 Index",
+   "market": "synthetic_index",
+   "submarket": "crash_index",
+   "pip": 0.001,
+   "spot": 5989.769,
+   "categories": [
+    "accumulator",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": true
+  },
+  {
+   "symbol": "cryETHUSD",
+   "name": "ETH/USD",
+   "market": "cryptocurrency",
+   "submarket": "non_stable_coin",
+   "pip": 1e-05,
+   "spot": 1644.445,
+   "categories": [
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "WLDEUR",
+   "name": "EUR Basket",
+   "market": "synthetic_index",
+   "submarket": "forex_basket",
+   "pip": 0.001,
+   "spot": 1079.234,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxEURAUD",
+   "name": "EUR/AUD",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 1.64716,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxEURCAD",
+   "name": "EUR/CAD",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 1.61234,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxEURCHF",
+   "name": "EUR/CHF",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 0.92169,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxEURGBP",
+   "name": "EUR/GBP",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 0.86369,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxEURJPY",
+   "name": "EUR/JPY",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 0.001,
+   "spot": 184.86,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxEURNZD",
+   "name": "EUR/NZD",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 1.99276,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxEURUSD",
+   "name": "EUR/USD",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 1.15178,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_SX5E",
+   "name": "Euro 50",
+   "market": "indices",
+   "submarket": "europe_OTC",
+   "pip": 0.01,
+   "spot": 6071.7,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_FCHI",
+   "name": "France 40",
+   "market": "indices",
+   "submarket": "europe_OTC",
+   "pip": 0.01,
+   "spot": 8219.15,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "WLDGBP",
+   "name": "GBP Basket",
+   "market": "synthetic_index",
+   "submarket": "forex_basket",
+   "pip": 0.001,
+   "spot": 1004.279,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxGBPAUD",
+   "name": "GBP/AUD",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 1.90712,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxGBPCAD",
+   "name": "GBP/CAD",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 1.8668,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxGBPCHF",
+   "name": "GBP/CHF",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 1.06715,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxGBPJPY",
+   "name": "GBP/JPY",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 0.001,
+   "spot": 214.036,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxGBPNOK",
+   "name": "GBP/NOK",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 12.70928,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxGBPNZD",
+   "name": "GBP/NZD",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 2.30727,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxGBPUSD",
+   "name": "GBP/USD",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 1.33356,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_GDAXI",
+   "name": "Germany 40",
+   "market": "indices",
+   "submarket": "europe_OTC",
+   "pip": 0.01,
+   "spot": 24263.55,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "WLDXAU",
+   "name": "Gold Basket",
+   "market": "synthetic_index",
+   "submarket": "commodity_basket",
+   "pip": 0.001,
+   "spot": 943009.49,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxXAUUSD",
+   "name": "Gold/USD",
+   "market": "commodities",
+   "submarket": "metals",
+   "pip": 0.01,
+   "spot": 4083.62,
+   "categories": [
+    "callput",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_HSI",
+   "name": "Hong Kong 50",
+   "market": "indices",
+   "submarket": "asia_oceania_OTC",
+   "pip": 0.01,
+   "spot": 24190.65,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_N225",
+   "name": "Japan 225",
+   "market": "indices",
+   "submarket": "asia_oceania_OTC",
+   "pip": 0.01,
+   "spot": 64650.5,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "JD10",
+   "name": "Jump 10 Index",
+   "market": "synthetic_index",
+   "submarket": "jump_index",
+   "pip": 0.01,
+   "spot": 95715.02,
+   "categories": [
+    "callput",
+    "callputequal",
+    "digits",
+    "multiplier"
+   ],
+   "digits": true,
+   "accumulator": false
+  },
+  {
+   "symbol": "JD25",
+   "name": "Jump 25 Index",
+   "market": "synthetic_index",
+   "submarket": "jump_index",
+   "pip": 0.01,
+   "spot": 119726.32,
+   "categories": [
+    "callput",
+    "callputequal",
+    "digits",
+    "multiplier"
+   ],
+   "digits": true,
+   "accumulator": false
+  },
+  {
+   "symbol": "JD50",
+   "name": "Jump 50 Index",
+   "market": "synthetic_index",
+   "submarket": "jump_index",
+   "pip": 0.01,
+   "spot": 53502.95,
+   "categories": [
+    "callput",
+    "callputequal",
+    "digits",
+    "multiplier"
+   ],
+   "digits": true,
+   "accumulator": false
+  },
+  {
+   "symbol": "JD75",
+   "name": "Jump 75 Index",
+   "market": "synthetic_index",
+   "submarket": "jump_index",
+   "pip": 0.01,
+   "spot": 8017.79,
+   "categories": [
+    "callput",
+    "callputequal",
+    "digits",
+    "multiplier"
+   ],
+   "digits": true,
+   "accumulator": false
+  },
+  {
+   "symbol": "JD100",
+   "name": "Jump 100 Index",
+   "market": "synthetic_index",
+   "submarket": "jump_index",
+   "pip": 0.01,
+   "spot": 260.85,
+   "categories": [
+    "callput",
+    "callputequal",
+    "digits",
+    "multiplier"
+   ],
+   "digits": true,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxNZDJPY",
+   "name": "NZD/JPY",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 0.001,
+   "spot": 92.766,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxNZDUSD",
+   "name": "NZD/USD",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 0.57798,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_AEX",
+   "name": "Netherlands 25",
+   "market": "indices",
+   "submarket": "europe_OTC",
+   "pip": 0.01,
+   "spot": 1058.04,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxXPDUSD",
+   "name": "Palladium/USD",
+   "market": "commodities",
+   "submarket": "metals",
+   "pip": 0.01,
+   "spot": 1257.14,
+   "categories": [
+    "callput"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxXPTUSD",
+   "name": "Platinum/USD",
+   "market": "commodities",
+   "submarket": "metals",
+   "pip": 0.01,
+   "spot": 1681.33,
+   "categories": [
+    "callput"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "RB100",
+   "name": "Range Break 100 Index",
+   "market": "synthetic_index",
+   "submarket": "range_index",
+   "pip": 0.1,
+   "spot": 65324,
+   "categories": [
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "RB200",
+   "name": "Range Break 200 Index",
+   "market": "synthetic_index",
+   "submarket": "range_index",
+   "pip": 0.1,
+   "spot": 70452,
+   "categories": [
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxXAGUSD",
+   "name": "Silver/USD",
+   "market": "commodities",
+   "submarket": "metals",
+   "pip": 0.0001,
+   "spot": 64.0938,
+   "categories": [
+    "callput",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "stpRNG",
+   "name": "Step Index 100",
+   "market": "synthetic_index",
+   "submarket": "step_index",
+   "pip": 0.1,
+   "spot": 8007.9,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "stpRNG2",
+   "name": "Step Index 200",
+   "market": "synthetic_index",
+   "submarket": "step_index",
+   "pip": 0.1,
+   "spot": 10206.4,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "stpRNG3",
+   "name": "Step Index 300",
+   "market": "synthetic_index",
+   "submarket": "step_index",
+   "pip": 0.1,
+   "spot": 12224.8,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "stpRNG4",
+   "name": "Step Index 400",
+   "market": "synthetic_index",
+   "submarket": "step_index",
+   "pip": 0.1,
+   "spot": 9044.8,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "stpRNG5",
+   "name": "Step Index 500",
+   "market": "synthetic_index",
+   "submarket": "step_index",
+   "pip": 0.1,
+   "spot": 4148.5,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_SSMI",
+   "name": "Swiss 20",
+   "market": "indices",
+   "submarket": "europe_OTC",
+   "pip": 0.01,
+   "spot": 13572.75,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_FTSE",
+   "name": "UK 100",
+   "market": "indices",
+   "submarket": "europe_OTC",
+   "pip": 0.01,
+   "spot": 10326.95,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_SPC",
+   "name": "US 500",
+   "market": "indices",
+   "submarket": "americas_OTC",
+   "pip": 0.01,
+   "spot": 7288.2,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "OTC_NDX",
+   "name": "US Tech 100",
+   "market": "indices",
+   "submarket": "americas_OTC",
+   "pip": 0.01,
+   "spot": 28759.95,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "WLDUSD",
+   "name": "USD Basket",
+   "market": "synthetic_index",
+   "submarket": "forex_basket",
+   "pip": 0.001,
+   "spot": 1231.251,
+   "categories": [
+    "callput",
+    "callputequal",
+    "multiplier"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxUSDCAD",
+   "name": "USD/CAD",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 1.40006,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxUSDCHF",
+   "name": "USD/CHF",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 1e-05,
+   "spot": 0.80024,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxUSDJPY",
+   "name": "USD/JPY",
+   "market": "forex",
+   "submarket": "major_pairs",
+   "pip": 0.001,
+   "spot": 160.5,
+   "categories": [
+    "callput",
+    "callputequal",
+    "endsinout",
+    "multiplier",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxUSDMXN",
+   "name": "USD/MXN",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 0.0001,
+   "spot": 17.3847,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxUSDNOK",
+   "name": "USD/NOK",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 9.53035,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxUSDPLN",
+   "name": "USD/PLN",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 0.0001,
+   "spot": 3.6953,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "frxUSDSEK",
+   "name": "USD/SEK",
+   "market": "forex",
+   "submarket": "minor_pairs",
+   "pip": 1e-05,
+   "spot": 9.54641,
+   "categories": [
+    "callput",
+    "callputequal"
+   ],
+   "digits": false,
+   "accumulator": false
+  },
+  {
+   "symbol": "1HZ10V",
+   "name": "Volatility 10 (1s) Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.01,
+   "spot": 10173.22,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "R_10",
+   "name": "Volatility 10 Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.001,
+   "spot": 4892.271,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "1HZ15V",
+   "name": "Volatility 15 (1s) Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.001,
+   "spot": 12599.641,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "1HZ25V",
+   "name": "Volatility 25 (1s) Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.01,
+   "spot": 784777.81,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "R_25",
+   "name": "Volatility 25 Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.001,
+   "spot": 2797.597,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "1HZ30V",
+   "name": "Volatility 30 (1s) Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.001,
+   "spot": 7730.948,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "1HZ50V",
+   "name": "Volatility 50 (1s) Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.01,
+   "spot": 273423.28,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "R_50",
+   "name": "Volatility 50 Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.0001,
+   "spot": 95.8662,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "1HZ75V",
+   "name": "Volatility 75 (1s) Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.01,
+   "spot": 5326.06,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "R_75",
+   "name": "Volatility 75 Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.0001,
+   "spot": 34439.5927,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "1HZ90V",
+   "name": "Volatility 90 (1s) Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.001,
+   "spot": 8140.883,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "1HZ100V",
+   "name": "Volatility 100 (1s) Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.01,
+   "spot": 712.51,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "R_100",
+   "name": "Volatility 100 Index",
+   "market": "synthetic_index",
+   "submarket": "random_index",
+   "pip": 0.01,
+   "spot": 354.71,
+   "categories": [
+    "accumulator",
+    "asian",
+    "callput",
+    "callputequal",
+    "digits",
+    "endsinout",
+    "highlowticks",
+    "lookback",
+    "multiplier",
+    "reset",
+    "runs",
+    "staysinout",
+    "touchnotouch",
+    "turbos",
+    "vanilla"
+   ],
+   "digits": true,
+   "accumulator": true
+  },
+  {
+   "symbol": "OTC_DJI",
+   "name": "Wall Street 30",
+   "market": "indices",
+   "submarket": "americas_OTC",
+   "pip": 0.01,
+   "spot": 50229,
+   "categories": [
+    "callput",
+    "endsinout",
+    "staysinout",
+    "touchnotouch"
+   ],
+   "digits": false,
+   "accumulator": false
+  }
+ ],
+ "physics": {
+  "RDBEAR": {
+   "n": 4999,
+   "sigma_pips": 4425.75239166516,
+   "mean_step": 19.94598919783957,
+   "step_mod10": [
+    0.09981996399279856,
+    0.09461892378475695,
+    0.09341868373674735,
+    0.10262052410482096,
+    0.10142028405681136,
+    0.10822164432886577,
+    0.09941988397679535,
+    0.10062012402480495,
+    0.10262052410482096,
+    0.09721944388877776
+   ],
+   "tv_mod10": 0.01550310062012402,
+   "parity_flip": 0.5033006601320265,
+   "digit_dist": [
+    0.0984,
+    0.1032,
+    0.0982,
+    0.0962,
+    0.103,
+    0.1018,
+    0.0992,
+    0.097,
+    0.0998,
+    0.1032
+   ],
+   "tv_digits": 0.011200000000000009,
+   "max_cond_dev": 0.045631067961165055,
+   "pip_decimals": 4,
+   "spot": 1129.5798
+  },
+  "RDBULL": {
+   "n": 4999,
+   "sigma_pips": 4675.605237043026,
+   "mean_step": 79.5235047009402,
+   "step_mod10": [
+    0.10302060412082416,
+    0.09761952390478096,
+    0.10162032406481296,
+    0.09641928385677136,
+    0.09921984396879376,
+    0.09801960392078415,
+    0.10682136427285457,
+    0.09881976395279056,
+    0.09921984396879376,
+    0.09921984396879376
+   ],
+   "tv_mod10": 0.011462292458491709,
+   "parity_flip": 0.4900980196039208,
+   "digit_dist": [
+    0.105,
+    0.1036,
+    0.1004,
+    0.0972,
+    0.0974,
+    0.0944,
+    0.102,
+    0.1048,
+    0.0994,
+    0.0958
+   ],
+   "tv_digits": 0.0158,
+   "max_cond_dev": 0.025714285714285717,
+   "pip_decimals": 4,
+   "spot": 1064.6335
+  },
+  "JD10": {
+   "n": 4999,
+   "sigma_pips": 174.53016394107635,
+   "mean_step": -3.519503900780156,
+   "step_mod10": [
+    0.10382076415283056,
+    0.09521904380876176,
+    0.10102020404080816,
+    0.09901980396079216,
+    0.09881976395279056,
+    0.09481896379275855,
+    0.10342068413682737,
+    0.09941988397679535,
+    0.10402080416083216,
+    0.10042008401680336
+   ],
+   "tv_mod10": 0.012702540508101622,
+   "parity_flip": 0.4888977795559112,
+   "digit_dist": [
+    0.0998,
+    0.0938,
+    0.1028,
+    0.0936,
+    0.105,
+    0.1052,
+    0.1058,
+    0.0996,
+    0.1004,
+    0.094
+   ],
+   "tv_digits": 0.01920000000000001,
+   "max_cond_dev": 0.03904761904761905,
+   "pip_decimals": 2,
+   "spot": 95707.97
+  },
+  "JD25": {
+   "n": 4999,
+   "sigma_pips": 892.9521871653382,
+   "mean_step": -6.60252050410082,
+   "step_mod10": [
+    0.09761952390478096,
+    0.09401880376075215,
+    0.09861972394478896,
+    0.10822164432886577,
+    0.10382076415283056,
+    0.09641928385677136,
+    0.10162032406481296,
+    0.09981996399279856,
+    0.10262052410482096,
+    0.09721944388877776
+   ],
+   "tv_mod10": 0.016283256651330257,
+   "parity_flip": 0.4956991398279656,
+   "digit_dist": [
+    0.1036,
+    0.098,
+    0.1074,
+    0.0966,
+    0.0994,
+    0.1006,
+    0.0962,
+    0.1012,
+    0.1004,
+    0.0966
+   ],
+   "tv_digits": 0.01319999999999999,
+   "max_cond_dev": 0.03682092555331992,
+   "pip_decimals": 2,
+   "spot": 119723.82
+  },
+  "JD50": {
+   "n": 4999,
+   "sigma_pips": 634.4831292629411,
+   "mean_step": 10.552910582116423,
+   "step_mod10": [
+    0.09801960392078415,
+    0.10422084416883377,
+    0.10042008401680336,
+    0.10542108421684337,
+    0.09141828365673135,
+    0.10142028405681136,
+    0.10782156431286258,
+    0.09581916383276655,
+    0.10102020404080816,
+    0.09441888377675535
+   ],
+   "tv_mod10": 0.020324064812962596,
+   "parity_flip": 0.5013002600520104,
+   "digit_dist": [
+    0.099,
+    0.0978,
+    0.0956,
+    0.1058,
+    0.0944,
+    0.0946,
+    0.1076,
+    0.0986,
+    0.1046,
+    0.102
+   ],
+   "tv_digits": 0.020000000000000004,
+   "max_cond_dev": 0.03446088794926004,
+   "pip_decimals": 2,
+   "spot": 53506.89
+  },
+  "JD75": {
+   "n": 4999,
+   "sigma_pips": 112.16627841430046,
+   "mean_step": -0.5969193838767753,
+   "step_mod10": [
+    0.09861972394478896,
+    0.10562112422484497,
+    0.10082016403280657,
+    0.09461892378475695,
+    0.10082016403280657,
+    0.10382076415283056,
+    0.10102020404080816,
+    0.10362072414482897,
+    0.09421884376875375,
+    0.09681936387277455
+   ],
+   "tv_mod10": 0.015723144628925788,
+   "parity_flip": 0.504500900180036,
+   "digit_dist": [
+    0.1,
+    0.0938,
+    0.1014,
+    0.092,
+    0.0996,
+    0.1066,
+    0.1044,
+    0.1064,
+    0.1014,
+    0.0944
+   ],
+   "tv_digits": 0.02020000000000001,
+   "max_cond_dev": 0.038697318007662844,
+   "pip_decimals": 2,
+   "spot": 8017.74
+  },
+  "JD100": {
+   "n": 4999,
+   "sigma_pips": 4.789951755224831,
+   "mean_step": 0.027405481096219243,
+   "step_mod10": [
+    0.10282056411282256,
+    0.09901980396079216,
+    0.11082216443288657,
+    0.09981996399279856,
+    0.09841968393678736,
+    0.09101820364072814,
+    0.09421884376875375,
+    0.09561912382476495,
+    0.10342068413682737,
+    0.10482096419283857
+   ],
+   "tv_mod10": 0.021884376875375075,
+   "parity_flip": 0.4902980596119224,
+   "digit_dist": [
+    0.098,
+    0.0942,
+    0.0974,
+    0.099,
+    0.108,
+    0.106,
+    0.1004,
+    0.1006,
+    0.0938,
+    0.1026
+   ],
+   "tv_digits": 0.01759999999999999,
+   "max_cond_dev": 0.03543599257884972,
+   "pip_decimals": 2,
+   "spot": 260.84
+  },
+  "1HZ10V": {
+   "n": 4999,
+   "sigma_pips": 17.815004465300145,
+   "mean_step": 0.5429085817163433,
+   "step_mod10": [
+    0.10282056411282256,
+    0.10122024404880976,
+    0.10342068413682737,
+    0.10082016403280657,
+    0.08941788357671535,
+    0.10262052410482096,
+    0.09961992398479697,
+    0.09961992398479697,
+    0.10062012402480495,
+    0.09981996399279856
+   ],
+   "tv_mod10": 0.011522304460892162,
+   "parity_flip": 0.5041008201640328,
+   "digit_dist": [
+    0.1044,
+    0.0952,
+    0.096,
+    0.103,
+    0.1046,
+    0.1036,
+    0.0952,
+    0.1038,
+    0.0954,
+    0.0988
+   ],
+   "tv_digits": 0.019399999999999994,
+   "max_cond_dev": 0.028151260504201664,
+   "pip_decimals": 2,
+   "spot": 10172.35
+  },
+  "R_10": {
+   "n": 4999,
+   "sigma_pips": 123.19980211091419,
+   "mean_step": -1.740748149629926,
+   "step_mod10": [
+    0.10782156431286258,
+    0.09841968393678736,
+    0.09821964392878575,
+    0.09561912382476495,
+    0.09861972394478896,
+    0.10402080416083216,
+    0.09421884376875375,
+    0.10602120424084817,
+    0.10062012402480495,
+    0.09641928385677136
+   ],
+   "tv_mod10": 0.01848369673934787,
+   "parity_flip": 0.500500100020004,
+   "digit_dist": [
+    0.1024,
+    0.1008,
+    0.0992,
+    0.1006,
+    0.0962,
+    0.093,
+    0.1018,
+    0.0952,
+    0.106,
+    0.1048
+   ],
+   "tv_digits": 0.016399999999999998,
+   "max_cond_dev": 0.03473684210526315,
+   "pip_decimals": 3,
+   "spot": 4891.477
+  },
+  "1HZ15V": {
+   "n": 4999,
+   "sigma_pips": 339.71228946646636,
+   "mean_step": -1.2338467693538708,
+   "step_mod10": [
+    0.10302060412082416,
+    0.09521904380876176,
+    0.09621924384876976,
+    0.09681936387277455,
+    0.10102020404080816,
+    0.09961992398479697,
+    0.09921984396879376,
+    0.09981996399279856,
+    0.10442088417683537,
+    0.10462092418483697
+   ],
+   "tv_mod10": 0.013082616523304662,
+   "parity_flip": 0.4960992198439688,
+   "digit_dist": [
+    0.101,
+    0.099,
+    0.0978,
+    0.1006,
+    0.0996,
+    0.104,
+    0.0974,
+    0.0994,
+    0.102,
+    0.0992
+   ],
+   "tv_digits": 0.007600000000000003,
+   "max_cond_dev": 0.037860082304526754,
+   "pip_decimals": 3,
+   "spot": 12600.766
+  },
+  "1HZ25V": {
+   "n": 4999,
+   "sigma_pips": 3427.923717828794,
+   "mean_step": -9.323064612922584,
+   "step_mod10": [
+    0.09821964392878575,
+    0.10622124424884977,
+    0.10302060412082416,
+    0.09221844368873774,
+    0.10502100420084017,
+    0.10102020404080816,
+    0.09501900380076016,
+    0.09781956391278256,
+    0.09821964392878575,
+    0.10322064412882577
+   ],
+   "tv_mod10": 0.01850370074014803,
+   "parity_flip": 0.500500100020004,
+   "digit_dist": [
+    0.1034,
+    0.1026,
+    0.0974,
+    0.0988,
+    0.1014,
+    0.0966,
+    0.0966,
+    0.0998,
+    0.1046,
+    0.0988
+   ],
+   "tv_digits": 0.012000000000000004,
+   "max_cond_dev": 0.03627254509018035,
+   "pip_decimals": 2,
+   "spot": 784813.46
+  },
+  "R_25": {
+   "n": 4999,
+   "sigma_pips": 175.2060331129311,
+   "mean_step": -0.4880976195239048,
+   "step_mod10": [
+    0.09921984396879376,
+    0.10242048409681936,
+    0.10042008401680336,
+    0.10362072414482897,
+    0.10102020404080816,
+    0.10442088417683537,
+    0.09641928385677136,
+    0.09881976395279056,
+    0.10042008401680336,
+    0.09321864372874575
+   ],
+   "tv_mod10": 0.012322464492898574,
+   "parity_flip": 0.50250050010002,
+   "digit_dist": [
+    0.0994,
+    0.0946,
+    0.0966,
+    0.1004,
+    0.1054,
+    0.1054,
+    0.0962,
+    0.107,
+    0.0984,
+    0.0966
+   ],
+   "tv_digits": 0.018199999999999994,
+   "max_cond_dev": 0.039293139293139295,
+   "pip_decimals": 3,
+   "spot": 2796.291
+  },
+  "1HZ30V": {
+   "n": 4999,
+   "sigma_pips": 417.32707855777034,
+   "mean_step": -5.950190038007602,
+   "step_mod10": [
+    0.09981996399279856,
+    0.10602120424084817,
+    0.09881976395279056,
+    0.09521904380876176,
+    0.09761952390478096,
+    0.09121824364872974,
+    0.10802160432086418,
+    0.10342068413682737,
+    0.09661932386477295,
+    0.10322064412882577
+   ],
+   "tv_mod10": 0.02068413682736548,
+   "parity_flip": 0.4990998199639928,
+   "digit_dist": [
+    0.094,
+    0.107,
+    0.094,
+    0.0886,
+    0.1134,
+    0.1038,
+    0.0938,
+    0.1048,
+    0.1056,
+    0.095
+   ],
+   "tv_digits": 0.034600000000000006,
+   "max_cond_dev": 0.04722753346080305,
+   "pip_decimals": 3,
+   "spot": 7729.407
+  },
+  "1HZ50V": {
+   "n": 4999,
+   "sigma_pips": 2403.4123218932496,
+   "mean_step": 61.12382476495299,
+   "step_mod10": [
+    0.09621924384876976,
+    0.09781956391278256,
+    0.10342068413682737,
+    0.10282056411282256,
+    0.10362072414482897,
+    0.10882176435287057,
+    0.09661932386477295,
+    0.10442088417683537,
+    0.09201840368073615,
+    0.09421884376875375
+   ],
+   "tv_mod10": 0.023104620924184832,
+   "parity_flip": 0.5081016203240648,
+   "digit_dist": [
+    0.0984,
+    0.0958,
+    0.0934,
+    0.1046,
+    0.101,
+    0.1076,
+    0.0964,
+    0.1044,
+    0.0992,
+    0.0992
+   ],
+   "tv_digits": 0.01760000000000002,
+   "max_cond_dev": 0.03709677419354837,
+   "pip_decimals": 2,
+   "spot": 273947.75
+  },
+  "R_50": {
+   "n": 4999,
+   "sigma_pips": 119.87805536841861,
+   "mean_step": 2.307261452290458,
+   "step_mod10": [
+    0.09281856371274255,
+    0.09881976395279056,
+    0.10462092418483697,
+    0.10782156431286258,
+    0.09841968393678736,
+    0.10302060412082416,
+    0.09621924384876976,
+    0.10182036407281456,
+    0.09861972394478896,
+    0.09781956391278256
+   ],
+   "tv_mod10": 0.01728345669133826,
+   "parity_flip": 0.5093018603720744,
+   "digit_dist": [
+    0.104,
+    0.0948,
+    0.1,
+    0.1002,
+    0.0982,
+    0.0994,
+    0.0998,
+    0.0998,
+    0.105,
+    0.0988
+   ],
+   "tv_digits": 0.009200000000000007,
+   "max_cond_dev": 0.04038461538461538,
+   "pip_decimals": 4,
+   "spot": 95.8909
+  },
+  "1HZ75V": {
+   "n": 4999,
+   "sigma_pips": 71.13365289868095,
+   "mean_step": -0.39147829565913184,
+   "step_mod10": [
+    0.10242048409681936,
+    0.10122024404880976,
+    0.10762152430486097,
+    0.10062012402480495,
+    0.10302060412082416,
+    0.09681936387277455,
+    0.08541708341668333,
+    0.09901980396079216,
+    0.10122024404880976,
+    0.10262052410482096
+   ],
+   "tv_mod10": 0.018743748749749933,
+   "parity_flip": 0.5003000600120024,
+   "digit_dist": [
+    0.098,
+    0.108,
+    0.0982,
+    0.0952,
+    0.096,
+    0.1052,
+    0.1028,
+    0.0916,
+    0.0968,
+    0.1082
+   ],
+   "tv_digits": 0.024200000000000006,
+   "max_cond_dev": 0.0425925925925926,
+   "pip_decimals": 2,
+   "spot": 5327.38
+  },
+  "R_75": {
+   "n": 4999,
+   "sigma_pips": 65000.67905531067,
+   "mean_step": 234.53430686137227,
+   "step_mod10": [
+    0.10382076415283056,
+    0.10162032406481296,
+    0.10022004400880176,
+    0.09421884376875375,
+    0.10402080416083216,
+    0.10042008401680336,
+    0.10302060412082416,
+    0.09461892378475695,
+    0.09941988397679535,
+    0.09861972394478896
+   ],
+   "tv_mod10": 0.013122624524904966,
+   "parity_flip": 0.48949789957991596,
+   "digit_dist": [
+    0.1,
+    0.1016,
+    0.1016,
+    0.102,
+    0.1076,
+    0.101,
+    0.1012,
+    0.093,
+    0.0966,
+    0.0954
+   ],
+   "tv_digits": 0.014999999999999986,
+   "max_cond_dev": 0.0392156862745098,
+   "pip_decimals": 4,
+   "spot": 34509.4786
+  },
+  "1HZ90V": {
+   "n": 4999,
+   "sigma_pips": 1302.6278325519093,
+   "mean_step": -32.295859171834365,
+   "step_mod10": [
+    0.09781956391278256,
+    0.10662132426485298,
+    0.09761952390478096,
+    0.10142028405681136,
+    0.10242048409681936,
+    0.09861972394478896,
+    0.10322064412882577,
+    0.09941988397679535,
+    0.09621924384876976,
+    0.09661932386477295
+   ],
+   "tv_mod10": 0.01368273654730947,
+   "parity_flip": 0.5027005401080216,
+   "digit_dist": [
+    0.0962,
+    0.0984,
+    0.1046,
+    0.104,
+    0.1094,
+    0.1008,
+    0.0996,
+    0.0964,
+    0.093,
+    0.0976
+   ],
+   "tv_digits": 0.018800000000000004,
+   "max_cond_dev": 0.03269230769230769,
+   "pip_decimals": 3,
+   "spot": 8145.34
+  },
+  "1HZ100V": {
+   "n": 4999,
+   "sigma_pips": 12.550475338883206,
+   "mean_step": 0.22244448889777957,
+   "step_mod10": [
+    0.10322064412882577,
+    0.10062012402480495,
+    0.09701940388077615,
+    0.10422084416883377,
+    0.09841968393678736,
+    0.10942188437687538,
+    0.10082016403280657,
+    0.09481896379275855,
+    0.09441888377675535,
+    0.09701940388077615
+   ],
+   "tv_mod10": 0.01830366073214644,
+   "parity_flip": 0.5061012202440488,
+   "digit_dist": [
+    0.0962,
+    0.1066,
+    0.1106,
+    0.0968,
+    0.1018,
+    0.0966,
+    0.0932,
+    0.103,
+    0.096,
+    0.0992
+   ],
+   "tv_digits": 0.022000000000000006,
+   "max_cond_dev": 0.03786407766990291,
+   "pip_decimals": 2,
+   "spot": 714.04
+  },
+  "R_100": {
+   "n": 4999,
+   "sigma_pips": 8.878433436088171,
+   "mean_step": 0.07201440288057612,
+   "step_mod10": [
+    0.09121824364872974,
+    0.09741948389677936,
+    0.10022004400880176,
+    0.10422084416883377,
+    0.09961992398479697,
+    0.10942188437687538,
+    0.08881776355271054,
+    0.10442088417683537,
+    0.10082016403280657,
+    0.10382076415283056
+   ],
+   "tv_mod10": 0.022924584916983397,
+   "parity_flip": 0.5193038607721544,
+   "digit_dist": [
+    0.0962,
+    0.1064,
+    0.1014,
+    0.0912,
+    0.1042,
+    0.0964,
+    0.104,
+    0.0968,
+    0.0984,
+    0.105
+   ],
+   "tv_digits": 0.020999999999999998,
+   "max_cond_dev": 0.03609467455621301,
+   "pip_decimals": 2,
+   "spot": 354.9
+  }
+ },
+ "ts": 1781190999.8687592
+}

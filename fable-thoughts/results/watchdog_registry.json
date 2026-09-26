@@ -1,0 +1,479 @@
+{
+ "history": [
+  {
+   "alerts": [
+    "NEW SYMBOLS: ['1HZ100V', '1HZ10V', '1HZ15V', '1HZ25V', '1HZ30V', '1HZ50V', '1HZ75V', '1HZ90V', 'BOOM1000', 'BOOM150N', 'BOOM300N', 'BOOM50', 'BOOM500', 'BOOM600', 'BOOM900', 'CRASH1000', 'CRASH150N', 'CRASH300N', 'CRASH50', 'CRASH500', 'CRASH600', 'CRASH900', 'JD10', 'JD100', 'JD25', 'JD50', 'JD75', 'OTC_AEX', 'OTC_AS51', 'OTC_DJI', 'OTC_FCHI', 'OTC_FTSE', 'OTC_GDAXI', 'OTC_HSI', 'OTC_N225', 'OTC_NDX', 'OTC_SPC', 'OTC_SSMI', 'OTC_SX5E', 'RB100', 'RB200', 'RDBEAR', 'RDBULL', 'R_10', 'R_100', 'R_25', 'R_50', 'R_75', 'WLDAUD', 'WLDEUR', 'WLDGBP', 'WLDUSD', 'WLDXAU', 'cryBTCUSD', 'cryETHUSD', 'frxAUDCAD', 'frxAUDCHF', 'frxAUDJPY', 'frxAUDNZD', 'frxAUDUSD', 'frxEURAUD', 'frxEURCAD', 'frxEURCHF', 'frxEURGBP', 'frxEURJPY', 'frxEURNZD', 'frxEURUSD', 'frxGBPAUD', 'frxGBPCAD', 'frxGBPCHF', 'frxGBPJPY', 'frxGBPNZD', 'frxGBPUSD', 'frxNZDJPY', 'frxNZDUSD', 'frxUSDCAD', 'frxUSDCHF', 'frxUSDJPY', 'frxUSDMXN', 'frxUSDPLN', 'frxXAGUSD', 'frxXAUUSD', 'frxXPDUSD', 'frxXPTUSD', 'stpRNG', 'stpRNG2', 'stpRNG3', 'stpRNG4', 'stpRNG5']",
+    "JD100: sigma 3.79 below 5.0"
+   ],
+   "n_digit": 20,
+   "n_symbols": 89,
+   "t": "2026-08-31T11:48:59+00:00"
+  }
+ ],
+ "symbols": {
+  "1HZ100V": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.923,
+   "name": "Volatility 100 (1s) Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 12.9168,
+   "spot": 744.09
+  },
+  "1HZ10V": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.923,
+   "name": "Volatility 10 (1s) Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 17.1849,
+   "spot": 9822.0
+  },
+  "1HZ15V": {
+   "digits": true,
+   "name": "Volatility 15 (1s) Index"
+  },
+  "1HZ25V": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Volatility 25 (1s) Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 3511.0541,
+   "spot": 813307.55
+  },
+  "1HZ30V": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Volatility 30 (1s) Index",
+   "pip": 3,
+   "proposal": 1.953,
+   "sigma": 342.8064,
+   "spot": 6526.261
+  },
+  "1HZ50V": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Volatility 50 (1s) Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 1896.4645,
+   "spot": 216256.05
+  },
+  "1HZ75V": {
+   "digits": true,
+   "name": "Volatility 75 (1s) Index"
+  },
+  "1HZ90V": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Volatility 90 (1s) Index",
+   "pip": 3,
+   "proposal": 1.953,
+   "sigma": 2792.341,
+   "spot": 18289.213
+  },
+  "BOOM1000": {
+   "digits": false,
+   "name": "Boom 1000 Index"
+  },
+  "BOOM150N": {
+   "digits": false,
+   "name": "Boom 150 Index"
+  },
+  "BOOM300N": {
+   "digits": false,
+   "name": "Boom 300 Index"
+  },
+  "BOOM50": {
+   "digits": false,
+   "name": "Boom 50 Index"
+  },
+  "BOOM500": {
+   "digits": false,
+   "name": "Boom 500 Index"
+  },
+  "BOOM600": {
+   "digits": false,
+   "name": "Boom 600 Index"
+  },
+  "BOOM900": {
+   "digits": false,
+   "name": "Boom 900 Index"
+  },
+  "CRASH1000": {
+   "digits": false,
+   "name": "Crash 1000 Index"
+  },
+  "CRASH150N": {
+   "digits": false,
+   "name": "Crash 150 Index"
+  },
+  "CRASH300N": {
+   "digits": false,
+   "name": "Crash 300 Index"
+  },
+  "CRASH50": {
+   "digits": false,
+   "name": "Crash 50 Index"
+  },
+  "CRASH500": {
+   "digits": false,
+   "name": "Crash 500 Index"
+  },
+  "CRASH600": {
+   "digits": false,
+   "name": "Crash 600 Index"
+  },
+  "CRASH900": {
+   "digits": false,
+   "name": "Crash 900 Index"
+  },
+  "JD10": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Jump 10 Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 158.1731,
+   "spot": 90437.1
+  },
+  "JD100": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.794,
+   "name": "Jump 100 Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 3.7892,
+   "spot": 216.85
+  },
+  "JD25": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Jump 25 Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 521.286,
+   "spot": 118986.51
+  },
+  "JD50": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Jump 50 Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 522.007,
+   "spot": 60879.61
+  },
+  "JD75": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Jump 75 Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 104.8346,
+   "spot": 7888.69
+  },
+  "OTC_AEX": {
+   "digits": false,
+   "name": "Netherlands 25"
+  },
+  "OTC_AS51": {
+   "digits": false,
+   "name": "Australia 200"
+  },
+  "OTC_DJI": {
+   "digits": false,
+   "name": "Wall Street 30"
+  },
+  "OTC_FCHI": {
+   "digits": false,
+   "name": "France 40"
+  },
+  "OTC_FTSE": {
+   "digits": false,
+   "name": "UK 100"
+  },
+  "OTC_GDAXI": {
+   "digits": false,
+   "name": "Germany 40"
+  },
+  "OTC_HSI": {
+   "digits": false,
+   "name": "Hong Kong 50"
+  },
+  "OTC_N225": {
+   "digits": false,
+   "name": "Japan 225"
+  },
+  "OTC_NDX": {
+   "digits": false,
+   "name": "US Tech 100"
+  },
+  "OTC_SPC": {
+   "digits": false,
+   "name": "US 500"
+  },
+  "OTC_SSMI": {
+   "digits": false,
+   "name": "Swiss 20"
+  },
+  "OTC_SX5E": {
+   "digits": false,
+   "name": "Euro 50"
+  },
+  "RB100": {
+   "digits": false,
+   "name": "Range Break 100 Index"
+  },
+  "RB200": {
+   "digits": false,
+   "name": "Range Break 200 Index"
+  },
+  "RDBEAR": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Bear Market Index",
+   "pip": 4,
+   "proposal": 1.953,
+   "sigma": 3805.2372,
+   "spot": 984.1318
+  },
+  "RDBULL": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Bull Market Index",
+   "pip": 4,
+   "proposal": 1.953,
+   "sigma": 4399.2117,
+   "spot": 913.5044
+  },
+  "R_10": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Volatility 10 Index",
+   "pip": 3,
+   "proposal": 1.953,
+   "sigma": 118.3094,
+   "spot": 4774.541
+  },
+  "R_100": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.923,
+   "name": "Volatility 100 Index",
+   "pip": 2,
+   "proposal": 1.953,
+   "sigma": 15.1098,
+   "spot": 619.72
+  },
+  "R_25": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Volatility 25 Index",
+   "pip": 3,
+   "proposal": 1.953,
+   "sigma": 168.5973,
+   "spot": 2728.388
+  },
+  "R_50": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Volatility 50 Index",
+   "pip": 4,
+   "proposal": 1.953,
+   "sigma": 118.0936,
+   "spot": 97.0094
+  },
+  "R_75": {
+   "checked": "2026-08-31T11:48:59+00:00",
+   "digits": true,
+   "executed": 1.953,
+   "name": "Volatility 75 Index",
+   "pip": 4,
+   "proposal": 1.953,
+   "sigma": 92361.7068,
+   "spot": 49370.9535
+  },
+  "WLDAUD": {
+   "digits": false,
+   "name": "AUD Basket"
+  },
+  "WLDEUR": {
+   "digits": false,
+   "name": "EUR Basket"
+  },
+  "WLDGBP": {
+   "digits": false,
+   "name": "GBP Basket"
+  },
+  "WLDUSD": {
+   "digits": false,
+   "name": "USD Basket"
+  },
+  "WLDXAU": {
+   "digits": false,
+   "name": "Gold Basket"
+  },
+  "cryBTCUSD": {
+   "digits": false,
+   "name": "BTC/USD"
+  },
+  "cryETHUSD": {
+   "digits": false,
+   "name": "ETH/USD"
+  },
+  "frxAUDCAD": {
+   "digits": false,
+   "name": "AUD/CAD"
+  },
+  "frxAUDCHF": {
+   "digits": false,
+   "name": "AUD/CHF"
+  },
+  "frxAUDJPY": {
+   "digits": false,
+   "name": "AUD/JPY"
+  },
+  "frxAUDNZD": {
+   "digits": false,
+   "name": "AUD/NZD"
+  },
+  "frxAUDUSD": {
+   "digits": false,
+   "name": "AUD/USD"
+  },
+  "frxEURAUD": {
+   "digits": false,
+   "name": "EUR/AUD"
+  },
+  "frxEURCAD": {
+   "digits": false,
+   "name": "EUR/CAD"
+  },
+  "frxEURCHF": {
+   "digits": false,
+   "name": "EUR/CHF"
+  },
+  "frxEURGBP": {
+   "digits": false,
+   "name": "EUR/GBP"
+  },
+  "frxEURJPY": {
+   "digits": false,
+   "name": "EUR/JPY"
+  },
+  "frxEURNZD": {
+   "digits": false,
+   "name": "EUR/NZD"
+  },
+  "frxEURUSD": {
+   "digits": false,
+   "name": "EUR/USD"
+  },
+  "frxGBPAUD": {
+   "digits": false,
+   "name": "GBP/AUD"
+  },
+  "frxGBPCAD": {
+   "digits": false,
+   "name": "GBP/CAD"
+  },
+  "frxGBPCHF": {
+   "digits": false,
+   "name": "GBP/CHF"
+  },
+  "frxGBPJPY": {
+   "digits": false,
+   "name": "GBP/JPY"
+  },
+  "frxGBPNZD": {
+   "digits": false,
+   "name": "GBP/NZD"
+  },
+  "frxGBPUSD": {
+   "digits": false,
+   "name": "GBP/USD"
+  },
+  "frxNZDJPY": {
+   "digits": false,
+   "name": "NZD/JPY"
+  },
+  "frxNZDUSD": {
+   "digits": false,
+   "name": "NZD/USD"
+  },
+  "frxUSDCAD": {
+   "digits": false,
+   "name": "USD/CAD"
+  },
+  "frxUSDCHF": {
+   "digits": false,
+   "name": "USD/CHF"
+  },
+  "frxUSDJPY": {
+   "digits": false,
+   "name": "USD/JPY"
+  },
+  "frxUSDMXN": {
+   "digits": false,
+   "name": "USD/MXN"
+  },
+  "frxUSDPLN": {
+   "digits": false,
+   "name": "USD/PLN"
+  },
+  "frxXAGUSD": {
+   "digits": false,
+   "name": "Silver/USD"
+  },
+  "frxXAUUSD": {
+   "digits": false,
+   "name": "Gold/USD"
+  },
+  "frxXPDUSD": {
+   "digits": false,
+   "name": "Palladium/USD"
+  },
+  "frxXPTUSD": {
+   "digits": false,
+   "name": "Platinum/USD"
+  },
+  "stpRNG": {
+   "digits": false,
+   "name": "Step Index 100"
+  },
+  "stpRNG2": {
+   "digits": false,
+   "name": "Step Index 200"
+  },
+  "stpRNG3": {
+   "digits": false,
+   "name": "Step Index 300"
+  },
+  "stpRNG4": {
+   "digits": false,
+   "name": "Step Index 400"
+  },
+  "stpRNG5": {
+   "digits": false,
+   "name": "Step Index 500"
+  }
+ }
+}
