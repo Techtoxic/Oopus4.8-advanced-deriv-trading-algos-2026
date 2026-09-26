@@ -226,3 +226,12 @@ two oracle-scoring fixes made **after** seeing KILL verdicts (commits 2947237, 1
 - **BOOM300N (exploratory, not pre-registered):** spot fell from ~1004 (June) to ~400, coarsening the
   lattice to K = 7-9. D = 1.00386 [1.00256, 1.00508], replay +8.4%/trade, oracle 99/99 in 10/10 cells.
   Needs its own fresh-data test.
+
+**Correction (same day): the PASS-B above is withdrawn.** Every proposal in these tools was public, and
+logged-in accounts are sold tighter barriers (CRASH1000 4%: 2.3454e-6 public vs 2.28724e-6 authenticated;
+CRASH500 4%: 4.7141e-6 vs 4.598554e-6; BOOM300N 2-5% also tighter; BOOM1000 4% equal). The 12 Sep demo
+run executed at 2.3454e-6, so the authenticated barrier was tightened after that. A7 compared public to a
+public-era record and could not catch it. Re-evaluated on authenticated barriers (reported independently),
+the CRASH1000 4% best band is about -6.3% per trade and BOOM300N 3% about -11.5% on the same ticks.
+Commit 3bfac08 moves all proposals to authenticated demo terms and makes A7 check the barrier you can
+buy. Status: read-only until an authenticated cell passes on fresh data not seen during design.
