@@ -266,6 +266,36 @@ python quantum_lattice_sentinel.py --grid live       --ticks 50000
 python quantum_lattice_sentinel.py --grid historical --ticks 50000
 ```
 
+# HUNT_RULES.md — how this repo hunts now (written after the two tier-split kills)
+
+RULE 1. Quote and fill on the SAME authenticated session.
+
+RULE 2. Never trust a public quote as a price.
+The public proposal socket is market data plus a showroom, not a price list.
+
+RULE 3. The deliverable is always a measured number from the tier you buy on.
+
+RULE 4. A strategy needs a live checker or it does not exist.
+
+RULE 5. Small-N screens use pre-registered grids and a margin benchmark.
+
+RULE 6. A rejected contract is data, not a bug.
+Empty rows are the broker telling you where the book is thin, dangerous, or withdrawn.
+Log them, table them, and check whether they used to be listed (JD100 OVER0/1 and
+UNDER8/9 were, and their removal is itself a pricing decision — it deleted four
+of the lattice's ten contracts).
+
+RULE 7. The spread and the commission are part of the book.
+`proposal - commission` is the only number that can be spent. A "fair" book with
+a fat `ask_price - bid_price` is a cut wearing a different name.
+
+RULE 8. Parametric grids must make acceptable quotes at runtime or the tool is dead.
+No more editing by hand. `exotic_sweep.py` calibrates its barrier matrix from the API's
+own errors and quits loudly on any bad-parameter rate above ~30%.
+
+---
+
+
 ### Raw evidence captured in `results/`
 
 | file | what it is |
