@@ -1,0 +1,14 @@
+[*] session DOT93131975 type demo
+[*] stpRNG spot 7382.7 epoch 1790495074
+  OK   CALL             dur=5t  payout=1.95 ask=1
+  OK   CALL             dur=10t  payout=2.57 ask=1
+  OK   CALL             dur=1m  payout=1.95 ask=1
+  OK   CALL             dur=5m  payout=1.95 ask=1
+  OK   CALL             dur=1h  payout=1.95 ask=1
+  OK   PUT              dur=5t  payout=1.95 ask=1
+  OK   PUT              dur=10t  payout=2.57 ask=1
+  OK   PUT              dur=1m  payout=1.95 ask=1
+  OK   PUT              dur=5m  payout=1.95 ask=1
+  OK   PUT              dur=1h  payout=1.95 ask=1
+
+[*] accepted 10, rejected 130 -> ..\results\exotic_stpRNG.jsonl

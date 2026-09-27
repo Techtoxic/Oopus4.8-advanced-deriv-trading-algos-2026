@@ -1,0 +1,26 @@
+[*] session DOT93131975 type demo
+[*] RDBULL spot 1026.8382 epoch 1790495020
+  OK   CALL             dur=5t  payout=1.9 ask=1
+  OK   CALL             dur=10t  payout=1.89 ask=1
+  OK   CALL             dur=1m  payout=1.87 ask=1
+  OK   CALL             dur=5m  payout=1.83 ask=1
+  OK   CALL             dur=1h  payout=1.66 ask=1
+  OK   HIGHER           dur=1m  payout=40 ask=1
+  OK   HIGHER           dur=5m  payout=18.88 ask=1
+  OK   HIGHER           dur=1h  payout=2.6 ask=1
+  OK   LOWER            dur=1m  payout=40 ask=1
+  OK   LOWER            dur=5m  payout=15.31 ask=1
+  OK   LOWER            dur=1h  payout=3.71 ask=1
+  OK   NOTOUCH          dur=1h  payout=1.44 ask=1
+  OK   NOTOUCH          dur=1h  payout=1.29 ask=1
+  OK   ONETOUCH         dur=5m  payout=40 ask=1
+  OK   ONETOUCH         dur=1h  payout=2.94 ask=1
+  OK   ONETOUCH         dur=5m  payout=40 ask=1
+  OK   ONETOUCH         dur=1h  payout=4.06 ask=1
+  OK   PUT              dur=5t  payout=1.93 ask=1
+  OK   PUT              dur=10t  payout=1.94 ask=1
+  OK   PUT              dur=1m  payout=1.95 ask=1
+  OK   PUT              dur=5m  payout=2 ask=1
+  OK   PUT              dur=1h  payout=2.26 ask=1
+
+[*] accepted 22, rejected 118 -> ..\results\exotic_RDBULL.jsonl

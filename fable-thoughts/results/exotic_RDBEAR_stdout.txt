@@ -1,0 +1,26 @@
+[*] session DOT93131975 type demo
+[*] RDBEAR spot 941.403 epoch 1790495074
+  OK   CALL             dur=5t  payout=1.93 ask=1
+  OK   CALL             dur=10t  payout=1.93 ask=1
+  OK   CALL             dur=1m  payout=1.94 ask=1
+  OK   CALL             dur=5m  payout=1.98 ask=1
+  OK   CALL             dur=1h  payout=2.16 ask=1
+  OK   HIGHER           dur=1m  payout=40 ask=1
+  OK   HIGHER           dur=5m  payout=32.99 ask=1
+  OK   HIGHER           dur=1h  payout=4.41 ask=1
+  OK   LOWER            dur=1m  payout=40 ask=1
+  OK   LOWER            dur=5m  payout=19.53 ask=1
+  OK   LOWER            dur=1h  payout=2.76 ask=1
+  OK   NOTOUCH          dur=1h  payout=1.19 ask=1
+  OK   NOTOUCH          dur=1h  payout=1.34 ask=1
+  OK   ONETOUCH         dur=5m  payout=40 ask=1
+  OK   ONETOUCH         dur=1h  payout=5.08 ask=1
+  OK   ONETOUCH         dur=5m  payout=40 ask=1
+  OK   ONETOUCH         dur=1h  payout=3.64 ask=1
+  OK   PUT              dur=5t  payout=1.9 ask=1
+  OK   PUT              dur=10t  payout=1.9 ask=1
+  OK   PUT              dur=1m  payout=1.89 ask=1
+  OK   PUT              dur=5m  payout=1.86 ask=1
+  OK   PUT              dur=1h  payout=1.72 ask=1
+
+[*] accepted 22, rejected 118 -> ..\results\exotic_RDBEAR.jsonl

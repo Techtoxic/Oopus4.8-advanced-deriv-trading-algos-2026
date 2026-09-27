@@ -1,0 +1,1 @@
+SIGMA_RDBULL 118.26 pips  N=40000 pip=4 last=1024.0463
