@@ -174,26 +174,67 @@ The signal is real. The book it needed is gone.
 | JD100 digit | sigma 2.38 pips, in the edge zone | **restricted** | **dead** — -10.06% OOS at the live grid |
 | JD10/25/50/75 digit | sigma ~11 pips | intact | dead — no lattice, -2.5% to -3.7% OOS |
 | Volatility digit (all 10) | sigma 12.9–17.2 pips | intact | dead — no lattice, -3% to -4% OOS, confirms FINDINGS.md §3 |
-| CRASH/BOOM accumulator | spike law + pip lattice | intact | **the surviving lead**, see below |
+| CRASH/BOOM accumulator | spike law + pip lattice | **tighter on buyable terms** | **dead** — 0 tradable cells, see below |
 
-### The one lead that is still alive
+### The accumulator lead I quoted is WITHDRAWN — and the same tier split killed it
 
-The accumulator phase lattice (`ACCU_PHASE_LATTICE.md`, `CRASH1000_ACCU_AUDIT.md`) is a
-different mechanism and is untouched by this repricing: it does not trade digits, it trades
-Deriv's **calibrated barrier ladder** against the **pip lattice** of the Crash/Boom spike
-law. Its 2026-09-26 decision run scored
+I wrote above that the CRASH/BOOM accumulator phase lattice "is untouched by this repricing"
+and quoted its `D = 1.00327 ... VERDICT: PASS-B`. **That was wrong, and the number is
+stale.** The same document withdraws it two sections below the headline I read:
+
+> **Correction (same day): the PASS-B above is withdrawn.** Every proposal in these tools was
+> public, and logged-in accounts are sold tighter barriers (CRASH1000 4%: 2.3454e-6 public vs
+> 2.28724e-6 authenticated; CRASH500 4%: 4.7141e-6 vs 4.598554e-6; BOOM300N 2-5% also
+> tighter; BOOM1000 4% equal). … Re-evaluated on authenticated barriers, the CRASH1000 4%
+> best band is about -6.3% per trade and BOOM300N 3% about -11.5% on the same ticks.
+
+`ACCU_PHASE_LATTICE.md` §6b, its own re-analysis on authenticated barriers:
+
+| | public barriers (information only) | authenticated barriers |
+|---|---|---|
+| pooled D | 1.00327 [1.00202, 1.00454] | n/a: no tradable cell |
+| tradable cells (A3) | CRASH1000/500 2–5% | **0** |
+| C1 (model calibration) | pass | 0.98949, **fails A5** |
+| CRASH500 frozen-band replay | positive | **-8.78%/trade, 99% [-11.0%, -6.6%]** |
+| verdict | PASS-B | **INCONCLUSIVE** |
+
+**So the answer to "did you test this with the authenticated barrier?" is: the repo did, and
+it failed.** I quoted the pre-correction headline. That is the second time in this session the
+same failure mode produced a false positive — a public-tier quote being compared against an
+authenticated-tier fill.
+
+#### Verified live today (2026-09-27)
+
+`accu_tier_compare.py`, proposals only, no orders:
 
 ```
-D = 1.00327, 99% [1.00202, 1.00454] on 191,566 in-band ticks, 72 blocks,
-C4 z = 37.7 at 0.97x model, placebo 0.990,
-20-tick replay CRASH1000 4% +6.3%/trade [+3.3%, +9.3%], placebo -19%
-VERDICT: PASS-B
+cells compared: 20   auth TIGHTER: 13   equal: 7   looser: 0
+cells where the integer K band changed: 7
+   CRASH1000 g=0.04  K 14 -> 13
+   CRASH500  g=0.02  K 16 -> 15
+   CRASH500  g=0.03  K 15 -> 14
+   CRASH500  g=0.05  K 14 -> 13
+   BOOM300N  g=0.02  K 9 -> 8
+   BOOM300N  g=0.04  K 8 -> 7
+   BOOM300N  g=0.05  K 8 -> 7
 ```
 
-with the caveat recorded in the same document, and it should be read as such: the pass
-definition was amended twice after the results were seen, the edge is only ~+0.13% per
-tick, it is open on only ~13% of spot levels, and the counterparty has now demonstrated it
-will reprice a symbol within days (they did exactly that to JD100).
+The first line is the whole story. The frozen candidate gate is **phase in [14, 14.25)**,
+which requires `w = b·spot/pip` to have integer part **K = 14**:
+
+```
+CRASH1000 4%  public:   w = 14.075  -> K = 14, phase 0.075  IN BAND
+              auth:     w = 13.726  -> K = 13, phase 0.726  nowhere near
+```
+
+A 2.48% tighter barrier moves the lattice one whole pip step and the gate can never fire on
+the price you can actually buy. That is why §6b found "CRASH1000 4% has no in-band ticks".
+The tightening is targeted, not incidental: it lands exactly on the cells where the band had
+positive G, while `BOOM1000` (which never had an edge) is left identical across all five
+growth rates.
+
+**Status: the accumulator phase lattice is closed on buyable terms.** `ACCU_PHASE_LATTICE.md`
+§6b reached that verdict on 2026-09-26 and it still holds today.
 
 ---
 

@@ -185,6 +185,12 @@ that file as the historical grid it is.
 The accumulator phase lattice (`ACCU_PHASE_LATTICE.md`) does not trade digits and was not
 touched by this repricing. It trades Deriv's calibrated barrier ladder against the pip
 lattice of the Crash/Boom spike law, and its 2026-09-26 decision run reached PASS-B with
-`D = 1.00327, 99% [1.00202, 1.00454]` on 191,566 in-band ticks. Read that document's own
-caveats before sizing anything.
+`D = 1.00327, 99% [1.00202, 1.00454]` on 191,566 in-band ticks.
+
+> **Correction 2026-09-27: that PASS-B is WITHDRAWN. Do not use it.** It was scored on
+> public-tier barrier quotes. Re-analysed on the authenticated barriers you can actually
+> buy (`ACCU_PHASE_LATTICE.md` §6b), there are **0 tradable cells**, C1 fails, and the
+> frozen-band replay is -8.78%/trade. Verified live again today: the authenticated barrier
+> is tighter on 13/20 Crash/Boom cells, flipping the integer K band on 7 of them
+> (CRASH1000 4%: K 14 -> 13). See `results/cross_asset_digit_grid.md`.
 
