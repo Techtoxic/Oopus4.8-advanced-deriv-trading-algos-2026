@@ -1,0 +1,48 @@
+symbol JD100  stake $0.35
+
+contract             old  proposal  executed  exec/old  verdict
+--------------------------------------------------------------------
+[demo DOT93131975 bal=675.58]
+
+DIGITMATCH0        8.929     2.857     2.857    0.3200  CUT 68.0%
+DIGITDIFF0         1.096        --This contract offers no         --  buy err: This contract offers no 
+DIGITOVER0         1.096        --This contract offers no         --  buy err: This contract offers no 
+DIGITOVER1         1.232        --This contract offers no         --  buy err: This contract offers no 
+DIGITOVER2         1.404     1.057     1.057    0.7530  CUT 24.7%
+DIGITOVER3         1.634     1.171     1.171    0.7169  CUT 28.3%
+DIGITOVER4         1.953     1.343     1.343    0.6876  CUT 31.2%
+DIGITOVER5         2.427     1.543     1.543    0.6357  CUT 36.4%
+DIGITOVER6         3.205     1.829     1.829    0.5705  CUT 42.9%
+DIGITOVER7         4.717     2.229     2.229    0.4725  CUT 52.8%
+DIGITOVER8         8.929     2.857     2.857    0.3200  CUT 68.0%
+DIGITUNDER1        8.929     2.857     2.857    0.3200  CUT 68.0%
+DIGITUNDER2        4.717     2.229     2.229    0.4725  CUT 52.8%
+DIGITUNDER3        3.205     1.829     1.829    0.5705  CUT 42.9%
+DIGITUNDER4        2.427     1.543     1.543    0.6357  CUT 36.4%
+DIGITUNDER5        1.953     1.343     1.343    0.6876  CUT 31.2%
+DIGITUNDER6        1.634     1.171     1.171    0.7169  CUT 28.3%
+DIGITUNDER7        1.404     1.057     1.057    0.7530  CUT 24.7%
+DIGITUNDER8        1.232        --This contract offers no         --  buy err: This contract offers no 
+DIGITUNDER9        1.096        --This contract offers no         --  buy err: This contract offers no 
+DIGITEVEN          1.953     1.343     1.343    0.6876  CUT 31.2%
+DIGITODD           1.953     1.343     1.343    0.6876  CUT 31.2%
+
+====================================================================
+RESTRICTED LADDER — what adaptive_sentinel actually trades
+====================================================================
+  DIGITOVER3     executed 1.1714  breakeven WR 85.37%
+       at WR 51.80%: EV -39.32%
+       at WR 52.78%: EV -38.17%
+  DIGITOVER4     executed 1.3429  breakeven WR 74.47%
+       at WR 51.80%: EV -30.44%
+       at WR 52.78%: EV -29.12%
+  DIGITUNDER5    executed 1.3429  breakeven WR 74.47%
+       at WR 51.80%: EV -30.44%
+       at WR 52.78%: EV -29.12%
+  DIGITUNDER6    executed 1.1714  breakeven WR 85.37%
+       at WR 51.80%: EV -39.32%
+       at WR 52.78%: EV -38.17%
+
+  Negative EV at both previously measured win rates. Grid is cut too far.
+
+wrote ../results/payout_audit.md

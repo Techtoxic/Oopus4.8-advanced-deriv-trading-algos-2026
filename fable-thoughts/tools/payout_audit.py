@@ -8,6 +8,33 @@ grid read off the app is clearly cut (Over 4: $2 -> $3.64 = 1.820x vs the old 1.
 Those cannot both be true, and this repo has already caught the proposal endpoint lying:
 FINDINGS.md sec 3 records CALLE/PUTE quoting 1.9530 and filling 1.800.
 
+--- CORRECTION (2026-09-27) ---------------------------------------------------
+The gap was NOT a lying endpoint. Two independent controls settle it:
+
+  payout_probe.py    quotes and fills on ONE authenticated socket, on the same
+                     tick. On JD100 DIGITOVER4, 8/8 probes returned proposal =
+                     executed = 0.47 (1.3429x). Ratio exactly 1.0000 on all six
+                     same-tick pairs. The endpoint does not lie.
+
+  endpoint_compare.py quotes the SAME contract back to back on the public socket
+                     and on the authenticated socket. On JD100 they disagree on
+                     all 18 rows: public OVER8 = 8.93 vs authenticated 2.86,
+                     public OVER4 = 1.95 vs authenticated 1.33, and the public
+                     socket still lists OVER0/OVER1/UNDER8/UNDER9 while the
+                     authenticated one returns "This contract offers no return."
+
+The real mechanism is a TIER SPLIT plus an in-flight repricing. This script used
+to quote on `ws = DerivWS(token="")` (PUBLIC) and fill on `tr = DerivWS()`
+(AUTHENTICATED) inside the same loop, so every row compared two different books
+AND two different ticks. It now quotes and fills on the same session and only
+labels a mismatch "ENDPOINT LIES" when the proposal and the fill share an epoch.
+
+The corrected, load-bearing finding is different and worse for the strategy: on
+JD100 Deriv restricts the authenticated digit book (OVER4 1.33 vs 1.95, OVER8
+2.86 vs 8.93, four barriers delisted), while JD10, JD25, JD50, JD75 and every
+volatility index keep the full grid. See grid_snapshot.py and jump_lattice_scan.py.
+------------------------------------------------------------------------------
+
 This matters a lot right now: JD100 is at sigma 3.90, INSIDE the edge zone and deeper than
 anything in the walk-forward (best band was 4.15-4.30). If the grid is intact the original
 edge is live in better conditions than when it worked. If it is cut, it is dead. Nothing in
@@ -81,16 +108,27 @@ def main():
 
     rows = []
     for ct, bar in order:
-        pr = ws.call({"proposal": 1, **params(ct, bar, a.symbol, a.stake)})
+        # IMPORTANT: the quote and the fill MUST come from the same session.
+        # `ws` is the PUBLIC socket and `tr` is the AUTHENTICATED one, and on
+        # JD100 they quote DIFFERENT books: the public socket still quotes the
+        # old intact grid (OVER8 = 8.93) while the authenticated one quotes the
+        # restricted grid (OVER8 = 2.86, OVER0/1 and UNDER8/9 delisted).
+        # This script used to quote on `ws` and fill on `tr`, which fabricated
+        # the "PROPOSAL LIES" rows. See endpoint_compare.py.
+        qs = tr if tr is not None else ws
+        pr = qs.call({"proposal": 1, **params(ct, bar, a.symbol, a.stake)})
         prop = (float(pr["proposal"]["payout"]) / a.stake) if "proposal" in pr else None
+        prop_t = pr.get("proposal", {}).get("spot_time")
 
         ex = None
+        ex_t = None
         if tr is not None:
             b = tr.call({"buy": 1, "price": round(a.stake * 20, 2),
                          "parameters": params(ct, bar, a.symbol, a.stake)})
             if "buy" in b:
                 pay = b["buy"].get("payout")
                 bp = float(b["buy"].get("buy_price") or a.stake)
+                ex_t = b["buy"].get("purchase_time")
                 if pay:
                     ex = float(pay) / bp
             else:
@@ -101,9 +139,14 @@ def main():
         label = ct + (str(bar) if bar is not None else "")
         ratio = (ex / old) if (isinstance(ex, float) and old) else None
 
+        same_tick = (prop_t is not None and ex_t is not None and prop_t == ex_t)
         if isinstance(ex, float) and prop:
             if abs(ex - prop) / prop > 0.005:
-                v = f"PROPOSAL LIES ({prop:.3f} vs {ex:.3f})"
+                if same_tick:
+                    v = f"ENDPOINT LIES ({prop:.3f} vs {ex:.3f})"
+                else:
+                    d = (ex_t - prop_t) if (prop_t and ex_t) else None
+                    v = f"state shift +{d}t ({prop:.3f} vs {ex:.3f})"
             elif ratio and ratio < 0.99:
                 v = f"CUT {(1-ratio)*100:.1f}%"
             else:
@@ -125,8 +168,16 @@ def main():
 
     md = [f"# Payout audit — {a.symbol}\n\n",
           "Proposal payout vs EXECUTED payout (from the buy response, which carries the ",
-          "contracted payout). The proposal endpoint is known to misreport: FINDINGS.md ",
-          "sec 3 records CALLE/PUTE quoting 1.9530 and filling 1.800.\n\n",
+          "contracted payout).\n\n",
+          "**Quote and fill are taken from the SAME session.** That matters: the public ",
+          "socket and the authenticated socket quote DIFFERENT books on JD100. The public ",
+          "one still serves the old intact grid (OVER8 = 8.93); the authenticated one ",
+          "serves the restricted grid (OVER8 = 2.86, OVER0/1 and UNDER8/9 delisted). Earlier ",
+          "versions of this table quoted on the public socket and filled on the ",
+          "authenticated one, which produced 'PROPOSAL LIES' rows that were really tier and ",
+          "tick-state artifacts. See `endpoint_compare.py` and `payout_probe.py`, which show ",
+          "the same session quoting exactly what it fills (8/8 same-tick pairs, ratio ",
+          "1.0000).\n\n",
           "| contract | old | proposal | executed | exec/old | verdict |\n",
           "|---|---:|---:|---:|---:|---|\n"]
     for lbl, old, prop, ex, ratio, v in rows:

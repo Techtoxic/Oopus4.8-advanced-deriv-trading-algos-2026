@@ -1,0 +1,43 @@
+================================================================================
+QUANTUM PHASE-SPACE & CYCLIC LATTICE EDGE AUDIT (JD100)
+Payout grid: HISTORICAL  (18 contracts)
+================================================================================
+[*] Fetching 20000 clean, monotonic ticks from Deriv API...
+[+] Loaded 20000 ticks. Latest Spot: 130.70. Pip size: 2
+[+] Microscopic Quantum Diffusion Width: sigma = 2.346 pips
+
+--- 1. QUANTUM HARMONIC DECOHERENCE DYNAMICS (S^1 Phase Space) ---
+  tau=1 tick(s): Measured Coherence = 0.3383 | Theoretical = 0.3374 | Error = 0.0009
+  tau=2 tick(s): Measured Coherence = 0.1220 | Theoretical = 0.1138 | Error = 0.0082
+  tau=3 tick(s): Measured Coherence = 0.0482 | Theoretical = 0.0384 | Error = 0.0098
+  tau=4 tick(s): Measured Coherence = 0.0253 | Theoretical = 0.0130 | Error = 0.0124
+  tau=5 tick(s): Measured Coherence = 0.0167 | Theoretical = 0.0044 | Error = 0.0123
+
+--- 2. OPTIMAL DIGIT CONTRACT POLICY (AT 100% SIGNAL DENSITY) ---
+  Digit 0: Play UNDER 2  (Payout 4.720) -> P(win)=34.02%, EV=+60.58%
+  Digit 1: Play UNDER 3  (Payout 3.210) -> P(win)=47.34%, EV=+51.96%
+  Digit 2: Play UNDER 4  (Payout 2.430) -> P(win)=61.63%, EV=+49.77%
+  Digit 3: Play UNDER 5  (Payout 1.950) -> P(win)=66.99%, EV=+30.63%
+  Digit 4: Play UNDER 6  (Payout 1.630) -> P(win)=72.09%, EV=+17.51%
+  Digit 5: Play OVER 2  (Payout 1.400) -> P(win)=83.80%, EV=+17.32%
+  Digit 6: Play OVER 4  (Payout 1.950) -> P(win)=68.52%, EV=+33.61%
+  Digit 7: Play OVER 5  (Payout 2.430) -> P(win)=58.02%, EV=+40.99%
+  Digit 8: Play OVER 6  (Payout 3.210) -> P(win)=46.77%, EV=+50.12%
+  Digit 9: Play OVER 7  (Payout 4.720) -> P(win)=33.57%, EV=+58.44%
+
+--- 3. OUT-OF-SAMPLE RIGOROUS VALIDATION (50/50 SPLIT) ---
+  OOS Sample Size: 9999 consecutive ticks
+  OOS Realized EV: +41.46% +/- 3.81% (99% CI)
+  OOS t-statistic: 28.06 (p < 1e-100)
+
+--- 4. ADVERSARIAL NEGATIVE CONTROLS ---
+  Lag-2 Control (Decoherence test): EV = +10.75%
+  Permutation Control (Zero-intelligence null): EV = -2.29% (Matches house margin)
+
+================================================================================
+VERDICT: HISTORICAL GRID — the signal, not the tradable book.
+  OOS EV +41.46% under the pre-repricing grid. This is a
+  counterfactual. It is NOT tradable: on JD100 the authenticated session
+  quotes the restricted grid, and JD10/25/50/75 run at sigma ~11 pips
+  where the lattice does not exist. See results/cross_asset_digit_grid.md.
+================================================================================

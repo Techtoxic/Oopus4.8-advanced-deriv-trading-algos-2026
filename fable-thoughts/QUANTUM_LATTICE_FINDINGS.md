@@ -1,5 +1,38 @@
 # Theoretical Quantum & Operator-Theoretic Findings: Discrete Cyclic Lattice Edge on JD100
 
+> ## CORRECTION 2026-09-27 — read this first
+>
+> **The edge in this document is real as a signal and dead as a trade.** It was measured
+> against a payout grid that Deriv no longer serves to an authenticated JD100 session.
+>
+> `quantum_lattice_sentinel.py` has been re-run on the same data under both grids:
+>
+> | grid | what it is | OOS EV (20k ticks) |
+> |---|---|---|
+> | `--grid historical` | the pre-repricing ladder this document assumes | **+41.46%**, t = 28.06 |
+> | `--grid live` | the authenticated JD100 ladder that actually fills | **-8.17%**, t = -12.81 |
+>
+> `jd100_counterfactual.py` isolates the repricing on 60,000 identical ticks: the intact
+> grid gives OOS **+38.48%** [+35.60%, +41.36%], the live grid gives **-10.06%**
+> [-11.01%, -9.11%]. Deriv removed **48.5 percentage points** of expected value from this
+> index by re-pricing it, with the signal untouched.
+>
+> Three further corrections to what follows:
+> 1. **The proposal endpoint does not lie.** `payout_probe.py` shows 8/8 same-tick pairs
+>    quoting exactly what they fill (ratio 1.0000). The "PROPOSAL LIES" rows came from
+>    `payout_audit.py` quoting on the public socket and filling on the authenticated one.
+>    The public socket still serves the old grid; the authenticated session serves the
+>    restricted one. See `endpoint_compare.py`.
+> 2. **The lag-2 control in §4.3 does not collapse.** It reads +9.4% to +10.8%, not -0.17%,
+>    because two ticks of diffusion at sigma 2.38 is 3.37 pips — still inside the lattice.
+>    The permutation control is the control that carries weight.
+> 3. **Deriv restricted JD100 only.** JD10, JD25, JD50, JD75 and all ten volatility
+>    indices keep the full 18-barrier grid — but they run at sigma ~11 pips, three times
+>    the 3.56 breakeven, where no lattice exists. The one index with the right
+>    microstructure is the one that was repriced.
+>
+> Full evidence: `results/cross_asset_digit_grid.md`.
+
 ## Executive Summary
 Using quantum operator formalisms and phase-space dynamics on the compact cyclic group $\mathbb{Z}_{10} \cong S^1$, we have discovered and statistically confirmed a massive, persistent positive expected value (+EV) trading edge on Deriv's **Jump 100 Index (`JD100`)**.
 
@@ -40,6 +73,13 @@ Empirical verification shows exact physical agreement with $< 0.8\%$ error at $\
 ---
 
 ## 2. Deriv Broker Payout Architecture & The Pricing Discrepancy
+
+> **Verified 2026-09-27 — this table is the pre-repricing grid, not what JD100 fills today.**
+> The live authenticated JD100 ladder is: OVER2 1.0571, OVER3 1.1714, OVER4 1.3429,
+> OVER5 1.5429, OVER6 1.8286, OVER7 2.2286, OVER8 2.8571, with OVER0, OVER1, UNDER8 and
+> UNDER9 delisted entirely. The public socket still serves the grid below, which is why
+> `payout_audit.py` appeared to catch the endpoint lying. It is also the live book on
+> JD10/JD25/JD50/JD75 and all volatility indices — none of which have the microstructure.
 
 Deriv offers Digit Over/Under contracts on `JD100` settled on the very next tick ($\tau = 1$). To extract a house edge against a uniform null ($P = 0.10$ per digit), Deriv applies a haircut to payouts:
 
@@ -107,7 +147,7 @@ Evaluating 8 independent temporal slices:
 *Result:* Absolute temporal stationarity across the entire dataset.
 
 ### 4.3 Adversarial Negative Controls
-1. **Temporal Horizon Delay (Lag $\tau = 2$):** Mean EV drops from $+25.3\%$ to $-0.17\%$, confirming that the edge is governed strictly by the phase coherence time of the microscopic diffusion kernel.
+1. **Temporal Horizon Delay (Lag $\tau = 2$):** ~~Mean EV drops from $+25.3\%$ to $-0.17\%$~~ **Measured 2026-09-27: +10.75% under the intact grid and +9.40% in `jd100_counterfactual.py`. The original $-0.17\%$ was not reproducible.** Two ticks of diffusion at $\sigma = 2.38$ pips is $3.37$ pips, still below the $3.56$ breakeven, so the digit is still sticky at lag 2 and the edge genuinely persists. The lag-2 test is therefore only a valid control for a one-tick-horizon strategy, not for this one. It is the permutation null below that carries the weight.
 2. **Phase Inversion (Antipodal Betting):** Inverting the policy (betting against the wavepacket) yields an expected loss of **$-47.80\%$**, proving the edge is non-spurious.
 3. **Permutation Null (Zero Intelligence):** Shuffling tick order destroys temporal structure and yields an EV of **$-11.55\%$**, matching Deriv's baseline house margin.
 
@@ -117,7 +157,34 @@ Evaluating 8 independent temporal slices:
 
 The production-grade audit engine is committed in `fable-thoughts/tools/quantum_lattice_sentinel.py`.
 To run the automated audit:
+
 ```bash
-python fable-thoughts/tools/quantum_lattice_sentinel.py --audit --ticks 50000
+# what Deriv actually fills today (negative — do NOT deploy)
+python fable-thoughts/tools/quantum_lattice_sentinel.py --grid live --ticks 50000
+
+# the pre-repricing ladder, for reproducing this document's numbers
+python fable-thoughts/tools/quantum_lattice_sentinel.py --grid historical --ticks 50000
 ```
+
+The `--grid` flag was added on 2026-09-27. Before that the script silently used a stale
+hardcoded table (`OVER4 = 1.8000`, `OVER8 = 6.3429`) that matched neither tier's live quote
+and had the effect of reporting a large positive EV that could not be filled.
+
+### Do not deploy this
+
+`quantum_lattice_live.py` was written to execute the policy on a live tick stream. Its
+`--min-ev` gate defaults to `-1.0` so the plumbing could be exercised end to end, and one
+authenticated `DIGITOVER 5` order did fill in 85 ms with a $0.54 payout on a $0.35 stake
+(`contract_id 14589846679`, settled in the money). That proves the execution path works. It
+does **not** make the strategy profitable: at the live grid the same policy runs at
+-8% to -10% OOS. Leave `--trade` off, and treat the `THEORETICAL_LATTICE_POLICY` table in
+that file as the historical grid it is.
+
+### The surviving lead is a different mechanism
+
+The accumulator phase lattice (`ACCU_PHASE_LATTICE.md`) does not trade digits and was not
+touched by this repricing. It trades Deriv's calibrated barrier ladder against the pip
+lattice of the Crash/Boom spike law, and its 2026-09-26 decision run reached PASS-B with
+`D = 1.00327, 99% [1.00202, 1.00454]` on 191,566 in-band ticks. Read that document's own
+caveats before sizing anything.
 

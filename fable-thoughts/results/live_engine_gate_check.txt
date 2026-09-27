@@ -1,0 +1,178 @@
+================================================================================
+QUANTUM LATTICE LIVE EXECUTION ENGINE (JD100)
+================================================================================
+[*] Account: DOT93131975 | Type: DEMO | Balance: 671.66 USD
+[i] DRY-RUN MODE: Simulating order fills. Use --trade to execute live.
+[*] Subscribing to live tick stream for JD100...
+[*] Calibrated on 19999 ticks (pip=2). Measured P(win | entry digit):
+      digit 0: UNDER 2  pay=2.2286 P(win)=34.09%  EV=-24.03%
+      digit 1: UNDER 3  pay=1.8286 P(win)=47.34%  EV=-13.43%
+      digit 2: UNDER 4  pay=1.5429 P(win)=61.85%  EV= -4.57%
+      digit 3: UNDER 6  pay=1.1714 P(win)=79.57%  EV= -6.79%
+      digit 4: UNDER 7  pay=1.0571 P(win)=82.99%  EV=-12.27%
+      digit 5: OVER 2  pay=1.0571 P(win)=83.78%  EV=-11.44%
+      digit 6: OVER 3  pay=1.1714 P(win)=80.85%  EV= -5.29%
+      digit 7: OVER 5  pay=1.5429 P(win)=58.04%  EV=-10.45%
+      digit 8: OVER 6  pay=1.8286 P(win)=46.42%  EV=-15.11%
+      digit 9: OVER 7  pay=2.2286 P(win)=33.49%  EV=-25.37%
+[*] Best available cell: digit 2 at EV -4.57% (gate: +0.00%)
+[!] No eligible contract. Every digit is below the EV gate on the
+    live grid, so this session will only report and never trade.
+    That is the correct outcome: see results/cross_asset_digit_grid.md.
+[*] Initial tick epoch: 1790493425, Spot: 130.48
+[*] Listening for new ticks (1-second tick cadence)... Press Ctrl+C to stop.
+
+[SIGNAL] Tick Spot: 130.44 | Digit: 4 -> Action: UNDER 7
+         Theoretical Payout: 1.314x | Actual Live Payout: 1.057x
+         Measured WinRate: 83.0% (n=19999) | Est Live EV: -12.27%
+ [SKIP] Estimated EV (-12.27%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.47 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.47 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.46 | Digit: 6 -> Action: OVER 3
+         Theoretical Payout: 1.514x | Actual Live Payout: 1.171x
+         Measured WinRate: 80.8% (n=19999) | Est Live EV: -5.29%
+ [SKIP] Estimated EV (-5.29%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.46 | Digit: 6 -> Action: OVER 3
+         Theoretical Payout: 1.514x | Actual Live Payout: 1.171x
+         Measured WinRate: 80.8% (n=19999) | Est Live EV: -5.29%
+ [SKIP] Estimated EV (-5.29%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.45 | Digit: 5 -> Action: OVER 2
+         Theoretical Payout: 1.314x | Actual Live Payout: 1.057x
+         Measured WinRate: 83.8% (n=19999) | Est Live EV: -11.44%
+ [SKIP] Estimated EV (-11.44%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.47 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.50 | Digit: 0 -> Action: UNDER 2
+         Theoretical Payout: 3.886x | Actual Live Payout: 2.229x
+         Measured WinRate: 34.1% (n=19999) | Est Live EV: -24.03%
+ [SKIP] Estimated EV (-24.03%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.49 | Digit: 9 -> Action: OVER 7
+         Theoretical Payout: 3.886x | Actual Live Payout: 2.229x
+         Measured WinRate: 33.5% (n=19999) | Est Live EV: -25.37%
+ [SKIP] Estimated EV (-25.37%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.49 | Digit: 9 -> Action: OVER 7
+         Theoretical Payout: 3.886x | Actual Live Payout: 2.229x
+         Measured WinRate: 33.5% (n=19999) | Est Live EV: -25.37%
+ [SKIP] Estimated EV (-25.37%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.49 | Digit: 9 -> Action: OVER 7
+         Theoretical Payout: 3.886x | Actual Live Payout: 2.229x
+         Measured WinRate: 33.5% (n=19999) | Est Live EV: -25.37%
+ [SKIP] Estimated EV (-25.37%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.47 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.47 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.45 | Digit: 5 -> Action: OVER 2
+         Theoretical Payout: 1.314x | Actual Live Payout: 1.057x
+         Measured WinRate: 83.8% (n=19999) | Est Live EV: -11.44%
+ [SKIP] Estimated EV (-11.44%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.45 | Digit: 5 -> Action: OVER 2
+         Theoretical Payout: 1.314x | Actual Live Payout: 1.057x
+         Measured WinRate: 83.8% (n=19999) | Est Live EV: -11.44%
+ [SKIP] Estimated EV (-11.44%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.45 | Digit: 5 -> Action: OVER 2
+         Theoretical Payout: 1.314x | Actual Live Payout: 1.057x
+         Measured WinRate: 83.8% (n=19999) | Est Live EV: -11.44%
+ [SKIP] Estimated EV (-11.44%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.48 | Digit: 8 -> Action: OVER 6
+         Theoretical Payout: 2.800x | Actual Live Payout: 1.829x
+         Measured WinRate: 46.4% (n=19999) | Est Live EV: -15.11%
+ [SKIP] Estimated EV (-15.11%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.51 | Digit: 1 -> Action: UNDER 3
+         Theoretical Payout: 2.800x | Actual Live Payout: 1.829x
+         Measured WinRate: 47.3% (n=19999) | Est Live EV: -13.43%
+ [SKIP] Estimated EV (-13.43%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.52 | Digit: 2 -> Action: UNDER 4
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 61.9% (n=19999) | Est Live EV: -4.57%
+ [SKIP] Estimated EV (-4.57%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.57 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.56 | Digit: 6 -> Action: OVER 3
+         Theoretical Payout: 1.514x | Actual Live Payout: 1.171x
+         Measured WinRate: 80.8% (n=19999) | Est Live EV: -5.29%
+ [SKIP] Estimated EV (-5.29%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.57 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.59 | Digit: 9 -> Action: OVER 7
+         Theoretical Payout: 3.886x | Actual Live Payout: 2.229x
+         Measured WinRate: 33.5% (n=19999) | Est Live EV: -25.37%
+ [SKIP] Estimated EV (-25.37%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.60 | Digit: 0 -> Action: UNDER 2
+         Theoretical Payout: 3.886x | Actual Live Payout: 2.229x
+         Measured WinRate: 34.1% (n=19999) | Est Live EV: -24.03%
+ [SKIP] Estimated EV (-24.03%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.59 | Digit: 9 -> Action: OVER 7
+         Theoretical Payout: 3.886x | Actual Live Payout: 2.229x
+         Measured WinRate: 33.5% (n=19999) | Est Live EV: -25.37%
+ [SKIP] Estimated EV (-25.37%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.58 | Digit: 8 -> Action: OVER 6
+         Theoretical Payout: 2.800x | Actual Live Payout: 1.829x
+         Measured WinRate: 46.4% (n=19999) | Est Live EV: -15.11%
+ [SKIP] Estimated EV (-15.11%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.57 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.56 | Digit: 6 -> Action: OVER 3
+         Theoretical Payout: 1.514x | Actual Live Payout: 1.171x
+         Measured WinRate: 80.8% (n=19999) | Est Live EV: -5.29%
+ [SKIP] Estimated EV (-5.29%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.58 | Digit: 8 -> Action: OVER 6
+         Theoretical Payout: 2.800x | Actual Live Payout: 1.829x
+         Measured WinRate: 46.4% (n=19999) | Est Live EV: -15.11%
+ [SKIP] Estimated EV (-15.11%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.57 | Digit: 7 -> Action: OVER 5
+         Theoretical Payout: 2.200x | Actual Live Payout: 1.543x
+         Measured WinRate: 58.0% (n=19999) | Est Live EV: -10.45%
+ [SKIP] Estimated EV (-10.45%) < min_ev (+0.00%). Gate blocked.
+
+[SIGNAL] Tick Spot: 130.56 | Digit: 6 -> Action: OVER 3
+         Theoretical Payout: 1.514x | Actual Live Payout: 1.171x
+         Measured WinRate: 80.8% (n=19999) | Est Live EV: -5.29%
+ [SKIP] Estimated EV (-5.29%) < min_ev (+0.00%). Gate blocked.

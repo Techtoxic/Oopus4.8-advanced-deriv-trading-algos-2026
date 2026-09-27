@@ -16,20 +16,54 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from derivfetch import fetch_ticks
 from deriv_api import DerivWS
 
-# AUTHENTICATED REAL EXECUTED PAYOUTS (Audited from real live buy responses on JD100)
-# Warning: The public/proposal endpoint overstates payouts on JD100 by up to 25%.
-# These values are the exact fills received when contracts are bought on authenticated demo accounts.
-AUTHENTICATED_EXECUTED_PAYOUTS = {
-    ('OVER', 0): 1.0571, ('UNDER', 9): 1.0571,
-    ('OVER', 1): 1.1714, ('UNDER', 8): 1.1714,
-    ('OVER', 2): 1.3143, ('UNDER', 7): 1.3143,
-    ('OVER', 3): 1.5143, ('UNDER', 6): 1.5143,
-    ('OVER', 4): 1.8000, ('UNDER', 5): 1.8000,
-    ('OVER', 5): 2.2000, ('UNDER', 4): 2.2000,
-    ('OVER', 6): 2.8000, ('UNDER', 3): 2.8000,
-    ('OVER', 7): 3.8857, ('UNDER', 2): 3.8857,
-    ('OVER', 8): 6.3429, ('UNDER', 1): 6.3429,
+# LIVE QUOTED PAYOUTS — read off the AUTHENTICATED session on 2026-09-27 and
+# verified by fill (payout_audit.py, quote and fill on the SAME socket).
+#
+# Do NOT confuse this with the HISTORICAL grid in HISTORICAL_INTACT_PAYOUTS
+# below. On JD100 the two tiers quote DIFFERENT books:
+#   public socket        18 contracts, OVER4 = 1.95, OVER8 = 8.93
+#   authenticated socket 14 contracts, OVER4 = 1.33, OVER8 = 2.86,
+#                        and OVER0/OVER1/UNDER8/UNDER9 return
+#                        "This contract offers no return."
+# The proposal endpoint does not lie (payout_probe.py: 8/8 same-tick pairs,
+# executed/proposal ratio exactly 1.0000). The earlier "PROPOSAL LIES" rows in
+# results/payout_audit.md came from quoting on the public socket and filling on
+# the authenticated one. See endpoint_compare.py and jd100_counterfactual.py.
+LIVE_QUOTED_PAYOUTS = {
+    ('OVER', 2): 1.0571, ('UNDER', 7): 1.0571,
+    ('OVER', 3): 1.1714, ('UNDER', 6): 1.1714,
+    ('OVER', 4): 1.3429, ('UNDER', 5): 1.3429,
+    ('OVER', 5): 1.5429, ('UNDER', 4): 1.5429,
+    ('OVER', 6): 1.8286, ('UNDER', 3): 1.8286,
+    ('OVER', 7): 2.2286, ('UNDER', 2): 2.2286,
+    ('OVER', 8): 2.8571, ('UNDER', 1): 2.8571,
 }
+
+# HISTORICAL INTACT GRID — the JD100 book BEFORE the repricing, still quoted by
+# the public socket and still the live book on JD10/JD25/JD50/JD75 and every
+# volatility index. Kept so the counterfactual is reproducible offline:
+# on 60,000 real JD100 ticks (sigma 2.38 pips) this grid yields OOS EV +38.48%
+# where the live grid yields -10.06%. Same ticks, same policy, only the prices
+# differ. See results/cross_asset_digit_grid.md.
+HISTORICAL_INTACT_PAYOUTS = {
+    ('OVER', 0): 1.0900, ('UNDER', 9): 1.0900,
+    ('OVER', 1): 1.2300, ('UNDER', 8): 1.2300,
+    ('OVER', 2): 1.4000, ('UNDER', 7): 1.4000,
+    ('OVER', 3): 1.6300, ('UNDER', 6): 1.6300,
+    ('OVER', 4): 1.9500, ('UNDER', 5): 1.9500,
+    ('OVER', 5): 2.4300, ('UNDER', 4): 2.4300,
+    ('OVER', 6): 3.2100, ('UNDER', 3): 3.2100,
+    ('OVER', 7): 4.7200, ('UNDER', 2): 4.7200,
+    ('OVER', 8): 8.9300, ('UNDER', 1): 8.9300,
+}
+
+# Backwards-compatible alias. Everything that used to import the old, stale
+# table now gets the verified live one. The old table was WRONG in both
+# directions at once (it had OVER4 = 1.8000, which matched neither the 1.95 the
+# public tier quoted nor the 1.33 the authenticated tier fills).
+AUTHENTICATED_EXECUTED_PAYOUTS = LIVE_QUOTED_PAYOUTS
+GRIDS = {'live': LIVE_QUOTED_PAYOUTS, 'historical': HISTORICAL_INTACT_PAYOUTS}
+
 
 
 def compute_quantum_coherence(digits, max_tau=5):
@@ -42,7 +76,9 @@ def compute_quantum_coherence(digits, max_tau=5):
     return coherences
 
 
-def derive_optimal_policy(digits):
+def derive_optimal_policy(digits, payouts=None):
+    if payouts is None:
+        payouts = LIVE_QUOTED_PAYOUTS
     d_curr = digits[:-1]
     d_next = digits[1:]
     policy = {}
@@ -54,7 +90,7 @@ def derive_optimal_policy(digits):
         if not np.any(mask):
             continue
         nd = d_next[mask]
-        for (ctype, barrier), payout in AUTHENTICATED_EXECUTED_PAYOUTS.items():
+        for (ctype, barrier), payout in payouts.items():
             win_m = (nd > barrier) if ctype == 'OVER' else (nd < barrier)
             p = float(np.mean(win_m))
             ev = p * payout - 1.0
@@ -69,13 +105,15 @@ def derive_optimal_policy(digits):
         }
     return policy
 
-def run_quantum_audit(ticks_count=50000):
+def run_quantum_audit(ticks_count=50000, grid='live', symbol='JD100'):
+    payouts = GRIDS[grid]
     print("=" * 80)
-    print("QUANTUM PHASE-SPACE & CYCLIC LATTICE EDGE AUDIT (JD100)")
+    print(f"QUANTUM PHASE-SPACE & CYCLIC LATTICE EDGE AUDIT ({symbol})")
+    print(f"Payout grid: {grid.upper()}  ({len(payouts)} contracts)")
     print("=" * 80)
     ws = DerivWS()
     print(f"[*] Fetching {ticks_count} clean, monotonic ticks from Deriv API...")
-    t, p, pip = fetch_ticks(ws, 'JD100', ticks_count, verbose=False)
+    t, p, pip = fetch_ticks(ws, symbol, ticks_count, verbose=False)
     ws.close()
     
     dp = np.diff(p)
@@ -97,7 +135,7 @@ def run_quantum_audit(ticks_count=50000):
     
     # 2. Optimal Policy
     print("\n--- 2. OPTIMAL DIGIT CONTRACT POLICY (AT 100% SIGNAL DENSITY) ---")
-    policy = derive_optimal_policy(digits)
+    policy = derive_optimal_policy(digits, payouts)
     for entry in range(10):
         pol = policy[entry]
         ctype, barrier, payout = pol['contract']
@@ -108,7 +146,9 @@ def run_quantum_audit(ticks_count=50000):
     mid = len(digits) // 2
     d_is = digits[:mid]
     d_oos = digits[mid:]
-    policy_is = derive_optimal_policy(d_is)
+    policy_is = derive_optimal_policy(d_is, payouts)
+    for _k, _v in policy.items():
+        policy_is.setdefault(_k, _v)
     
     pnl_oos = []
     for t_idx in range(len(d_oos) - 1):
@@ -151,17 +191,33 @@ def run_quantum_audit(ticks_count=50000):
         win = (nxt > barrier) if ctype == 'OVER' else (nxt < barrier)
         pnl_shuff.append(payout - 1.0 if win else -1.0)
     print(f"  Permutation Control (Zero-intelligence null): EV = {np.mean(pnl_shuff)*100:+.2f}% (Matches house margin)")
-    
+
     print("\n" + "=" * 80)
-    print("VERDICT: RIGOROUS QUANTUM EDGE CONFIRMED WITH POSITIVE EXPECTED VALUE (+25.3%)")
+    if grid == 'live':
+        print("VERDICT: EDGE IS NEGATIVE ON THE LIVE BOOK.")
+        print(f"  OOS EV {mean_ev*100:+.2f}% on the authenticated grid Deriv actually fills.")
+        print("  The lattice signal is real (the permutation and lag-2 controls stay")
+        print("  negative, the in-sample fit is strong), but Deriv repriced JD100's digit")
+        print("  book far past it. Re-run with --grid historical to see the same ticks")
+        print("  under the pre-repricing grid, which is still the live book on")
+        print("  JD10/JD25/JD50/JD75 and all volatility indices.")
+    else:
+        print("VERDICT: HISTORICAL GRID — the signal, not the tradable book.")
+        print(f"  OOS EV {mean_ev*100:+.2f}% under the pre-repricing grid. This is a")
+        print("  counterfactual. It is NOT tradable: on JD100 the authenticated session")
+        print("  quotes the restricted grid, and JD10/25/50/75 run at sigma ~11 pips")
+        print("  where the lattice does not exist. See results/cross_asset_digit_grid.md.")
     print("=" * 80)
 
 def main():
     parser = argparse.ArgumentParser(description="Quantum Lattice Arbitrage Engine")
     parser.add_argument("--audit", action="store_true", help="Run offline quantum edge audit")
     parser.add_argument("--ticks", type=int, default=50000, help="Number of ticks to fetch")
+    parser.add_argument("--grid", choices=sorted(GRIDS), default="live",
+                        help="Payout grid: live (what fills) or historical (counterfactual)")
+    parser.add_argument("--symbol", default="JD100", help="Underlying (default JD100)")
     args = parser.parse_args()
-    run_quantum_audit(ticks_count=args.ticks)
+    run_quantum_audit(ticks_count=args.ticks, grid=args.grid, symbol=args.symbol)
 
 if __name__ == "__main__":
     main()

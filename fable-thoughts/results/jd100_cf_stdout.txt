@@ -1,0 +1,30 @@
+JD100
+  public tier        : 18 digit contracts quoted
+  authenticated tier : 14 digit contracts quoted
+  public-only rows   : [('OVER', 0), ('OVER', 1), ('UNDER', 8), ('UNDER', 9)]
+  auth-only rows     : []
+ticks=60000  pip=2  sigma=2.38 pips
+==============================================================================
+SAME TICKS, TWO GRIDS — isolating Deriv's repricing from microstructure
+==============================================================================
+
+  [INTACT grid (pre-repricing)]  contracts available: 18
+    in-sample EV  +39.72%  (t=64.6)
+    OOS EV        +38.48%  99% CI [+35.60%, +41.36%]  t=34.4  n=29999
+    controls      lag2 +9.40%   permutation -5.07%
+
+  [PUBLIC tier grid (live quote)]  contracts available: 18
+    in-sample EV  +39.72%  (t=64.6)
+    OOS EV        +38.48%  99% CI [+35.60%, +41.36%]  t=34.4  n=29999
+    controls      lag2 +9.40%   permutation -5.17%
+
+  [AUTH tier grid (what you can trade)]  contracts available: 14
+    in-sample EV  -10.36%  (t=-38.8)
+    OOS EV        -10.06%  99% CI [-11.01%, -9.11%]  t=-27.4  n=29999
+    controls      lag2 -25.94%   permutation -34.36%
+
+==============================================================================
+Would the edge be live on an intact JD100 book? best OOS +38.48%
+On the book you can actually trade OOS EV = -10.06%  -> the index is untradeable as priced.
+==============================================================================
+[*] wrote ../results/jd100_counterfactual.json

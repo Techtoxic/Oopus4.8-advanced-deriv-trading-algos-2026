@@ -1,5 +1,14 @@
 """quantum_lattice_live.py — Real-Time Execution Engine for Cyclic Lattice Strategy.
 
+STATUS 2026-09-27: EXECUTION PATH VERIFIED, STRATEGY NEGATIVE. Do NOT trade it.
+The lattice signal is real and the fill path works (one authenticated DIGITOVER 5
+filled in 85 ms, $0.35 -> $0.54 payout, contract 14589846679, settled in the
+money). But on the LIVE authenticated JD100 grid the same policy runs at -8% to
+-10% out of sample, while the pre-repricing grid gave +41.46% on identical ticks.
+Deriv repriced JD100's digit book and removed the edge. See
+results/cross_asset_digit_grid.md. THEORETICAL_LATTICE_POLICY below is the
+historical grid, not a tradable one.
+
 Specification:
 - Direct authenticated WebSocket connection via DerivWS.
 - Sub-50ms execution via single buy-with-parameters call within the 1-second JD100 tick window.
@@ -10,7 +19,9 @@ Specification:
     * Max stake hard cap (default: $0.35).
     * Max loss / stop-loss halt (default: $5.00).
     * Max trades / iterations cap (default: 10).
-    * Strict EV gate: refuses to execute if model EV < --min-ev (default: +0.0%).
+    * EV gate measured from a real tick sample, not guessed, and defaulting to
+      positive-only (--min-ev 0.0). Running the live grid through it blocks
+      every trade on JD100, which is the correct behaviour.
     * Latency check: skips execution if network RTT exceeds threshold.
     * 1-tick settlement tracking and reconciliation.
 """
@@ -23,8 +34,11 @@ import json
 import argparse
 from decimal import Decimal
 
+import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from deriv_api import DerivWS
+from derivfetch import fetch_ticks
 
 # Current authentic live executed payout multipliers on JD100 (audited live on Deriv):
 LIVE_JD100_PAYOUTS = {
@@ -50,6 +64,13 @@ THEORETICAL_LATTICE_POLICY = {
     9: ('OVER', 7, 3.8857),
 }
 
+JUMP_PIP = {'JD10': 2, 'JD25': 2, 'JD50': 2, 'JD75': 2, 'JD100': 2}
+
+
+def _pip_of(symbol):
+    return JUMP_PIP.get(symbol, 2)
+
+
 class QuantumLatticeEngine:
     def __init__(self, ws, args):
         self.ws = ws
@@ -67,6 +88,8 @@ class QuantumLatticeEngine:
         self.trades_count = 0
         self.wins = 0
         self.losses = 0
+        self.p_win_table = {}
+        self.calib_n = 0
 
         self._validate_account()
 
@@ -87,6 +110,28 @@ class QuantumLatticeEngine:
         else:
             print("[i] DRY-RUN MODE: Simulating order fills. Use --trade to execute live.")
 
+    def calibrate(self, digits):
+        """Measure the conditional win rate P(win | entry digit) from real ticks.
+
+        The first version of this engine hardcoded guessed win rates (0.33/0.47/
+        0.59/0.79/0.84 by digit). Those numbers were invented, and together with
+        an `--min-ev` default of -1.0 they produced an EV gate that could not
+        block anything. This measures the table instead, against the LIVE payout
+        grid, so the gate means something.
+        """
+        d_curr, d_next = digits[:-1], digits[1:]
+        self.p_win_table = {}
+        for entry in range(10):
+            mask = (d_curr == entry)
+            target = THEORETICAL_LATTICE_POLICY.get(entry)
+            if not np.any(mask) or not target:
+                continue
+            ctype, barrier, _ = target
+            nd = d_next[mask]
+            win = (nd > barrier) if ctype == 'OVER' else (nd < barrier)
+            self.p_win_table[entry] = float(np.mean(win))
+        return self.p_win_table
+
     def execute_signal(self, current_digit, spot_price):
         target = THEORETICAL_LATTICE_POLICY.get(current_digit)
         if not target:
@@ -95,19 +140,16 @@ class QuantumLatticeEngine:
         ctype, barrier, theoretical_payout = target
         live_payout = LIVE_JD100_PAYOUTS.get((ctype, barrier), theoretical_payout)
 
-        # Baseline empirical conditional probability on JD100:
-        p_win_est = 0.50
-        if current_digit in [0, 9]: p_win_est = 0.33
-        elif current_digit in [1, 8]: p_win_est = 0.47
-        elif current_digit in [2, 7]: p_win_est = 0.59
-        elif current_digit in [3, 6]: p_win_est = 0.79
-        elif current_digit in [4, 5]: p_win_est = 0.84
+        p_win_est = self.p_win_table.get(current_digit)
+        if p_win_est is None:
+            print(f" [SKIP] digit {current_digit} not covered by the calibration sample.")
+            return
 
         est_ev = p_win_est * live_payout - 1.0
 
         print(f"\n[SIGNAL] Tick Spot: {spot_price:.2f} | Digit: {current_digit} -> Action: {ctype} {barrier}")
         print(f"         Theoretical Payout: {theoretical_payout:.3f}x | Actual Live Payout: {live_payout:.3f}x")
-        print(f"         Est WinRate: {p_win_est*100:.1f}% | Est Live EV: {est_ev*100:+.2f}%")
+        print(f"         Measured WinRate: {p_win_est*100:.1f}% (n={self.calib_n}) | Est Live EV: {est_ev*100:+.2f}%")
 
         if est_ev < self.min_ev:
             print(f" [SKIP] Estimated EV ({est_ev*100:+.2f}%) < min_ev ({self.min_ev*100:+.2f}%). Gate blocked.")
@@ -198,6 +240,42 @@ def run_live_loop(args):
     engine = QuantumLatticeEngine(ws, args)
 
     print(f"[*] Subscribing to live tick stream for {args.symbol}...")
+
+    # Calibrate the EV gate on real ticks BEFORE placing anything. The first
+    # version of this file guessed these probabilities; guessing an EV gate is
+    # the same as having none, which is how a -40% strategy got an 85 ms fill.
+    # NOTE: ticks_history caps at 1000 per request, so a raw call returns 999
+    # usable transitions. Page with fetch_ticks to get a real sample.
+    calib_count = max(2000, int(args.calib_ticks))
+    _, calib_prices, pip = fetch_ticks(ws, args.symbol, calib_count, verbose=False)
+    if len(calib_prices) < 1000:
+        print("[ERROR] Calibration sample too small; refusing to run without a "
+              "measured EV gate.")
+        ws.close()
+        sys.exit(1)
+    digits = (np.round(np.array(calib_prices, dtype=float)
+                       * (10 ** pip)).astype(int)) % 10
+    engine.calib_n = int(len(digits) - 1)
+    table = engine.calibrate(digits)
+    print(f"[*] Calibrated on {engine.calib_n} ticks "
+          f"(pip={pip}). Measured P(win | entry digit):")
+    for d in sorted(table):
+        ctype, bar, _ = THEORETICAL_LATTICE_POLICY[d]
+        pay = LIVE_JD100_PAYOUTS.get((ctype, bar), float('nan'))
+        print(f"      digit {d}: {ctype} {bar:<2} pay={pay:.4f} "
+              f"P(win)={table[d]*100:5.2f}%  EV={(table[d]*pay-1)*100:+6.2f}%")
+    best = max(table, key=lambda d: table[d] * LIVE_JD100_PAYOUTS[
+        (THEORETICAL_LATTICE_POLICY[d][0], THEORETICAL_LATTICE_POLICY[d][1])] - 1)
+    best_ev = table[best] * LIVE_JD100_PAYOUTS[
+        (THEORETICAL_LATTICE_POLICY[best][0],
+         THEORETICAL_LATTICE_POLICY[best][1])] - 1
+    print(f"[*] Best available cell: digit {best} at EV {best_ev*100:+.2f}% "
+          f"(gate: {args.min_ev*100:+.2f}%)")
+    if best_ev < args.min_ev:
+        print("[!] No eligible contract. Every digit is below the EV gate on the")
+        print("    live grid, so this session will only report and never trade.")
+        print("    That is the correct outcome: see results/cross_asset_digit_grid.md.")
+
     hist = ws.ticks_history(args.symbol, count=1)
     last_epoch = 0
     if 'history' in hist:
@@ -244,8 +322,9 @@ def main():
     parser.add_argument("--allow-real", action="store_true", help="Allow execution on real-money accounts")
     parser.add_argument("--max-loss", type=float, default=5.0, help="Max loss halt limit (default: $5.00)")
     parser.add_argument("--max-trades", type=int, default=10, help="Max trades to execute (default: 10)")
-    parser.add_argument("--min-ev", type=float, default=-1.0, help="Minimum EV gate to trigger trades")
+    parser.add_argument("--min-ev", type=float, default=0.0, help="Minimum measured EV required to trade (default: 0.0, i.e. positive only)")
     parser.add_argument("--rtt-max-ms", type=float, default=250.0, help="Maximum latency threshold in ms")
+    parser.add_argument("--calib-ticks", type=int, default=20000, help="Ticks used to measure the EV gate (default: 20000)")
 
     args = parser.parse_args()
     run_live_loop(args)
