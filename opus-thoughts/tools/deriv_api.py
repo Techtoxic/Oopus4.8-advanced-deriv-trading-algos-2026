@@ -3,8 +3,8 @@ import json, os, time, threading, itertools
 import urllib.request, urllib.error
 import websocket
 
-# ── Credentials — env first, fallback to pasted values ──────────────────────
-TOKEN  = os.environ.get("DERIV_TOKEN",  "pat_23c350f49ef832db6e7b117d69417416d804a610875e8899f6dc4936fa884f34")
+# ── Credentials — env first, NO embedded fallback (revoked throwaway removed 2026-09-27) ──
+TOKEN  = os.environ.get("DERIV_TOKEN",  "")
 APP_ID = os.environ.get("DERIV_APP_ID", "33wYNr1doMQUdym9qvsMk")
 
 # ── New API endpoints ────────────────────────────────────────────────────────
