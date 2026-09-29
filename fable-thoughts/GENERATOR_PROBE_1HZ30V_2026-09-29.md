@@ -48,3 +48,26 @@ Run on the user's machine from a cached 9,000,000-tick fetch. Read-only.
 correctly implemented generator (CSPRNG or not) produces, observed through a scaled, rounded price.
 There is no statistical edge in its history. Any edge on this symbol would have to come from pricing,
 not prediction.
+
+## Addendum: generator_probe_v3 on the same cache (32 tests)
+
+All five added tests are null against the spot-scaled simulated null:
+
+| test | calibrated p |
+|---|---|
+| A2 digit Markov, 1st order | 0.145 |
+| A2 digit Markov, 2nd order | 0.328 |
+| D2 leverage | 0.646 |
+| E2 block variance | 0.93-0.94 |
+| F2 run lengths | 0.689 |
+
+- **E2 is the clearest calibration lesson in the run.** Against the textbook formula all three block
+  sizes give p = 0, because block variances in pips follow spot over 104 days. Against the
+  spot-scaled null they give p = 0.93-0.94.
+- **The planted control flags E2 (block 128) and F2,** so both have power.
+- **Caveat: D2 and A2 have no positive control in this run.** The planted GARCH is symmetric, so it
+  has no leverage effect, and it carries no digit structure. For those two tests, a null result shows
+  there is nothing large, not that the tests could see something small.
+
+**Verdict unchanged.** No test survives Holm correction, the information bound is zero, and no rule
+has positive EV out of sample.
