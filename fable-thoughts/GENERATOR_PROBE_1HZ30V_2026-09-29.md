@@ -71,3 +71,26 @@ All five added tests are null against the spot-scaled simulated null:
 
 **Verdict unchanged.** No test survives Holm correction, the information bound is zero, and no rule
 has positive EV out of sample.
+
+## Addendum: boundary_probe on the same ticks plus 366 daily candles
+
+- **M (macro).**
+  - The API returned only 366 daily candles (2025-09-29 to 2026-09-29), so "lifetime" here means one year.
+  - No rebase: the largest overnight jump is 3.1 tick-sigmas.
+  - Lifetime simple drift t = 0.07.
+  - The reflection test cannot run: spot never sat in the bottom 5% of its running range, and the 20
+    top-5% days give a next-day t of -1.35.
+  - M4 (volatility at extremes) calibrated p = 0.18.
+- **N (number format).** Last digit and last two digits are uniform in every spot decile. The float32
+  test does not apply: at 7 significant digits one float32 step is 0.49 pips.
+- **O1 (feed gaps).** There are 15 gaps, 12 of them between 00:00 and 09:00 UTC. The price moved
+  through them like a walk that kept running (mean z^2 = 1.01), not one that paused (12.4). The 94 s
+  gap on 2026-07-28 moved 11 tick-sigmas, against sqrt(94) = 9.7 expected. So the outages are delivery
+  gaps: the generator does not stop.
+- **O2 (time-of-day volatility).** The profile is flat: dispersion z = 0.40, p = 0.35. The quietest
+  5-minute bin is 1.1% below average, against the 5.7% an accumulator at g = 1% would need.
+- **O3 (midnight window).** Variance ratio 1.0116 (z = 2.99, p = 0.0028). This is not significant after
+  Holm (threshold about 0.0004 for 26 tests). If real, it is 0.6% more volatility near midnight: no
+  direction, and the wrong sign for accumulators. It is noted for replication on the next fresh sample
+  and not acted on.
+- **Verdict.** No boundary test survives correction.
