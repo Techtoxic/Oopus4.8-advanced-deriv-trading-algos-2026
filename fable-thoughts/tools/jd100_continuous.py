@@ -16,6 +16,7 @@ from deriv_api import DerivWS
 QUOTE_REFRESH_SECONDS = 60
 QUOTE_MAX_AGE_SECONDS = 75
 PING_INTERVAL_SECONDS = 25
+CONTROL_PING_SECONDS = 20
 FEED_IDLE_SECONDS = 10
 BUY_ACK_RECOVERY_SECONDS = 20
 
@@ -164,6 +165,7 @@ def run_continuous(args, public, trader, emit):
     control = reader = pool = future = job = None
     payouts = None
     quoted_at = 0
+    last_control_use = time.monotonic()
     deadline = time.monotonic() + args.minutes * 60
     reason = 'session complete'
     stage = 'initialization'
@@ -183,6 +185,8 @@ def run_continuous(args, public, trader, emit):
             result = completed.result()
             if work[0] == 'prices':
                 payouts, quoted_at = result, work[2]
+            elif work[0] == 'keepalive':
+                pass
             else:
                 c = result.get('proposal_open_contract', {})
                 update = book.settle(work[1], c)
@@ -193,21 +197,34 @@ def run_continuous(args, public, trader, emit):
             if work[0] == 'settlement' and work[1] in book.pending:
                 book.pending[work[1]]['read_failed'] = True
 
+    def keepalive():
+        try:
+            return control._call({'ping': 1})
+        except TRANSPORT_ERRORS:
+            return reconnect_channel(control, events.put, deadline, 'control', buyer_account)
+
     def schedule(draining=False):
-        nonlocal future, job
+        nonlocal future, job, last_control_use
         if future is not None or pool is None:
             return
         now = time.monotonic()
         if not draining and now - quoted_at >= QUOTE_REFRESH_SECONDS:
+            last_control_use = now
             job = ('prices', None, now)
             future = pool.submit(model.prices, reader, args.stake)
             return
         available = [(cid, r) for cid, r in book.pending.items() if not r['read_failed'] and now - r['last_poll'] >= .15]
         if available:
+            last_control_use = now
             cid, row = min(available, key=lambda item: item[1]['last_poll'])
             row['last_poll'] = now
             job = ('settlement', cid, now)
             future = pool.submit(reader._call, {'proposal_open_contract': 1, 'contract_id': cid})
+            return
+        if not draining and now - last_control_use >= CONTROL_PING_SECONDS:
+            last_control_use = now
+            job = ('keepalive', None, now)
+            future = pool.submit(keepalive)
 
     try:
         if args.check_latency:
@@ -221,8 +238,12 @@ def run_continuous(args, public, trader, emit):
             raise RuntimeError('Buyer account type does not match requested mode')
         buyer_account = (trader.account.get('account_id'), expected_type) if trader else None
         stage = 'control_connection'
-        control = DerivWS(token=trader.token if trader else '', app_id=trader.app_id if trader else None,
-                          timeout=3, account_type=expected_type if trader else None)
+        try:
+            control = DerivWS(token=trader.token if trader else None, app_id=trader.app_id if trader else None,
+                              timeout=3, account_type=expected_type)
+        except ValueError:
+            control = DerivWS(token='', app_id=trader.app_id if trader else None, timeout=3, account_type=None)
+            emit({'event': 'warning', 'message': 'no API token: payouts are unauthenticated PUBLIC quotes and overstate what a logged-in account is offered'})
         stage = 'account_validation'
         if trader and (not trader.account.get('account_id')
                        or control.account.get('account_type') != expected_type
