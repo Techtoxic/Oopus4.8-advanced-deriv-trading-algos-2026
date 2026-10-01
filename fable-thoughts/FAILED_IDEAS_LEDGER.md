@@ -159,7 +159,7 @@ This ledger records every trading idea tried across all 15 branches: `main`, `de
 | 6.4 | CALLE/PUTE tie pair on JD100 | Quote implied +5.6% / +7.9%. Executed −2.12% live | PRICED |
 | 6.5 | CALLE/PUTE on all 17 symbols | −1.06% to −3.85% | PRICED |
 | 6.6 | Step Index Rise+Fall hedge | 7 of 20 pairs tied: −20% per round. Exact binomial pricing | PRICED |
-| 6.7 | T4: step-index barrier-offset parity | Every offset rejected; payout × P = 0.977 / 0.954–0.966 | DEAD |
+| 6.7 | T4: step-index barrier-offset parity | Every offset rejected; payout × P = 0.977 / 0.954–0.966 | DEAD, but **re-check**: on 2026-10-01 the volatility indices also rejected every free-form Higher/Lower offset ("Invalid barrier"), which points to server-defined barrier choices rather than "no barriers offered" |
 | 6.8 | RDBULL/RDBEAR drift (+9.24% / −5.65% per day, real) | CALL/PUT priced at a uniform −2.2% to −2.5% | PRICED |
 | 6.9 | Midnight reset snipe (00:00 = 1000.0000 exactly) | Buys in the final seconds are rejected; the reset tick belongs to the new session | DEAD |
 | 6.10 | Day-shape memory on reset indices | 0/364 duplicate days | DEAD |

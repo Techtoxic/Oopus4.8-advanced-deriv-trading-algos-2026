@@ -68,6 +68,7 @@ import argparse
 import json
 import math
 import os
+import re
 import sys
 import time
 
@@ -81,7 +82,9 @@ KS = [0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0]
 FLAG_MARGIN = 0.005
 STAKE = 10.0
 Z_A, Z_B = 2.576, 1.2816
+MIN_CELLS = 10          # per symbol; fewer quoted cells than this cannot support a verdict
 LONGCODES = {}
+DIAG = {}               # first rejection per symbol, raw, so a format problem is visible
 
 
 def ncdf(x):
@@ -199,6 +202,62 @@ def quote(ws, sym, ct, dur, unit, barrier=None):
     return None, f"{e.get('code')}: {str(e.get('message'))[:70]}"
 
 
+def hl_spec(ws, sym):
+    """contracts_for entries for Higher/Lower (CALL/PUT that take one barrier)."""
+    try:
+        r = ws.call({'contracts_for': sym})
+    except Exception as e:
+        return [{'error': str(e)}]
+    av = (r.get('contracts_for') or {}).get('available') or []
+    keep = ('contract_type', 'contract_category', 'expiry_type', 'min_contract_duration',
+            'max_contract_duration', 'barriers', 'barrier', 'barrier_choices', 'sentiment')
+    return [{k: c.get(k) for k in keep if k in c} for c in av
+            if c.get('contract_type') in ('CALL', 'PUT') and str(c.get('barriers')) == '1']
+
+
+def discover(ws, sym, dur, unit, trial):
+    """Ask the server which barriers it accepts for this duration. Deriv offers fixed
+    barrier choices on some products (vanillas did, option_audit.py), and the first live run
+    rejected all 2,200 free-form offsets with 'Invalid barrier'. Returns (free_form_ok,
+    choices, raw_error)."""
+    req = {'proposal': 1, 'amount': STAKE, 'basis': 'stake', 'contract_type': 'CALL',
+           'currency': 'USD', 'underlying_symbol': sym, 'duration': dur,
+           'duration_unit': unit, 'barrier': trial}
+    r = ws.call(req)
+    if 'proposal' in r:
+        ch = r['proposal'].get('barrier_choices') or []
+        return True, [str(x) for x in ch], None
+    e = r.get('error', {}) or {}
+    det = e.get('details') or {}
+    ch = det.get('barrier_choices') or det.get('barriers') or []
+    if isinstance(ch, dict):
+        ch = list(ch.values())
+    ch = [str(x) for x in ch] or re.findall(r'[+-]?\d+\.\d+', str(e.get('message', '')))
+    return False, ch, json.dumps(e)[:400]
+
+
+def signed_barriers(choices, default):
+    """Turn the server's choices (signed or not) plus the contracts_for default into a set of
+    (side, offset, string) cells, Higher above entry and Lower below."""
+    out = {}
+    for x in list(choices) + ([default] if default else []):
+        x = str(x).strip()
+        try:
+            v = float(x)
+        except ValueError:
+            continue
+        if v == 0:
+            continue
+        body = x.lstrip('+-')
+        if x[0] in '+-':
+            side = 1 if v > 0 else -1
+            out[(side, body)] = (side, abs(v), x)
+        else:
+            for side in (1, -1):
+                out[(side, body)] = (side, abs(v), ('+' if side > 0 else '-') + body)
+    return sorted(out.values(), key=lambda c: (c[0], c[1]))
+
+
 def audit_symbol(ws, sym, a, out):
     cache = dict(c.split('=', 1) for c in a.cache).get(sym)
     t, p, pip_size = get_ticks(ws, sym, a.ticks, cache)
@@ -221,36 +280,60 @@ def audit_symbol(ws, sym, a, out):
             print(f"  control {ct} failed: {err}")
         time.sleep(a.sleep)
 
+    spec = hl_spec(ws, sym)
+    defaults = {}
+    for c in spec:
+        if c.get('barrier'):
+            defaults.setdefault('t' if c.get('expiry_type') == 'tick' else 's', str(c['barrier']))
+    print(f"  contracts_for Higher/Lower: {json.dumps(spec)[:300]}")
+
     cells = []
     durs = [(d, 't') for d in TICK_DURS] + [(d, 's') for d in SEC_DURS]
     for dur, unit in durs:
         nmid, nalt = increments(dur, unit, dt)
-        for kk in KS:
-            B = round(kk * S * s * math.sqrt(nmid), pip_size)
-            if B < pip:
+        sd_n = S * s * math.sqrt(nmid)
+        trial = fmt_barrier(round(sd_n, pip_size) or pip, pip_size, 1)
+        free, choices, raw = discover(ws, sym, dur, unit, trial)
+        time.sleep(a.sleep)
+        grid = signed_barriers(choices, defaults.get(unit))
+        if free:
+            for kk in KS:
+                B = round(kk * sd_n, pip_size)
+                if B >= pip:
+                    grid += [(1, B, fmt_barrier(B, pip_size, 1)), (-1, B, fmt_barrier(B, pip_size, -1))]
+        if not grid:
+            DIAG.setdefault(sym, raw)
+            cells.append(dict(sym=sym, dur=dur, unit=unit, k=None, side=1, B=None,
+                              barrier=trial, err=raw))
+            print(f"  {dur}{unit}: no accepted barrier. Server said: {raw}")
+            continue
+        print(f"  {dur}{unit}: free-form {'yes' if free else 'no'}, {len(grid)} barriers "
+              f"({', '.join(g[2] for g in grid[:6])}{' ...' if len(grid) > 6 else ''})")
+        for side, B, bs in grid:
+            kk = round(B / sd_n, 3)
+            ct = 'CALL' if side > 0 else 'PUT'
+            pay, err = quote(ws, sym, ct, dur, unit, bs)
+            time.sleep(a.sleep)
+            if pay is None:
+                DIAG.setdefault(sym, err)
+                cells.append(dict(sym=sym, dur=dur, unit=unit, k=kk, side=side, B=B,
+                                  barrier=bs, err=err))
                 continue
-            for side, ct in ((1, 'CALL'), (-1, 'PUT')):
-                bs = fmt_barrier(B, pip_size, side)
-                pay, err = quote(ws, sym, ct, dur, unit, bs)
-                time.sleep(a.sleep)
-                if pay is None:
-                    cells.append(dict(sym=sym, dur=dur, unit=unit, k=kk, side=side, B=B,
-                                      barrier=bs, err=err))
-                    continue
-                pm = p_fair_max(side, B, S, s, s_se, nmid, pip)
-                pc = p_fair(side, B, S, s, nmid, pip)        # strict win: barrier + half pip
-                pa = p_fair(side, B, S, s, nalt, pip)
-                c = dict(sym=sym, dur=dur, unit=unit, k=kk, side=side, B=B, barrier=bs,
-                         pay=pay, p_central=pc, p_max=pm, ev_central=pay * pc - 1,
-                         ev_max=pay * pm - 1, ev_alt_n=pay * pa - 1, n_inc=(nmid, nalt))
-                c['flag'] = c['ev_max'] > FLAG_MARGIN
-                if unit == 't':
-                    kw, mw = empirical(p, pip_size, side, B, nmid, S)
-                    if mw:
-                        se = math.sqrt(pc * (1 - pc) / mw)
-                        c.update(emp=kw / mw, n_win=mw, z=(kw / mw - pc) / se if se else 0.0)
-                cells.append(c)
-    return dict(sym=sym, spot=S, s=s, s_se=s_se, dt=dt, pip=pip_size, controls=ctl), cells
+            pm = p_fair_max(side, B, S, s, s_se, nmid, pip)
+            pc = p_fair(side, B, S, s, nmid, pip)        # strict win: barrier + half pip
+            pa = p_fair(side, B, S, s, nalt, pip)
+            c = dict(sym=sym, dur=dur, unit=unit, k=kk, side=side, B=B, barrier=bs,
+                     pay=pay, p_central=pc, p_max=pm, ev_central=pay * pc - 1,
+                     ev_max=pay * pm - 1, ev_alt_n=pay * pa - 1, n_inc=(nmid, nalt))
+            c['flag'] = c['ev_max'] > FLAG_MARGIN
+            if unit == 't':
+                kw, mw = empirical(p, pip_size, side, B, nmid, S)
+                if mw:
+                    se = math.sqrt(pc * (1 - pc) / mw)
+                    c.update(emp=kw / mw, n_win=mw, z=(kw / mw - pc) / se if se else 0.0)
+            cells.append(c)
+    return dict(sym=sym, spot=S, s=s, s_se=s_se, dt=dt, pip=pip_size, controls=ctl,
+                hl_spec=spec), cells
 
 
 def report(meta, cells, public, path):
@@ -261,8 +344,11 @@ def report(meta, cells, public, path):
     # z over all cells is not a valid test; these few are compared one by one.
     ctl_cells = {}
     for c in good:
-        if 'z' in c and abs(c['k'] - 1.0) < 1e-9:
+        if 'z' in c and 0.5 <= c['k'] <= 1.5:
             ctl_cells.setdefault((c['sym'], c['dur']), []).append(c)
+    for key, cs in ctl_cells.items():           # keep the pair nearest 1 sd
+        best = min(abs(c['k'] - 1.0) for c in cs)
+        ctl_cells[key] = [c for c in cs if abs(c['k'] - 1.0) == best]
     zs = []
     for cs in ctl_cells.values():
         k = sum(c['emp'] * c['n_win'] for c in cs)
@@ -282,7 +368,7 @@ def report(meta, cells, public, path):
             okp = abs(c['emp'] - 0.5) < 0.03 and -0.10 < c['ev'] < 0
             ctl_ok &= okp
             L.append(f"- {m['sym']} {c['ct']} 5t: payout {c['pay']:.4f}, empirical P {c['emp']:.4f}, "
-                     f"EV at 0.5 {c['ev']*100:+.2f}% (known margin 2-4%) {'ok' if okp else 'CHECK'}")
+                     f"EV at 0.5 {c['ev']*100:+.2f}% (must lie between -10% and 0) {'ok' if okp else 'CHECK'}")
     if len(zs):
         zok = bool(np.abs(zs).max() < 3.5)
         ctl_ok &= zok
@@ -302,8 +388,15 @@ def report(meta, cells, public, path):
         L.append(f"| {m['sym']} | {len(cs)} | {max(c['ev_central'] for c in cs)*100:+.2f}% | "
                  f"{b['ev_max']*100:+.2f}% | {b['dur']}{b['unit']} {'Higher' if b['side']>0 else 'Lower'} "
                  f"{b['barrier']} ({b['k']} sd), payout {b['pay']:.4f} |")
+    per_sym = {m['sym']: sum(1 for c in good if c['sym'] == m['sym']) for m in meta}
+    enough = [sy for sy, n in per_sym.items() if n >= MIN_CELLS]
     L.append("\n## Verdict\n")
-    if not ctl_ok:
+    if len(enough) < max(1, (len(meta) + 1) // 2):
+        v = (f"INVALID: too few cells quoted ({len(good)} in total; {len(enough)} of {len(meta)} "
+             f"symbols reached {MIN_CELLS}). Nothing was compared, so there is no verdict. See "
+             "the rejections below.")
+        ctl_ok = ctl_ok  # controls are reported but the verdict is already decided
+    elif not ctl_ok:
         v = "INVALID: a control failed. Do not read the EVs."
     elif public:
         v = "NO VERDICT: public quotes. Rerun with DERIV_TOKEN set."
@@ -319,6 +412,14 @@ def report(meta, cells, public, path):
                  f"payout {c['pay']:.4f}, P {c['p_central']:.4f} to {pc:.4f}, EV {c['ev_central']*100:+.2f}% "
                  f"to {c['ev_max']*100:+.2f}% (EV with n-1 increments {c['ev_alt_n']*100:+.2f}%), trades needed ~{n_needed(c['pay'], pc, c['ev_max']):,.0f}"
                  + (f", empirical {c['emp']:.4f} on {c['n_win']} windows" if 'emp' in c else ''))
+    if DIAG:
+        L.append("\n## First rejection per symbol (raw server reply)\n")
+        for sy, msg in DIAG.items():
+            L.append(f"- {sy}: `{msg}`")
+    for m in meta:
+        if m.get('hl_spec'):
+            L.append(f"\n<details><summary>{m['sym']} contracts_for Higher/Lower</summary>\n\n"
+                     f"```\n{json.dumps(m['hl_spec'], indent=1)[:3000]}\n```\n</details>")
     if bad:
         L.append("\n## Rejected requests (first 10)\n")
         for c in bad[:10]:
@@ -348,6 +449,8 @@ def selftest():
     assert increments(15, 's', 1.0) == (15, 14)
     assert increments(5, 't', 1.0) == (5, 4)
     assert 20_000 < n_needed(1.95, 0.5256, 0.025) < 25_000
+    g = signed_barriers(['+71.69', '-71.69', '30.5'], '+71.69')
+    assert (1, 71.69, '+71.69') in g and (-1, 71.69, '-71.69') in g and (-1, 30.5, '-30.5') in g
     print("selftest ok")
 
 
@@ -373,10 +476,19 @@ def main():
     meta, cells = [], []
     try:
         for sym in a.symbols:
-            try:
-                m, c = audit_symbol(ws, sym, a, cells)
-            except Exception as e:  # one bad symbol must not lose the rest
-                print(f"{sym}: {e}")
+            m = None
+            for attempt in (1, 2):
+                try:
+                    m, c = audit_symbol(ws, sym, a, cells)
+                    break
+                except Exception as e:  # reconnect once; one bad symbol must not lose the rest
+                    print(f"{sym}: {e} (attempt {attempt})")
+                    try:
+                        ws.close()
+                    except Exception:
+                        pass
+                    ws = DerivWS(token=tok, account_type='demo') if tok else DerivWS(token='')
+            if m is None:
                 continue
             meta.append(m)
             cells += c
