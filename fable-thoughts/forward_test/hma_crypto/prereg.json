@@ -1,0 +1,20 @@
+{
+ "name": "HMA/RSI/LinReg long-only crypto trend, 4H, paper forward test",
+ "frozen_on": "2026-09-27",
+ "source": "Ziad Francis, CoinQuant_Vs_Python_HMA_Strategy (defaults), reimplemented in signals.py; matches his prepare_dataset exactly on 2017-2026 BTCUSDT (0 signal mismatches)",
+ "symbols": ["BTCUSDT", "ETHUSDT"],
+ "timeframe": "4h, closed Binance spot candles only",
+ "params": {"hma_fast": 16, "hma_slow": 64, "rsi_len": 14, "rsi_min": 52, "linreg_len": 50},
+ "execution_model": "enter at the close of the signal bar, exit at the close of the exit bar, one position per symbol, 100% notional",
+ "fee_bps_per_side": 3,
+ "benchmark": "exposure-matched random longs: same trade count and holding lengths placed at random times in the same forward window (2000 draws)",
+ "backtest_evidence": "BTC 2017-12..2019-02 96th pct, 2019-02..2026-05 99.8th pct vs random timing; ETH/BNB/SOL mixed (SOL failed pre-2021)",
+ "decision_rule": {
+   "minimum_duration_months": 6,
+   "pass": "pooled BTC+ETH forward timing percentile >= 95 AND net paper return > random-timing median",
+   "fail": "pooled percentile < 50 after 6 months",
+   "otherwise": "inconclusive: extend, never retune"
+ },
+ "no_changes": "Parameters, symbols, fees and rules above may not change during the test. Any change starts a new test with a new start date.",
+ "no_orders": "Paper only. This tool never connects to an exchange account."
+}
