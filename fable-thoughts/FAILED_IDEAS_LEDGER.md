@@ -271,6 +271,7 @@ This ledger records every trading idea tried across all 15 branches: `main`, `de
 | 12.4 | Adaptive trend following (SuperTrend + ADX + ATR), no COT | 2 of 9 instruments profitable; mean −7.4% | DEAD (FX majors) |
 | 12.5 | + COT-index filter | Gold +23.7% (PF 1.29); FX still negative | Filter SURVIVED |
 | 12.6 | In-sample vs out-of-sample with the COT index | Gold out-of-sample +16.9%, PF 1.51, Sharpe 0.52. AUDUSD and EURJPY died out-of-sample. **Audit 2026-10-01** (`currencies-metals-swing/research/gold_cot_audit.py`, verdict rules fixed before the run): out-of-sample CAGR 1.88%, Sharpe 0.52, vs buy-and-hold gold Sharpe 0.94; buy-and-hold scaled to the same volatility makes 3.45%/yr with the same −5.7% drawdown. Swap at −6%/−2% a year takes 45% of the profit (71% over the full period). Entry timing vs 2,000 random-date placements of the same trades: 87.6th percentile (83rd full period), below the 95th required. The COT filter does add over the bare system (+356 out-of-sample, +1,198 full) | **DEAD: beaten by holding gold at the same risk; timing not significant** |
+| 12.6b | COT signal as a tilt on an always-long gold position (0.5x / 1x / 1.5x), `currencies-metals-swing/research/gold_cot_tilt.py`, pre-registered | Out-of-sample +0.62%/yr over buy-and-hold at the same average weight, 73.7th percentile of 2,000 shifted-signal nulls (full period +0.01%/yr, 56.8th); Sharpe 0.90 vs 0.94 for plain holding. Speculators' 3-year index: +0.07%/yr, 68th | **DEAD: the COT signal does not time gold** |
 | 12.7 | Equal-risk 9-instrument portfolio | Sharpe −0.03, DD −24.7% | DEAD |
 | 12.8 | COT gate on a Donchian/EMA/ADX core | Mean PF 0.98 → 1.28 over 9 pairs | SURVIVED (FX data ends 2020) |
 | 12.9 | Commercials-net COT rule | Blocks gold's secular uptrend; mean PF 0.84 | DEAD |
@@ -289,14 +290,14 @@ This ledger records every trading idea tried across all 15 branches: `main`, `de
 | 12.22 | AdaptiveSwingTrader_v2, FFZ_v3, XU_SEMA_v2 and 9 F5 EAs | Compile clean; **no backtests run** (fixes: MSNR never traded; QuantumGoldSilver delivered RR 1.33 instead of 2.0) | UNTESTED |
 | 12.23 | SMC / indicator confluence (ZULU SMC, SelfAwareTrend, MSnR-GAPS, LVRB) | Assessed as well built; never backtested | UNTESTED |
 | 12.24 | EURUSD barrier quantisation (0.86 bp minimum offset; same shape as JD100) | Never tested | **OPEN** |
-| 12.25 | BTC lead-lag (Binance → cryBTCUSD multipliers) | Never tested; must beat spread + commission | **OPEN** |
+| 12.25 | BTC lead-lag (Binance → cryBTCUSD multipliers) | Tool built 2026-10-01: `tools/btc_leadlag.py` (Binance 1 s candles vs Deriv ticks, 2 s latency, multiplier commission from a live quote; first half chooses, second half judges, rules in its docstring). Self-test: planted 3 s lag PASS, no lag KILL, 40 bp cost KILL | **OPEN: ready to run locally** |
 | 12.26 | Cross-market lead (real → synthetic) | Never tested | OPEN |
 
 ## Part 13. Crypto
 
 | # | Idea | Result | Status |
 |---|---|---|---|
-| 13.1 | HMA 16/64 + RSI > 52 + close above LinReg(50), long-only, 4h | BTC beat exposure-matched random timing (96th / 99.8th percentile); ETH/BNB/SOL mixed. Paper forward test started 2026-09-27; PASS ≥ 95th percentile, FAIL < 50th, minimum 6 months | FORWARD-TEST RUNNING |
+| 13.1 | HMA 16/64 + RSI > 52 + close above LinReg(50), long-only, 4h | BTC beat exposure-matched random timing (96th / 99.8th percentile); ETH/BNB/SOL mixed. Paper forward test started 2026-09-27; PASS ≥ 95th percentile, FAIL < 50th, minimum 6 months | FORWARD-TEST RUNNING (code now also on this branch: `fable-thoughts/forward_test/hma_crypto/`) |
 
 ## Part 14. External reviewer rounds
 
