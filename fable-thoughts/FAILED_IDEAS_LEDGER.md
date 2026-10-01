@@ -373,7 +373,7 @@ This ledger records every trading idea tried across all 15 branches: `main`, `de
 | CRASH900 4% / BOOM600 3% logged-in cells | Eligible on 2026-09-27; never tested | Low: pre-register, then replay |
 | BOOM300N at spot ≈ 170–256 | Only if spot gets there | Watcher |
 | JD100 grid restoration / pip_size change / new launches / executed > proposal (`watchdog.py`) | "Stale parameter" is the only edge shape that has ever worked | Needs a cron job |
-| Payout-grid audit of Higher/Lower barriers vs fair value | Any barrier paid above fair is the only way 15.1 lives | Low |
+| Payout-grid audit of Higher/Lower barriers vs fair value (`tools/hl_grid_audit.py`, built 2026-10-01, verdict rules pre-registered in its docstring) | Any barrier paid above fair is the only way 15.1 lives. Never audited before: `surface_scan.py` skipped HIGHER/LOWER with an offset | Low: quotes only, run locally with the token |
 | 18 unmeasured turbo cells; ACCU barriers with g > 0.01 | Incomplete audits | Low |
 | EURUSD barrier quantisation | Same shape as JD100, on a real market | Medium |
 | BTC lead-lag; cross-market real → synthetic | Untested | Medium |
