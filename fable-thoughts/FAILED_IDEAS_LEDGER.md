@@ -270,7 +270,7 @@ This ledger records every trading idea tried across all 15 branches: `main`, `de
 | 12.3 | OTC indices while the exchange is closed | They follow exchange hours | DEAD |
 | 12.4 | Adaptive trend following (SuperTrend + ADX + ATR), no COT | 2 of 9 instruments profitable; mean −7.4% | DEAD (FX majors) |
 | 12.5 | + COT-index filter | Gold +23.7% (PF 1.29); FX still negative | Filter SURVIVED |
-| 12.6 | In-sample vs out-of-sample with the COT index | **Gold out-of-sample +16.9%, PF 1.51, Sharpe 0.52.** AUDUSD and EURJPY died out-of-sample | **SURVIVED (gold only)** |
+| 12.6 | In-sample vs out-of-sample with the COT index | Gold out-of-sample +16.9%, PF 1.51, Sharpe 0.52. AUDUSD and EURJPY died out-of-sample. **Audit 2026-10-01** (`currencies-metals-swing/research/gold_cot_audit.py`, verdict rules fixed before the run): out-of-sample CAGR 1.88%, Sharpe 0.52, vs buy-and-hold gold Sharpe 0.94; buy-and-hold scaled to the same volatility makes 3.45%/yr with the same −5.7% drawdown. Swap at −6%/−2% a year takes 45% of the profit (71% over the full period). Entry timing vs 2,000 random-date placements of the same trades: 87.6th percentile (83rd full period), below the 95th required. The COT filter does add over the bare system (+356 out-of-sample, +1,198 full) | **DEAD: beaten by holding gold at the same risk; timing not significant** |
 | 12.7 | Equal-risk 9-instrument portfolio | Sharpe −0.03, DD −24.7% | DEAD |
 | 12.8 | COT gate on a Donchian/EMA/ADX core | Mean PF 0.98 → 1.28 over 9 pairs | SURVIVED (FX data ends 2020) |
 | 12.9 | Commercials-net COT rule | Blocks gold's secular uptrend; mean PF 0.84 | DEAD |
