@@ -1,0 +1,53 @@
+{
+ "test": "T2: universal ACCU phase map and re-tuning lag (NEXT_TESTS_2026-09-26.md)",
+ "fixed_utc": "2026-09-26",
+ "fixed_before": "any phase-map build or T2 watcher data; the watcher logs this file's sha256 on its first line and refuses a map built against a different hash",
+ "orders": "none: read-only. A pass leads to a separate fresh-data test on authenticated terms decided by the user; the watcher never trades",
+ "terms": "every barrier is an authenticated DEMO quote (DerivWS(token=DERIV_TOKEN, account_type='demo')); the public quote is logged as a diagnostic only",
+ "symbols": "every symbol on which an authenticated ACCU proposal succeeds, from: all Boom/Crash, 1HZ10V-1HZ100V, R_10-R_100, JD10-JD100",
+ "gates": {
+  "sigma_pips_max": 40,
+  "sigma_pips_definition": "per-tick sd of the small (non-spike) step in pips at the build spot; vol indices use the nominal sigma from the name",
+  "oracle": "OR-1 per symbol on public ticks_stayed_in snapshots: every rate whose record is primary with >= 50 covered runs must have raw_incl completed_full; at least 3 such rates; otherwise the symbol is EXCLUDED, not modelled",
+  "oracle_min_rates": 3,
+  "misfit_z_max": 3.0,
+  "misfit_definition": "per cell, on the build's recent ticks at the authenticated b: z = (empirical survival - mean model survival) / sqrt(p(1-p)/n); |z| > 3 excludes the cell",
+  "unmodelled": "symbols without a step law (JD, anything not Boom/Crash or R_/1HZ) are EXCLUDED with reason 'no step law'"
+ },
+ "models": {
+  "boom_crash": "frozen small-step law (accu_phase_data/frozen_steplaw.json), m measured from the build ticks (lib.step_law / lib.model_params), lambda = 1/N unless the data excludes it; G = (1+g) * min over kernels V1, V2 of P(stay | K, phase); scale-free in spot because steps are proportional to spot",
+  "vol": "Gaussian relative step with the nominal sigma (sigma_ann / sqrt(365*86400/dt)), scaled to spot and then rounded to whole pips: D = round(e + X), e ~ U(-0.5, 0.5), X ~ N(0, s), s = sigma_rel * spot / pip; stay iff |D| <= K for phase > 0"
+ },
+ "map": {
+  "G_threshold": 1.001,
+  "phase_grid": 64,
+  "spot_range_factor": 3.0,
+  "window": "a maximal contiguous run of w = b*spot/pip grid points (phase step 1/64) where model G >= 1.001, reported as a spot interval"
+ },
+ "watch": {
+  "base_quote_interval_s": 600,
+  "near_quote_interval_s": 60,
+  "near_definition": "spot within one level width (pip / b) of a mapped window of the current authenticated b",
+  "remap": "when the authenticated b of a cell changes, its windows are recomputed from the stored model with the new b at once"
+ },
+ "window_rules": {
+  "open": "an authenticated quote whose spot lies inside a window of the b quoted at that moment",
+  "close": "the first later quote outside it; reason 'retune' when b changed and the spot would still be inside the old b's window, else 'spot_exit'",
+  "min_dwell_s": 1800,
+  "qualifying": "open for >= 1800 s (first inside quote to first outside quote)"
+ },
+ "decision": {
+  "horizon_days": 14,
+  "KILL": "at day 14: no qualifying window, OR at least one window opened and every opened window closed by retune in < 1800 s, OR pooled fresh-tick D upper 99% < 1 with >= 100000 in-window ticks",
+  "PASS": "pooled fresh-tick D lower 99% >= 1 over >= 16 hour-blocks (the PASS-B rule of accu_phase_decide, unchanged); ticks count only inside qualifying windows, at the authenticated b in force at that tick",
+  "D": "mean of (1+g) * stay over in-window ticks (knockout rule raw_incl, lib.knockout), one cell per tick (highest model G when several are in window), hour-block bootstrap 5000 reps, percentile 99% interval",
+  "INCONCLUSIVE": "anything else; report dwell times, retune latencies and D per cell as information",
+  "multiple_comparisons": "one pooled test only; per-cell and per-window numbers are information, never a pass"
+ },
+ "carried_T1_drift": {
+  "symbol": "CRASH1000",
+  "statistic": "mean relative step per contiguous tick over the whole T2 archive, hour-block bootstrap 99%",
+  "breakeven": 5e-08,
+  "rule": "upper 99% < 5e-8 -> T1 CRASH1000 KILL; lower 99% > 5e-8 -> T1 ALIVE (needs its own fresh test); else INCONCLUSIVE (expected: 14 days is about 1.2M ticks, SE about 4e-8)"
+ }
+}

@@ -1,0 +1,45 @@
+================================================================================
+QUANTUM PHASE-SPACE & CYCLIC LATTICE EDGE AUDIT (JD100)
+Payout grid: LIVE  (14 contracts)
+================================================================================
+[*] Fetching 20000 clean, monotonic ticks from Deriv API...
+[+] Loaded 20000 ticks. Latest Spot: 130.69. Pip size: 2
+[+] Microscopic Quantum Diffusion Width: sigma = 2.346 pips
+
+--- 1. QUANTUM HARMONIC DECOHERENCE DYNAMICS (S^1 Phase Space) ---
+  tau=1 tick(s): Measured Coherence = 0.3384 | Theoretical = 0.3374 | Error = 0.0010
+  tau=2 tick(s): Measured Coherence = 0.1215 | Theoretical = 0.1138 | Error = 0.0077
+  tau=3 tick(s): Measured Coherence = 0.0484 | Theoretical = 0.0384 | Error = 0.0100
+  tau=4 tick(s): Measured Coherence = 0.0250 | Theoretical = 0.0130 | Error = 0.0120
+  tau=5 tick(s): Measured Coherence = 0.0166 | Theoretical = 0.0044 | Error = 0.0122
+
+--- 2. OPTIMAL DIGIT CONTRACT POLICY (AT 100% SIGNAL DENSITY) ---
+  Digit 0: Play UNDER 3  (Payout 1.829) -> P(win)=45.82%, EV=-16.21%
+  Digit 1: Play UNDER 5  (Payout 1.343) -> P(win)=68.98%, EV=-7.37%
+  Digit 2: Play UNDER 5  (Payout 1.343) -> P(win)=73.43%, EV=-1.39%
+  Digit 3: Play UNDER 6  (Payout 1.171) -> P(win)=79.57%, EV=-6.79%
+  Digit 4: Play UNDER 7  (Payout 1.057) -> P(win)=83.05%, EV=-12.21%
+  Digit 5: Play OVER 2  (Payout 1.057) -> P(win)=83.83%, EV=-11.39%
+  Digit 6: Play OVER 3  (Payout 1.171) -> P(win)=81.08%, EV=-5.02%
+  Digit 7: Play OVER 4  (Payout 1.343) -> P(win)=70.43%, EV=-5.42%
+  Digit 8: Play OVER 5  (Payout 1.543) -> P(win)=60.29%, EV=-6.97%
+  Digit 9: Play OVER 6  (Payout 1.829) -> P(win)=45.28%, EV=-17.20%
+
+--- 3. OUT-OF-SAMPLE RIGOROUS VALIDATION (50/50 SPLIT) ---
+  OOS Sample Size: 9999 consecutive ticks
+  OOS Realized EV: -8.17% +/- 1.65% (99% CI)
+  OOS t-statistic: -12.81 (p < 1e-100)
+
+--- 4. ADVERSARIAL NEGATIVE CONTROLS ---
+  Lag-2 Control (Decoherence test): EV = -25.91%
+  Permutation Control (Zero-intelligence null): EV = -33.55% (Matches house margin)
+
+================================================================================
+VERDICT: EDGE IS NEGATIVE ON THE LIVE BOOK.
+  OOS EV -8.17% on the authenticated grid Deriv actually fills.
+  The lattice signal is real (the permutation and lag-2 controls stay
+  negative, the in-sample fit is strong), but Deriv repriced JD100's digit
+  book far past it. Re-run with --grid historical to see the same ticks
+  under the pre-repricing grid, which is still the live book on
+  JD10/JD25/JD50/JD75 and all volatility indices.
+================================================================================

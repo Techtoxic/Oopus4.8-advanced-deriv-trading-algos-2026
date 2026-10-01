@@ -1,0 +1,30 @@
+[*] session DOT93131975 type demo
+[*] 1HZ100V spot 1070.94 epoch 1790495021
+  OK   ASIAND           dur=5t  payout=1.95 ask=1
+  OK   ASIAND           dur=10t  payout=1.95 ask=1
+  OK   ASIANU           dur=5t  payout=1.95 ask=1
+  OK   ASIANU           dur=10t  payout=1.95 ask=1
+  OK   CALL             dur=5t  payout=1.9 ask=1
+  OK   CALL             dur=10t  payout=1.9 ask=1
+  OK   CALL             dur=1m  payout=1.88 ask=1
+  OK   CALL             dur=5m  payout=1.89 ask=1
+  OK   CALL             dur=1h  payout=1.89 ask=1
+  OK   HIGHER           dur=1m  payout=32.26 ask=1
+  OK   HIGHER           dur=5m  payout=31.73 ask=1
+  OK   HIGHER           dur=1h  payout=4.95 ask=1
+  OK   LOWER            dur=1m  payout=32.26 ask=1
+  OK   LOWER            dur=5m  payout=31.5 ask=1
+  OK   LOWER            dur=1h  payout=4.72 ask=1
+  OK   NOTOUCH          dur=1h  payout=1.04 ask=1
+  OK   NOTOUCH          dur=1h  payout=1.04 ask=1
+  OK   ONETOUCH         dur=5m  payout=40 ask=1
+  OK   ONETOUCH         dur=1h  payout=15.04 ask=1
+  OK   ONETOUCH         dur=5m  payout=40 ask=1
+  OK   ONETOUCH         dur=1h  payout=12.61 ask=1
+  OK   PUT              dur=5t  payout=1.9 ask=1
+  OK   PUT              dur=10t  payout=1.9 ask=1
+  OK   PUT              dur=1m  payout=1.88 ask=1
+  OK   PUT              dur=5m  payout=1.88 ask=1
+  OK   PUT              dur=1h  payout=1.88 ask=1
+
+[*] accepted 26, rejected 114 -> ..\results\exotic_1HZ100V.jsonl

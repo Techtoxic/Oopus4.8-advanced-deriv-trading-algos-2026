@@ -1,0 +1,100 @@
+========================================================================================
+JUMP INDEX LATTICE SCAN — live quoted grid vs empirical digit lattice
+========================================================================================
+
+[*] JD10: quoting grid then fetching 40000 ticks...
+    ticks=40000  pip=2  sigma=11.29 pips  grid_contracts=18
+    in-sample  EV = -0.20%  (t=-0.3)
+    OOS        EV = -3.36%  99% CI [-6.12%, -0.60%]  t=-3.1  n=19999
+    controls   lag2 = -2.56%   permutation = -4.03%
+    ----------------------------------------------------------------------
+      digit 0: OVER  5  pay=2.4300  p=41.18%  n=  4058  EV=+0.06%
+      digit 1: OVER  7  pay=4.7200  p=21.23%  n=  3891  EV=+0.20%
+      digit 2: UNDER 6  pay=1.6300  p=60.72%  n=  3969  EV=-1.03%
+      digit 3: UNDER 6  pay=1.6300  p=61.88%  n=  4022  EV=+0.87%
+      digit 4: UNDER 9  pay=1.0900  p=90.77%  n=  3996  EV=-1.07%
+      digit 5: UNDER 4  pay=2.4300  p=40.61%  n=  4051  EV=-1.32%
+      digit 6: OVER  7  pay=4.7200  p=21.20%  n=  3878  EV=+0.05%
+      digit 7: OVER  3  pay=1.6300  p=60.70%  n=  3952  EV=-1.05%
+      digit 8: OVER  7  pay=4.7200  p=21.74%  n=  4075  EV=+2.62%
+      digit 9: UNDER 6  pay=1.6300  p=60.53%  n=  4107  EV=-1.33%
+
+[*] JD25: quoting grid then fetching 40000 ticks...
+    ticks=40000  pip=2  sigma=11.04 pips  grid_contracts=18
+    in-sample  EV = -0.36%  (t=-0.7)
+    OOS        EV = -3.09%  99% CI [-5.46%, -0.71%]  t=-3.4  n=19999
+    controls   lag2 = -2.64%   permutation = -2.96%
+    ----------------------------------------------------------------------
+      digit 0: UNDER 4  pay=2.4300  p=40.97%  n=  4062  EV=-0.45%
+      digit 1: UNDER 2  pay=4.7200  p=21.35%  n=  3976  EV=+0.79%
+      digit 2: UNDER 5  pay=1.9500  p=51.27%  n=  4004  EV=-0.02%
+      digit 3: OVER  1  pay=1.2300  p=80.59%  n=  4107  EV=-0.87%
+      digit 4: OVER  4  pay=1.9500  p=50.72%  n=  3971  EV=-1.10%
+      digit 5: OVER  4  pay=1.9500  p=51.40%  n=  3959  EV=+0.23%
+      digit 6: OVER  0  pay=1.0900  p=90.51%  n=  3982  EV=-1.35%
+      digit 7: UNDER 8  pay=1.2300  p=80.54%  n=  3941  EV=-0.94%
+      digit 8: UNDER 5  pay=1.9500  p=51.29%  n=  4059  EV=+0.02%
+      digit 9: UNDER 6  pay=1.6300  p=61.40%  n=  3938  EV=+0.08%
+
+[*] JD50: quoting grid then fetching 40000 ticks...
+    ticks=40000  pip=2  sigma=11.01 pips  grid_contracts=18
+    in-sample  EV = -0.52%  (t=-0.8)
+    OOS        EV = -3.70%  99% CI [-5.89%, -1.50%]  t=-4.4  n=19999
+    controls   lag2 = -4.25%   permutation = -3.71%
+    ----------------------------------------------------------------------
+      digit 0: OVER  5  pay=2.4300  p=41.56%  n=  3985  EV=+0.98%
+      digit 1: OVER  6  pay=3.2100  p=30.80%  n=  3890  EV=-1.14%
+      digit 2: OVER  3  pay=1.6300  p=60.96%  n=  3998  EV=-0.64%
+      digit 3: OVER  6  pay=3.2100  p=30.99%  n=  4018  EV=-0.54%
+      digit 4: OVER  1  pay=1.2300  p=80.36%  n=  4018  EV=-1.15%
+      digit 5: UNDER 8  pay=1.2300  p=80.67%  n=  4005  EV=-0.77%
+      digit 6: OVER  8  pay=8.9300  p=11.24%  n=  4003  EV=+0.39%
+      digit 7: UNDER 6  pay=1.6300  p=60.53%  n=  4044  EV=-1.33%
+      digit 8: UNDER 8  pay=1.2300  p=81.02%  n=  4030  EV=-0.35%
+      digit 9: UNDER 8  pay=1.2300  p=80.76%  n=  4008  EV=-0.66%
+
+[*] JD75: quoting grid then fetching 40000 ticks...
+    ticks=40000  pip=2  sigma=11.26 pips  grid_contracts=18
+    in-sample  EV = -0.59%  (t=-1.3)
+    OOS        EV = -2.50%  99% CI [-4.42%, -0.58%]  t=-3.4  n=19999
+    controls   lag2 = -2.37%   permutation = -2.78%
+    ----------------------------------------------------------------------
+      digit 0: OVER  5  pay=2.4300  p=40.49%  n=  4021  EV=-1.62%
+      digit 1: OVER  2  pay=1.4000  p=71.63%  n=  3881  EV=+0.28%
+      digit 2: UNDER 7  pay=1.4000  p=70.81%  n=  3919  EV=-0.87%
+      digit 3: UNDER 4  pay=2.4300  p=41.09%  n=  4149  EV=-0.14%
+      digit 4: OVER  3  pay=1.6300  p=61.09%  n=  3917  EV=-0.42%
+      digit 5: OVER  1  pay=1.2300  p=81.24%  n=  3993  EV=-0.07%
+      digit 6: OVER  1  pay=1.2300  p=80.78%  n=  4054  EV=-0.64%
+      digit 7: OVER  5  pay=2.4300  p=40.85%  n=  4061  EV=-0.73%
+      digit 8: UNDER 8  pay=1.2300  p=80.24%  n=  3973  EV=-1.30%
+      digit 9: OVER  5  pay=2.4300  p=41.01%  n=  4031  EV=-0.35%
+
+[*] JD100: quoting grid then fetching 40000 ticks...
+    ticks=40000  pip=2  sigma=2.38 pips  grid_contracts=14
+    in-sample  EV = -10.24%  (t=-31.4)
+    OOS        EV = -9.45%  99% CI [-10.61%, -8.29%]  t=-21.1  n=19999
+    controls   lag2 = -25.87%   permutation = -33.81%
+    ----------------------------------------------------------------------
+      digit 0: UNDER 3  pay=1.8200  p=44.46%  n=  3920  EV=-19.07%
+      digit 1: UNDER 4  pay=1.5400  p=59.65%  n=  3993  EV=-8.13%
+      digit 2: UNDER 5  pay=1.3300  p=71.87%  n=  3974  EV=-4.42%
+      digit 3: UNDER 6  pay=1.1800  p=78.33%  n=  4139  EV=-7.57%
+      digit 4: UNDER 7  pay=1.0500  p=83.19%  n=  4069  EV=-12.65%
+      digit 5: OVER  2  pay=1.0500  p=83.87%  n=  4117  EV=-11.93%
+      digit 6: OVER  3  pay=1.1800  p=80.12%  n=  3933  EV=-5.46%
+      digit 7: OVER  4  pay=1.3300  p=70.16%  n=  4022  EV=-6.68%
+      digit 8: OVER  5  pay=1.5400  p=59.31%  n=  3876  EV=-8.66%
+      digit 9: OVER  6  pay=1.8200  p=45.07%  n=  3956  EV=-17.97%
+
+[*] wrote ../results/jump_lattice_scan.json
+
+========================================================================================
+SUMMARY — OOS EV under the LIVE quoted grid
+========================================================================================
+symbol     sigma   grid     IS EV    OOS EV   OOS t  verdict
+JD10       11.29   full    -0.20%    -3.36%    -3.1  negative
+JD25       11.04   full    -0.36%    -3.09%    -3.4  negative
+JD50       11.01   full    -0.52%    -3.70%    -4.4  negative
+JD75       11.26   full    -0.59%    -2.50%    -3.4  negative
+JD100       2.38    CUT   -10.24%    -9.45%   -21.1  negative

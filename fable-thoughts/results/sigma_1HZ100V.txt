@@ -1,0 +1,2 @@
+[*] appended C:\Users\maxxciey.runnervm99s1a\AppData\Local\Cline\Oopus4.8-advanced-deriv-trading-algos-2026\fable-thoughts\tools\..\results\sigma_table.jsonl
+SIGMA_1HZ100V 18.67 pips  N=30000 pip=2 last=1066.17

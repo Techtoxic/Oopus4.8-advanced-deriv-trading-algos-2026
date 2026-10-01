@@ -1,0 +1,38 @@
+fresh executed payout 1.8, breakeven 55.56%
+sigma range in data: 3.21 .. 3.78
+
+=== band A 4.0-4.3: n=0
+
+=== band B 3.5-3.9: n=123851
+  pooled p=0.5352  EV=-3.6641%  wilson99lb=0.5315
+  d=0 UNDER5 n= 12336 p=0.5139 lb99=0.5023 EV=-7.490%
+  d=1 UNDER5 n= 12381 p=0.5393 lb99=0.5277 EV=-2.927%
+  d=2 UNDER5 n= 12398 p=0.5557 lb99=0.5441 EV=+0.018% >BE(point)
+  d=3 UNDER5 n= 12419 p=0.5513 lb99=0.5397 EV=-0.775%
+  d=4 UNDER5 n= 12391 p=0.5157 lb99=0.5041 EV=-7.175%
+  d=5 OVER4  n= 12125 p=0.5121 lb99=0.5004 EV=-7.825%
+  d=6 OVER4  n= 12411 p=0.5386 lb99=0.5271 EV=-3.046%
+  d=7 OVER4  n= 12379 p=0.5542 lb99=0.5427 EV=-0.236%
+  d=8 OVER4  n= 12483 p=0.5431 lb99=0.5316 EV=-2.249%
+  d=9 OVER4  n= 12528 p=0.5275 lb99=0.5160 EV=-5.043%
+
+=== band C <3.5: n=74347
+  pooled p=0.5408  EV=-2.6629%  wilson99lb=0.5361
+  d=0 UNDER5 n=  7507 p=0.5243 lb99=0.5094 EV=-5.624%
+  d=1 UNDER5 n=  7490 p=0.5502 lb99=0.5354 EV=-0.964%
+  d=2 UNDER5 n=  7595 p=0.5654 lb99=0.5507 EV=+1.767% >BE(point)
+  d=3 UNDER5 n=  7456 p=0.5604 lb99=0.5455 EV=+0.864% >BE(point)
+  d=4 UNDER5 n=  7423 p=0.5215 lb99=0.5065 EV=-6.132%
+  d=5 OVER4  n=  7473 p=0.5232 lb99=0.5083 EV=-5.821%
+  d=6 OVER4  n=  7506 p=0.5573 lb99=0.5425 EV=+0.312% >BE(point)
+  d=7 OVER4  n=  7338 p=0.5485 lb99=0.5335 EV=-1.267%
+  d=8 OVER4  n=  7396 p=0.5466 lb99=0.5317 EV=-1.604%
+  d=9 OVER4  n=  7163 p=0.5086 lb99=0.4934 EV=-8.455%
+
+=== payout stress (band C, pooled and per-digit point estimates) ===
+  grid 1.953: breakeven 51.20%
+  grid 1.886: breakeven 53.02%
+  grid 1.818: breakeven 55.01%
+  grid 1.8: breakeven 55.56%
+  grid 1.75: breakeven 57.14%
+  grid 1.7: breakeven 58.82%
