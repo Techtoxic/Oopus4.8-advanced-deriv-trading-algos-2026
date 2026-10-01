@@ -243,6 +243,7 @@ This ledger records every trading idea tried across all 15 branches: `main`, `de
 | 10.12 | IEEE-754 float32 digit skew | Quotes are double precision: all 39 grid residues occupied (p 0.99) | DEAD |
 | 10.13 | Reseed / maintenance / midnight anomalies | Generator keeps running through feed gaps. Midnight excess p 0.003 on 1HZ30V failed to replicate on R_75 (p 0.79) | DEAD |
 | 10.14 | Time-of-day volatility | p 0.35 / 0.32 | DEAD |
+| 10.15 | **MT5 feed = API feed?** Volatility 90 Index exported from Deriv MT5 (9.94M ticks, 230 days, 2 s, mid price) through `mt5_ticks_to_npz.py` + `generator_probe_v3.py --no-digits` | σ measured/nominal **0.99988**, drift t 0.38, 28 tests no Holm flag, MI 0.000000 bits, out-of-sample rise/fall hit 0.4997–0.4999. Same generator on MT5. Median MT5 spread 47.4 ≈ 3.4 bp ≈ 1.5 tick-σ, paid on every round trip | DEAD (and the MT5 pipeline is validated) |
 
 ## Part 11. Technical analysis, money management, execution
 

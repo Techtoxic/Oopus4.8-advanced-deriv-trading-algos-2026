@@ -116,6 +116,16 @@ def digit_key(k, no_digits):
     return no_digits and (k.startswith('A ') or k.startswith('A2') or k.startswith('C '))
 
 
+def hide_digits(r, no_digits):
+    """Drop digit and rounding rows from a result dict before it is shown (they are already out of
+    the Holm family in no-digits mode; printing them only invites misreading)."""
+    if not no_digits:
+        return r
+    return {k: v for k, v in r.items()
+            if k == '__stat' or not (digit_key(k.lstrip('_'), True) or k.lstrip('_').startswith('A_')
+                                      or k.startswith('_lag1'))}
+
+
 def load(symbol, n, cache):
     path = Path(cache) if cache else Path(f'../results/{symbol}_{n}.npz')
     if path.exists():
@@ -879,6 +889,9 @@ def main():
 
     dist, _ = distribution_block(dx)
     print(f'\n{"=" * 78}\nG  DISTRIBUTION\n{"=" * 78}')
+    if a.no_digits:
+        print('  (mid price: steps sit on a half-pip grid, so the rounded-normal fit below is not meaningful;'
+              '\n   pooled pip steps also mix spot levels, which inflates kurtosis. Use J for the model fit.)')
     for k, v in dist.items():
         print(f'  {k:<44} {v}')
 
@@ -899,6 +912,7 @@ def main():
         real[k] = cal[k]
     pv = {k: v for k, v in real.items() if not k.startswith('_') and not digit_key(k, a.no_digits)}
     flagged = holm(pv)
+    real = hide_digits(real, a.no_digits)
     show(f'REAL SERIES {a.symbol}  ({len(pv)} tests; p calibrated on {a.null_sims} same-law simulations, '
          f'Holm family alpha 0.01)', real, flagged)
 
@@ -930,7 +944,7 @@ def main():
             ref = np.array([nl[k] for nl in cnulls if k in nl], dtype=float)
             rc[k] = calib_p(v, ref)
         pc = {k: v for k, v in rc.items() if not k.startswith('_') and not digit_key(k, a.no_digits)}
-        show(label, rc, holm(pc))
+        show(label, hide_digits(rc, a.no_digits), holm(pc))
 
     print(f'\n{"=" * 78}\nH  BOLLINGER (20, 2) MEAN-REVERSION CLAIM\n{"=" * 78}')
     print('  mean_reversion_pips > 0 means price moved back toward the band after closing outside it.')
@@ -968,6 +982,8 @@ def main():
     show_pred(pred, f'L  OUT-OF-SAMPLE PREDICTION (train 70% / trade 30%, decide on T, contract on T+1; '
                     f'payouts even/odd {a.payout_evenodd}, rise/fall {a.payout_risefall})')
     ppred = prediction_block(pdx, plevel, a.payout_evenodd, a.payout_risefall, ks=(1, 2))
+    if a.no_digits:
+        ppred = {k: v for k, v in ppred.items() if not k.startswith('even_odd')}
     show_pred(ppred, 'L  PLANTED CONTROL -> rise_fall must show a positive EV lower bound (else block L has no power)')
     edge = [k for k, v in pred.items() if 'PLACEBO' not in k and v['trades'] and v['ev_ci99'][0] > 0]
     best_excess = max((r['excess_bits'] for r in info_rows), default=0.0)
