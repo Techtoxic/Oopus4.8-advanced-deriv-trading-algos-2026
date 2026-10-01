@@ -13,7 +13,8 @@ WHAT IS WRITTEN
   p    the BID by default. On Deriv synthetics the spread sits around the index, so bid and
        ask move together and the bid stays on the price grid; a mid can land half a pip off
        it, which the probes' integrity check flags. Use --price mid or ask to change it.
-  pip  decimals of the price, read from the file
+  pip  decimals of the price, read from the file (one more with --price mid, so the mid
+       stays on its own grid and the probe's off-lattice check passes)
   Also saved: spread (ask - bid) per tick, because on MT5 the cost of a direction trade is
   the spread, not a payout.
 
@@ -112,7 +113,7 @@ def convert(path, price='bid'):
     multi = int((d.groupby('sec')['px'].nunique() > 1).sum())
     last = d.groupby('sec', sort=True).last()
     return dict(t=last.index.values.astype(np.int64), p=last['px'].values.astype(float),
-                pip=int(pip), spread=(last['ask'] - last['bid']).values.astype(float),
+                pip=int(pip) + (1 if price == 'mid' else 0), spread=(last['ask'] - last['bid']).values.astype(float),
                 rows=len(d), multi_price_seconds=multi)
 
 
@@ -151,7 +152,53 @@ def selftest():
         assert list(r['p']) == [100.10, 100.20, 100.00], r['p']
         assert np.allclose(r['spread'], [0.40, 0.40, 0.40]), r['spread']
         assert r['pip'] == 2 and r['multi_price_seconds'] == 0
+        with tempfile.NamedTemporaryFile('wb', suffix='.csv', delete=False) as f:
+            f.write(txt.encode(enc))
+            path = f.name
+        m = convert(path, 'mid')
+        os.unlink(path)
+        assert m['pip'] == 3 and np.allclose(m['p'], [100.30, 100.40, 100.20]), (m['pip'], m['p'])
     print('selftest ok')
+
+
+def inspect(path):
+    """How does the spread behave? A spread that moves contaminates bid (or ask) increments
+    with spread changes, which a probe would read as structure. Also: what it costs."""
+    z = np.load(path)
+    t, p, pip, sp = z['t'].astype(np.int64), z['p'].astype(float), int(z['pip']), z['spread'].astype(float)
+    kind = str(z['price']) if 'price' in z.files else 'bid'
+    mid = p + {'bid': 0.5, 'ask': -0.5, 'mid': 0.0}[kind] * sp   # sigma from the mid, not the bid
+    ok = np.diff(t) == int(np.median(np.diff(t)))
+    dsp = np.diff(sp)[ok]
+    chg = float((np.abs(dsp) > 0.5 * 10.0 ** -pip).mean())
+    r = np.diff(np.log(mid))[ok]
+    mad = np.median(np.abs(r)) * 1.4826
+    s_tick = float(np.sqrt(np.mean(r[np.abs(r) < 8 * mad] ** 2)))
+    rel = sp / mid
+    in_sig = rel / s_tick
+    print(f"file                 {path}  (price saved: {kind})")
+    print(f"spread changes on    {chg*100:.2f}% of ticks"
+          + ("  (saved price is the mid: fine)" if kind == 'mid' else
+             "  <- bid increments carry spread changes: convert with --price mid" if chg > 0.01
+             else "  (bid is fine)"))
+    print(f"price step sd         {np.std(np.diff(p)[ok]):.4f}; spread step sd {np.std(dsp):.4f}"
+          f" ({np.std(dsp)/max(np.std(np.diff(p)[ok]),1e-12)*100:.1f}% of the price step)")
+    q = np.percentile(rel, [5, 50, 95]) * 1e4
+    print(f"spread / price       p5 {q[0]:.2f}  median {q[1]:.2f}  p95 {q[2]:.2f} bp")
+    q = np.percentile(in_sig, [5, 50, 95])
+    print(f"spread / tick sigma  p5 {q[0]:.1f}  median {q[1]:.1f}  p95 {q[2]:.1f}  (one tick sigma = {s_tick*1e4:.3f} bp)")
+    for h, lab in ((1800, '1 hour'), (21600, '6 hours'), (86400, '1 day')):
+        n = h / max(int(np.median(np.diff(t))), 1)
+        print(f"break-even over {lab:8} drift must beat {np.median(in_sig)/n:.4f} tick-sigma per tick "
+              f"(= median spread over {n:,.0f} ticks)")
+    hrs = (t // 3600) % 24
+    med = [np.median(sp[hrs == h]) if (hrs == h).any() else np.nan for h in range(24)]
+    print("median spread by UTC hour  " + " ".join(f"{h:02d}:{m:.1f}" for h, m in enumerate(med)))
+    mon = (t // (30 * 86400))
+    ms = [np.median(sp[mon == m]) for m in np.unique(mon)]
+    mp = [np.median(p[mon == m]) for m in np.unique(mon)]
+    print("median spread / price by 30-day block  "
+          + "  ".join(f"{a:.1f}/{b:.0f}" for a, b in zip(ms, mp)))
 
 
 def main():
@@ -160,14 +207,17 @@ def main():
     ap.add_argument('--out', default=None, help='npz path (default: next to the csv)')
     ap.add_argument('--price', choices=('bid', 'ask', 'mid'), default='bid')
     ap.add_argument('--selftest', action='store_true')
+    ap.add_argument('--inspect', metavar='NPZ', help='report how the spread behaves in a converted file')
     a = ap.parse_args()
     if a.selftest:
         return selftest()
+    if a.inspect:
+        return inspect(a.inspect)
     if not a.csv:
         ap.error('give the exported csv')
     r = convert(a.csv, a.price)
     out = a.out or os.path.splitext(a.csv)[0] + '.npz'
-    np.savez_compressed(out, t=r['t'], p=r['p'], pip=r['pip'], spread=r['spread'])
+    np.savez_compressed(out, t=r['t'], p=r['p'], pip=r['pip'], spread=r['spread'], price=a.price)
     summarize(r)
     print(f"saved {out}")
 

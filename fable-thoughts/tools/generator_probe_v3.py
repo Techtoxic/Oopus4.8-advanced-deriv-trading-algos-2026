@@ -111,6 +111,11 @@ def calib_p(v, ref):
 
 
 # ---------------------------------------------------------------- data
+def digit_key(k, no_digits):
+    """Tests that read the last digit or the pip-rounding grid; meaningless on an MT5 mid price."""
+    return no_digits and (k.startswith('A ') or k.startswith('A2') or k.startswith('C '))
+
+
 def load(symbol, n, cache):
     path = Path(cache) if cache else Path(f'../results/{symbol}_{n}.npz')
     if path.exists():
@@ -830,6 +835,9 @@ def main():
     ap.add_argument('--control-n', type=int, default=2_000_000, help='length of the planted-structure control')
     ap.add_argument('--null-sims', type=int, default=12, help='same-length simulated nulls used to calibrate p-values (more = steadier tails)')
     ap.add_argument('--out', default=None)
+    ap.add_argument('--no-digits', action='store_true',
+                    help='drop digit and pip-rounding tests (automatic for MT5 mid-price files: the mid sits '
+                         'on a half-pip grid, its last digit is always 0 or 5, and MT5 sells no digit contracts)')
     ap.add_argument('--json-out', default=None, help='write every block as JSON (the file to send back)')
     ap.add_argument('--payout-evenodd', type=float, default=1.923,
                     help='EXECUTED 1-tick EVEN/ODD payout on this symbol (placeholder: 1.923)')
@@ -841,6 +849,12 @@ def main():
     a = ap.parse_args()
 
     t, p, pip = load(a.symbol, a.ticks, a.cache)
+    if a.cache and Path(a.cache).exists():
+        with np.load(a.cache) as zz:
+            if 'price' in zz.files and str(zz['price']) == 'mid':
+                a.no_digits = True
+    if a.no_digits:
+        print('NO-DIGITS MODE: digit tests, the pip-rounding test and even/odd rows are dropped.')
     integ = integrity_block(t, p, pip)
     print(f'\n{"=" * 78}\n0  DATA INTEGRITY\n{"=" * 78}')
     for k, v in integ.items():
@@ -883,7 +897,7 @@ def main():
         cal[k] = calib_p(v, ref)
         real[f'_{k} | textbook p'] = f'{real[k]:.3g}'
         real[k] = cal[k]
-    pv = {k: v for k, v in real.items() if not k.startswith('_')}
+    pv = {k: v for k, v in real.items() if not k.startswith('_') and not digit_key(k, a.no_digits)}
     flagged = holm(pv)
     show(f'REAL SERIES {a.symbol}  ({len(pv)} tests; p calibrated on {a.null_sims} same-law simulations, '
          f'Holm family alpha 0.01)', real, flagged)
@@ -915,7 +929,7 @@ def main():
                 continue
             ref = np.array([nl[k] for nl in cnulls if k in nl], dtype=float)
             rc[k] = calib_p(v, ref)
-        pc = {k: v for k, v in rc.items() if not k.startswith('_')}
+        pc = {k: v for k, v in rc.items() if not k.startswith('_') and not digit_key(k, a.no_digits)}
         show(label, rc, holm(pc))
 
     print(f'\n{"=" * 78}\nH  BOLLINGER (20, 2) MEAN-REVERSION CLAIM\n{"=" * 78}')
@@ -937,14 +951,20 @@ def main():
     # K and L use the full contiguous-in-time series (gaps are rare; a move across a gap counts once)
     dx_all = np.diff(level)
     info_rows, be = info_block(dx_all, level, a.payout_evenodd)
+    if a.no_digits:
+        info_rows = [r for r in info_rows if r['series'] != 'digits']
     show_info(info_rows, be, 'K  INFORMATION BOUND (bias-corrected MI of the past about the next tick)')
     pdx, plevel = simulate(dx, min(a.control_n, len(dx)), seed=11)
     pdx = planted_persistence(pdx, a.planted_q)
     plevel = np.r_[plevel[0], plevel[0] + np.cumsum(pdx)]
     prow, _ = info_block(pdx, plevel, a.payout_evenodd)
+    if a.no_digits:
+        prow = [r for r in prow if r['series'] != 'digits']
     show_info(prow, be, f'K  PLANTED CONTROL ({a.planted_q:.0%} of moves copy the move 2 ticks back) '
                         f'-> moves k>=2 must be ABOVE NULL')
     pred = prediction_block(dx_all, level, a.payout_evenodd, a.payout_risefall)
+    if a.no_digits:
+        pred = {k: v for k, v in pred.items() if not k.startswith('even_odd')}
     show_pred(pred, f'L  OUT-OF-SAMPLE PREDICTION (train 70% / trade 30%, decide on T, contract on T+1; '
                     f'payouts even/odd {a.payout_evenodd}, rise/fall {a.payout_risefall})')
     ppred = prediction_block(pdx, plevel, a.payout_evenodd, a.payout_risefall, ks=(1, 2))
