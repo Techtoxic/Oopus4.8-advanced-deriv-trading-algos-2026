@@ -62,7 +62,9 @@ def binance_1s(start_s, end_s, symbol='BTCUSDT'):
         if not rows:
             break
         for r in rows:
-            out[int(r[0]) // 1000] = float(r[4])        # open time (s) -> close price
+            # the close belongs to the END of the 1 s candle; keying it by the open time made
+            # Binance look 1 s later than it is (first real run: the +1 s peak was partly this)
+            out[int(r[0]) // 1000 + 1] = float(r[4])
         cur = int(rows[-1][0]) + 1000
         time.sleep(0.05)
     ks = np.array(sorted(k for k in out if start_s <= k < end_s), dtype=np.int64)

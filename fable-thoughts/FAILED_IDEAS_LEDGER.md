@@ -290,7 +290,7 @@ This ledger records every trading idea tried across all 15 branches: `main`, `de
 | 12.22 | AdaptiveSwingTrader_v2, FFZ_v3, XU_SEMA_v2 and 9 F5 EAs | Compile clean; **no backtests run** (fixes: MSNR never traded; QuantumGoldSilver delivered RR 1.33 instead of 2.0) | UNTESTED |
 | 12.23 | SMC / indicator confluence (ZULU SMC, SelfAwareTrend, MSnR-GAPS, LVRB) | Assessed as well built; never backtested | UNTESTED |
 | 12.24 | EURUSD barrier quantisation (0.86 bp minimum offset; same shape as JD100) | Never tested | **OPEN** |
-| 12.25 | BTC lead-lag (Binance → cryBTCUSD multipliers) | Tool built 2026-10-01: `tools/btc_leadlag.py` (Binance 1 s candles vs Deriv ticks, 2 s latency, multiplier commission from a live quote; first half chooses, second half judges, rules in its docstring). Self-test: planted 3 s lag PASS, no lag KILL, 40 bp cost KILL | **OPEN: ready to run locally** |
+| 12.25 | BTC lead-lag (Binance → cryBTCUSD multipliers), `tools/btc_leadlag.py`, pre-registered | Run 2026-10-01 on 48 h (172,559 Deriv ticks, 172,800 Binance 1 s candles): Deriv follows Binance with correlation 0.74 at +1 s, 0.23 at +2 s, ~0 by +3 s (the +1 s peak is partly a candle-labelling offset, since fixed, so the true lag is under ~1 s). Multiplier cost x50: $0.35 on $10 = 7.00 bp. With 2 s latency the best setting caught +0.15 bp gross, −6.85 bp net on 411 second-half events (99% bound −7.20) | **DEAD: the lag is shorter than retail latency and far smaller than the commission (A5)** |
 | 12.26 | Cross-market lead (real → synthetic) | Never tested | OPEN |
 
 ## Part 13. Crypto
